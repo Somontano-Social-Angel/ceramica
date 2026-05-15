@@ -1,0 +1,160 @@
+{
+    "categorias": [
+      {
+        "categoria": "Brasa",
+        "slug": "brasa",
+        "items": [
+          {
+            "nombre": "Churrasco",
+            "precio": "16,50€",
+            "ingredientes": ["Churrasco"],
+            "buscar_por": "churrasco",
+            "tags": ["brasa", "carne"],
+            "orden": 1,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Cordero",
+            "precio": "17,50€",
+            "ingredientes": ["Cordero"],
+            "buscar_por": "cordero",
+            "tags": ["brasa", "carne"],
+            "orden": 2,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Entrecot 300gr (aprox)",
+            "precio": "19,00€",
+            "ingredientes": ["Entrecot"],
+            "buscar_por": "entrecot 300gr (aprox)",
+            "tags": ["brasa", "carne"],
+            "orden": 3,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Panceta",
+            "precio": "9,00€",
+            "ingredientes": ["Panceta"],
+            "buscar_por": "panceta",
+            "tags": ["brasa", "carne"],
+            "orden": 4,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Secreto",
+            "precio": "10,50€",
+            "ingredientes": ["Secreto"],
+            "buscar_por": "secreto",
+            "tags": ["brasa", "carne"],
+            "orden": 5,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Pinchos adobados",
+            "precio": "9,80€",
+            "ingredientes": ["Pinchos adobados"],
+            "buscar_por": "pinchos adobados",
+            "tags": ["brasa", "carne"],
+            "orden": 6,
+            "tipo": "plato"
+          }
+        ],
+        "nota": ""
+      },
+      {
+        "categoria": "Sandwiches",
+        "slug": "sandwiches",
+        "items": [
+          {
+            "nombre": "Sandwich de vegetal",
+            "descripcion": "Lechuga, tomate, pimiento y cebolla",
+            "precio": "7,00€",
+            "ingredientes": ["Lechuga", "tomate", "pimiento", "cebolla", "mayonesa"],
+            "alergenos_contiene": ["huevo", "gluten"],
+            "dietas_no_apto": ["vegetariano_estricto", "sin_gluten", "sin_huevo"],
+            "buscar_por": "sandwich de vegetal",
+            "tags": ["sandwich", "vegetal"],
+            "orden": 1,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Sandwich de atún",
+            "descripcion": "Lechuga, cebolla, tomate y atún",
+            "precio": "7,50€",
+            "ingredientes": ["Lechuga", "cebolla", "tomate", "atún", "mayonesa"],
+            "alergenos_contiene": ["huevo", "gluten", "pescado"],
+            "dietas_no_apto": ["sin_gluten", "sin_huevo", "sin_pescado"],
+            "buscar_por": "sandwich de atun",
+            "tags": ["sandwich", "atun"],
+            "orden": 2,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Sandwich de lomo",
+            "descripcion": "Lechuga, cebolla caramelizada, queso, tomate y lomo",
+            "precio": "8,00€",
+            "ingredientes": ["Lechuga", "cebolla caramelizada", "queso", "tomate", "lomo", "mayonesa"],
+            "alergenos_contiene": ["huevo", "gluten", "leche"],
+            "dietas_no_apto": ["sin_gluten", "sin_huevo", "sin_lactosa"],
+            "buscar_por": "sandwich de lomo",
+            "tags": ["sandwich", "lomo"],
+            "orden": 3,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Sandwich de pollo",
+            "descripcion": "Lechuga, cebolla caramelizada, queso, tomate y pollo",
+            "precio": "8,00€",
+            "ingredientes": ["Lechuga", "cebolla caramelizada", "queso", "tomate", "pollo", "mayonesa"],
+            "alergenos_contiene": ["huevo", "gluten", "leche"],
+            "dietas_no_apto": ["sin_gluten", "sin_huevo", "sin_lactosa"],
+            "buscar_por": "sandwich de pollo",
+            "tags": ["sandwich", "pollo"],
+            "orden": 4,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "La Cerámica",
+            "descripcion": "Lechuga, cebolla caramelizada, queso, tomate, bacon y lomo",
+            "precio": "9,00€",
+            "ingredientes": ["Lechuga", "cebolla caramelizada", "queso", "tomate", "bacon", "lomo", "mayonesa"],
+            "alergenos_contiene": ["huevo", "gluten", "leche"],
+            "dietas_no_apto": ["sin_gluten", "sin_huevo", "sin_lactosa"],
+            "buscar_por": "la ceramica",
+            "tags": ["sandwich", "especial"],
+            "orden": 5,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Sandwich clásico \"Bikini\"",
+            "descripcion": "Mantequilla, jamón dulce y queso",
+            "precio": "6,50€",
+            "ingredientes": ["Mantequilla", "jamón dulce", "queso", "mayonesa"],
+            "alergenos_contiene": ["huevo", "gluten", "leche"],
+            "dietas_no_apto": ["sin_gluten", "sin_huevo", "sin_lactosa"],
+            "buscar_por": "sandwich clasico bikini",
+            "tags": ["sandwich", "bikini"],
+            "orden": 6,
+            "tipo": "plato"
+          }
+        ],
+        "nota": "Todos nuestros sándwich contienen mayonesa"
+      }
+    ],
+    "alergenos_referencia": [
+      "gluten",
+      "crustaceos",
+      "huevo",
+      "pescado",
+      "cacahuetes",
+      "soja",
+      "leche",
+      "frutos_de_cascara",
+      "apio",
+      "mostaza",
+      "sesamo",
+      "sulfitos",
+      "altramuces",
+      "moluscos"
+    ]
+  }

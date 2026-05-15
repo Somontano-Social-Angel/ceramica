@@ -1,0 +1,251 @@
+---
+const nav = [
+  { href: "/#inicio", label: "Inicio" },
+  { href: "/#nosotros", label: "Nosotros" },
+  { href: "/#firma", label: "Firma" },
+  { href: "/carta", label: "Carta" },
+  { href: "/#experiencia", label: "Experiencia" },
+  { href: "/#horario", label: "Horario" },
+  { href: "/#contacto", label: "Contacto" },
+];
+---
+
+<header class="header">
+  <div class="inner">
+    <a class="brand" href="/">
+      <img class="brand__logo" src="/logo.svg" alt="" width="44" height="29" loading="eager" decoding="async" />
+      <span class="brand__text">
+        <span class="brand__name">La Cerámica</span>
+        <span class="brand__loc">Polígono · Barbastro</span>
+      </span>
+    </a>
+    <nav class="nav" aria-label="Principal">
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href}>{item.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <a class="cta" href="/reservar">Reservar</a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="mobile-nav" data-menu-btn>
+      <span class="sr-only">Abrir menú</span>
+      <span class="menu-btn__bar"></span>
+      <span class="menu-btn__bar"></span>
+    </button>
+  </div>
+  <div class="mobile" id="mobile-nav" hidden data-mobile-nav>
+    <nav aria-label="Móvil">
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href}>{item.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+      <a class="cta cta--block" href="/reservar">Reservar mesa</a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const btn = document.querySelector("[data-menu-btn]");
+  const panel = document.querySelector("[data-mobile-nav]");
+  if (btn && panel) {
+    btn.addEventListener("click", () => {
+      const open = panel.hasAttribute("hidden");
+      panel.toggleAttribute("hidden", !open);
+      btn.setAttribute("aria-expanded", String(open));
+    });
+    panel.querySelectorAll("a").forEach((a) => {
+      a.addEventListener("click", () => {
+        panel.setAttribute("hidden", "");
+        btn.setAttribute("aria-expanded", "false");
+      });
+    });
+  }
+</script>
+
+<style>
+  .header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    background: linear-gradient(to bottom, rgba(27, 27, 27, 0.95), rgba(27, 27, 27, 0.75) 70%, transparent);
+    border-bottom: 1px solid transparent;
+    transition: background 0.35s var(--ease-out), border-color 0.35s;
+  }
+
+  .header.is-scrolled {
+    background: rgba(27, 27, 27, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom-color: var(--border);
+  }
+
+  .inner {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--fg);
+    flex-shrink: 0;
+  }
+
+  .brand__logo {
+    width: 44px;
+    height: auto;
+    max-height: 36px;
+    flex-shrink: 0;
+    object-fit: contain;
+    filter: invert(1) brightness(1.05);
+  }
+
+  .brand__text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+  }
+
+  .brand__name {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .brand__loc {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--fg-subtle);
+  }
+
+  .nav {
+    margin-left: auto;
+    display: none;
+  }
+
+  .nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 1.75rem;
+  }
+
+  .nav a {
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    transition: color 0.2s;
+  }
+
+  .nav a:hover {
+    color: var(--fg);
+  }
+
+  .cta {
+    display: none;
+    padding: 0.65rem 1.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--fg);
+    border-radius: 999px;
+    transition: transform 0.2s var(--ease-out), box-shadow 0.2s;
+  }
+
+  .cta:hover {
+    color: var(--bg);
+    transform: translateY(-1px);
+    box-shadow: 0 12px 32px rgba(255, 255, 255, 0.12);
+  }
+
+  .cta--block {
+    display: block;
+    text-align: center;
+    margin-top: 1.5rem;
+  }
+
+  .menu-btn {
+    margin-left: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-soft);
+    cursor: pointer;
+    color: var(--fg);
+  }
+
+  .menu-btn__bar {
+    display: block;
+    width: 18px;
+    height: 2px;
+    margin: 0 auto;
+    background: currentColor;
+    border-radius: 1px;
+  }
+
+  .mobile {
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    padding: 1rem 1.5rem 1.5rem;
+  }
+
+  .mobile ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mobile a {
+    display: block;
+    padding: 0.65rem 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-bottom: 1px solid var(--border);
+    color: var(--fg-muted);
+  }
+
+  @media (min-width: 960px) {
+    .nav,
+    .cta {
+      display: block;
+    }
+
+    .cta:not(.cta--block) {
+      display: inline-block;
+    }
+
+    .menu-btn {
+      display: none;
+    }
+
+    .mobile {
+      display: none !important;
+    }
+  }
+</style>

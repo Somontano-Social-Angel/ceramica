@@ -1,0 +1,194 @@
+<section class="section" id="experiencia" aria-labelledby="exp-title">
+  <div class="wrap">
+    <div class="row">
+      <div class="text">
+        <p class="eyebrow">El local</p>
+        <h2 id="exp-title" class="h2">Tres ambientes, un solo espíritu</h2>
+        <p class="p">
+          En la entrada, junto a la barra, tienes unas <strong class="strong">seis mesas de cuatro</strong> para
+          quien quiere estar en el meollo: pedidos, cañas y conversación. El <strong class="strong">interior</strong>
+          engulle a mucha gente a la vez: ideal para grupos, celebraciones o cenar con calma.
+        </p>
+        <p class="p">
+          La <strong class="strong">terraza</strong> es tan grande como el salón: aire, sombra según hora y
+          <strong class="strong">mascotas bienvenidas</strong> (en terraza; en interior no). Encima, fútbol en
+          pantalla y un trato que nos gusta presumir: atención de verdad, sin postureo.
+        </p>
+      </div>
+      <figure class="shot">
+        <img
+          class="shot__img"
+          src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=880&q=82"
+          alt="Terraza de restaurante con mesas al aire libre"
+          width="440"
+          height="560"
+          loading="lazy"
+          decoding="async"
+        />
+        <figcaption class="shot__cap">Imagen de ambiente; sustituye por foto real de la terraza o el salón.</figcaption>
+      </figure>
+      <ul class="tiles" aria-label="Detalles del servicio">
+        <li>
+          <span class="tiles__label">Aparcamiento</span>
+          <span class="tiles__val">Polígono industrial: sitio de sobra para aparcar sin dramas</span>
+        </li>
+        <li>
+          <span class="tiles__label">Accesibilidad</span>
+          <span class="tiles__val">Plenamente accesible para movilidad reducida — avisa al reservar si necesitas mesa concreta</span>
+        </li>
+        <li>
+          <span class="tiles__label">Alérgenos</span>
+          <span class="tiles__val">Comprometidos con el cumplimiento en carta; pregunta al equipo</span>
+        </li>
+        <li>
+          <span class="tiles__label">Mascotas</span>
+          <span class="tiles__val">Sí en terraza · no en interior</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .section {
+    padding: 5rem 1.5rem;
+    border-top: 1px solid var(--border);
+    background: var(--bg-elevated);
+  }
+
+  .wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+  }
+
+  .row {
+    display: grid;
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  @media (min-width: 880px) {
+    .row {
+      grid-template-columns: 1fr minmax(260px, 0.9fr);
+      grid-template-rows: auto auto;
+      gap: 2rem 3rem;
+    }
+
+    .text {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .shot {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      align-self: stretch;
+    }
+
+    .tiles {
+      grid-column: 1;
+      grid-row: 2;
+    }
+  }
+
+  .eyebrow {
+    margin: 0 0 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .h2 {
+    margin: 0 0 1.25rem;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--fg);
+  }
+
+  .p {
+    margin: 0 0 1rem;
+    color: var(--fg-muted);
+    line-height: 1.75;
+    max-width: 36rem;
+  }
+
+  .strong {
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  .shot {
+    margin: 0;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+  }
+
+  .shot__img {
+    width: 100%;
+    height: 100%;
+    min-height: 220px;
+    object-fit: cover;
+    display: block;
+    aspect-ratio: 3 / 4;
+  }
+
+  @media (min-width: 880px) {
+    .shot__img {
+      min-height: 100%;
+      aspect-ratio: auto;
+    }
+  }
+
+  .shot__cap {
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    color: var(--fg-subtle);
+    background: var(--bg);
+    line-height: 1.4;
+  }
+
+  .tiles {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .tiles li {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1.25rem 1.35rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .tiles li:last-child {
+    border-bottom: 0;
+  }
+
+  .tiles__label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .tiles__val {
+    font-size: 0.95rem;
+    color: var(--fg-muted);
+  }
+</style>

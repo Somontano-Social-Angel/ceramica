@@ -1,0 +1,99 @@
+{
+    "categorias": [
+      {
+        "categoria": "Ensaladas",
+        "slug": "ensaladas",
+        "items": [
+          {
+            "nombre": "Ensalada verde",
+            "descripcion": "Lechuga, pimiento verde y rojo, cebolla, maíz, aceitunas, tomate, remolacha y zanahoria",
+            "precio": "7,60€",
+            "ingredientes": ["Lechuga", "pimiento verde", "pimiento rojo", "cebolla", "maíz", "aceitunas", "tomate", "remolacha", "zanahoria"],
+            "alergenos_contiene": [],
+            "dietas_no_apto": [],
+            "buscar_por": "ensalada verde",
+            "tags": ["ensalada", "vegetariana"],
+            "orden": 1,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Ensalada di mare",
+            "descripcion": "Lechuga, pimiento verde y rojo, cebolla, maíz, aceitunas, tomate, mejillones, gambas, langostinos, remolacha y zanahoria",
+            "precio": "14,00€",
+            "ingredientes": ["Lechuga", "pimiento verde", "pimiento rojo", "cebolla", "maíz", "aceitunas", "tomate", "mejillones", "gambas", "langostinos", "remolacha", "zanahoria"],
+            "alergenos_contiene": ["moluscos", "crustaceos"],
+            "dietas_no_apto": ["sin_marisco"],
+            "buscar_por": "ensalada di mare",
+            "tags": ["ensalada", "marisco"],
+            "orden": 2,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Ensalada de atún",
+            "descripcion": "Lechuga, pimiento verde y rojo, cebolla, maíz, aceitunas, tomate, atún, remolacha, zanahoria",
+            "precio": "8,00€",
+            "ingredientes": ["Lechuga", "pimiento verde", "pimiento rojo", "cebolla", "maíz", "aceitunas", "tomate", "atún", "remolacha", "zanahoria"],
+            "alergenos_contiene": ["pescado"],
+            "dietas_no_apto": ["sin_pescado"],
+            "buscar_por": "ensalada de atun",
+            "tags": ["ensalada", "atun"],
+            "orden": 3,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Ensalada \"La cerámica\"",
+            "descripcion": "Lechuga, pimiento verde y rojo, cebolla, maíz, aceitunas, tomate, remolacha, zanahoria, jamón serrano, queso curado, pasas y frutos secos",
+            "precio": "13,20€",
+            "ingredientes": ["Lechuga", "pimiento verde", "pimiento rojo", "cebolla", "maíz", "aceitunas", "tomate", "remolacha", "zanahoria", "jamón serrano", "queso curado", "pasas", "frutos secos"],
+            "alergenos_contiene": ["leche", "frutos_de_cascara"],
+            "dietas_no_apto": ["sin_lactosa", "sin_frutos_secos"],
+            "buscar_por": "ensalada la ceramica",
+            "tags": ["ensalada"],
+            "orden": 4,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Ensalada de rulo de cabra",
+            "descripcion": "Lechuga, pimiento verde y rojo, cebolla, maíz, aceitunas, tomate, frutos secos, remolacha, zanahoria, rulo de cabra rebozado",
+            "precio": "11,80€",
+            "ingredientes": ["Lechuga", "pimiento verde", "pimiento rojo", "cebolla", "maíz", "aceitunas", "tomate", "frutos secos", "remolacha", "zanahoria", "rulo de cabra", "rebozado"],
+            "alergenos_contiene": ["leche", "frutos_de_cascara", "gluten"],
+            "dietas_no_apto": ["sin_lactosa", "sin_frutos_secos", "sin_gluten"],
+            "buscar_por": "ensalada de rulo de cabra",
+            "tags": ["ensalada", "queso de cabra"],
+            "orden": 5,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Coctel de gambas \"Gumer\"",
+            "descripcion": "Lechuga, gambas peladas, langostinos, palitos de cangrejo y salsa rosa",
+            "precio": "11,00€",
+            "ingredientes": ["Lechuga", "gambas peladas", "langostinos", "palitos de cangrejo", "salsa rosa"],
+            "alergenos_contiene": ["crustaceos", "moluscos", "huevo"],
+            "dietas_no_apto": ["sin_marisco", "sin_huevo"],
+            "buscar_por": "coctel de gambas gumer",
+            "tags": ["ensalada", "marisco"],
+            "orden": 6,
+            "tipo": "plato"
+          }
+        ],
+        "nota": ""
+      }
+    ],
+    "alergenos_referencia": [
+      "gluten",
+      "crustaceos",
+      "huevo",
+      "pescado",
+      "cacahuetes",
+      "soja",
+      "leche",
+      "frutos_de_cascara",
+      "apio",
+      "mostaza",
+      "sesamo",
+      "sulfitos",
+      "altramuces",
+      "moluscos"
+    ]
+  }

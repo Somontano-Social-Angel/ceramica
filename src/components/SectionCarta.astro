@@ -1,0 +1,228 @@
+<section class="section" id="carta" aria-labelledby="carta-title">
+  <div class="wrap">
+    <div class="intro">
+      <div class="intro__text">
+        <p class="eyebrow">Carta</p>
+        <h2 id="carta-title" class="h2">Brasa, smash y lo que te apetezca</h2>
+        <p class="p">
+          La carta gira en torno a la <strong class="strong">pizza al horno de leña</strong> y las
+          <strong class="strong">hamburguesas</strong>, con opciones para compartir, picar o ir a lo grande. Si tienes
+          <strong class="strong">alergias o intolerancias</strong>, dímelo al pedir o al reservar: estamos comprometidos
+          con el cumplimiento y te orientamos con claridad.
+        </p>
+        <a class="carta-cta" href="/carta">Ver carta interactiva</a>
+      </div>
+      <figure class="intro__shot">
+        <img
+          class="intro__img"
+          src="https://images.unsplash.com/photo-1568904223864-a4b2bfe4d539?auto=format&fit=crop&w=880&q=82"
+          alt="Hamburguesa jugosa y pan tostado, ambiente de carta"
+          width="440"
+          height="520"
+          loading="lazy"
+          decoding="async"
+        />
+        <figcaption class="intro__cap">Sustituye por foto propia del local cuando la tengas.</figcaption>
+      </figure>
+    </div>
+    <div class="cols">
+      <div class="panel">
+        <h3 class="h3">Pizzas & entrantes</h3>
+        <ul>
+          <li>Pizzas redondas y al corte, con masas trabajadas y topping sin recato</li>
+          <li>Para picar: croquetas, patatas bravas, ensaladas… según temporada</li>
+          <li>Pregunta por opciones sin gluten u otros alérgenos — lo vemos en sala</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3 class="h3">Hamburguesas & carnaza</h3>
+        <ul>
+          <li>Smash burgers, dobles y combinaciones con queso fundido y salsas caseras</li>
+          <li><strong class="strong">La Reto</strong>: reto de tamaño XL; si la bajas en menos de 30 minutos, gratis la burger y lo que bebas en el reto</li>
+          <li>Extras y guarniciones para rematar el festín</li>
+        </ul>
+      </div>
+      <div class="panel panel--highlight">
+        <h3 class="h3">Bebida & plan</h3>
+        <p class="panel__note">
+          Cervezas, refrescos, vinos y combinados para acompañar el partido: tenemos fútbol en pantalla y un equipo
+          que te mira a los ojos cuando pides la cuenta. Pide carta completa en barra o mesa.
+        </p>
+        <p class="price">La Reto</p>
+        <p class="price-hint">Consulta en sala condiciones del reto y disponibilidad.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .section {
+    padding: 5rem 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+  }
+
+  .intro {
+    display: grid;
+    gap: 1.75rem;
+    margin-bottom: 2.5rem;
+    align-items: center;
+  }
+
+  @media (min-width: 880px) {
+    .intro {
+      grid-template-columns: 1fr minmax(240px, 36%);
+      gap: 2.5rem;
+    }
+  }
+
+  .intro__text {
+    min-width: 0;
+  }
+
+  .eyebrow {
+    margin: 0 0 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .h2 {
+    margin: 0 0 1rem;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--fg);
+  }
+
+  .p {
+    margin: 0;
+    color: var(--fg-muted);
+    line-height: 1.75;
+  }
+
+  .intro__shot {
+    margin: 0;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    position: relative;
+  }
+
+  .intro__img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    display: block;
+  }
+
+  .intro__cap {
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    color: var(--fg-subtle);
+    background: rgba(0, 0, 0, 0.35);
+    line-height: 1.4;
+  }
+
+  .strong {
+    color: var(--fg);
+    font-weight: 600;
+  }
+
+  .carta-cta {
+    display: inline-block;
+    margin-top: 1.25rem;
+    padding: 0.7rem 1.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--fg);
+    border-radius: 999px;
+    transition: transform 0.2s var(--ease-out), box-shadow 0.2s;
+  }
+
+  .carta-cta:hover {
+    color: var(--bg);
+    transform: translateY(-1px);
+    box-shadow: 0 12px 32px rgba(255, 255, 255, 0.12);
+  }
+
+  .cols {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 900px) {
+    .cols {
+      grid-template-columns: repeat(3, 1fr);
+      align-items: stretch;
+    }
+  }
+
+  .panel {
+    padding: 1.5rem 1.35rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+  }
+
+  .panel--highlight {
+    border-color: var(--border-strong);
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.06) 0%, var(--bg-soft) 55%);
+  }
+
+  .h3 {
+    margin: 0 0 1rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg);
+  }
+
+  .panel ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    color: var(--fg-muted);
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+
+  .panel li {
+    margin-bottom: 0.5rem;
+  }
+
+  .panel__note {
+    margin: 0 0 1.25rem;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--fg-muted);
+  }
+
+  .price {
+    margin: 0 0 0.35rem;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .price-hint {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--fg-subtle);
+  }
+</style>

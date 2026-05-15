@@ -1,0 +1,127 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import CartaApp from "../components/CartaApp.astro";
+import { loadCarta } from "../data/carta";
+
+const carta = loadCarta();
+---
+
+<Layout
+  title="Carta | La Cerámica"
+  description="Carta completa de La Cerámica en Barbastro: pizzas, hamburguesas, brasa, ensaladas y más. Filtra por alérgenos e intolerancias."
+>
+  <a class="skip" href="#carta-app">Saltar a la carta</a>
+  <Header />
+  <main class="page">
+    <div class="shell">
+      <header class="page-head">
+        <p class="eyebrow">Carta</p>
+        <h1 class="h1">Nuestra carta</h1>
+        <p class="lead">
+          Explora platos por categoría, busca por nombre o ingrediente y marca los <strong>alérgenos</strong> que
+          quieras evitar. Los platos con trazas posibles se indican aparte. Ante dudas, consúltanos en sala o al
+          reservar.
+        </p>
+      </header>
+      <CartaApp carta={carta} />
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  const header = document.querySelector(".header");
+  const onScroll = () => {
+    if (header) header.classList.toggle("is-scrolled", window.scrollY > 48);
+  };
+  onScroll();
+  window.addEventListener("scroll", onScroll, { passive: true });
+</script>
+
+<style>
+  .skip {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    z-index: 100;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--bg);
+    background: var(--fg);
+    border-radius: 0 0 8px 8px;
+    transform: translate(-50%, -120%);
+    transition: transform 0.25s var(--ease-out);
+  }
+
+  .skip:focus {
+    transform: translate(-50%, 0);
+  }
+
+  .page {
+    padding: 5.25rem 0 3rem;
+    min-height: 100vh;
+  }
+
+  @media (min-width: 640px) {
+    .page {
+      padding: 6.5rem 1.5rem 4rem;
+    }
+  }
+
+  .shell {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 0 0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    .shell {
+      padding: 0;
+    }
+  }
+
+  .page-head {
+    margin-bottom: 1.5rem;
+    max-width: 42rem;
+    padding: 0 0.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .page-head {
+      margin-bottom: 2.5rem;
+      padding: 0;
+    }
+  }
+
+  .eyebrow {
+    margin: 0 0 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .h1 {
+    margin: 0 0 1rem;
+    font-family: var(--font-display);
+    font-size: clamp(2.25rem, 5vw, 3.25rem);
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--fg);
+  }
+
+  .lead {
+    margin: 0;
+    color: var(--fg-muted);
+    line-height: 1.75;
+  }
+
+  .lead strong {
+    color: var(--fg);
+    font-weight: 600;
+  }
+</style>

@@ -1,0 +1,316 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Admin reservas | La Cerámica" description="Panel de reservas (personal autorizado)." robots="noindex, nofollow">
+  <main class="adm">
+    <section class="card" id="login-panel">
+      <h1 class="h1">La Cerámica — Admin</h1>
+      <p class="p">Acceso restringido. Introduce la contraseña configurada en el servidor.</p>
+      <form class="form" id="login-form">
+        <label class="lbl" for="pwd">Contraseña</label>
+        <input class="inp" type="password" id="pwd" autocomplete="current-password" required />
+        <p class="err" id="login-err" hidden></p>
+        <button class="btn" type="submit">Entrar</button>
+      </form>
+    </section>
+
+    <section class="card" id="dash-panel" hidden>
+      <header class="head">
+        <h1 class="h1">Reservas</h1>
+        <button class="link" type="button" id="logout-btn">Salir</button>
+      </header>
+      <div class="filters">
+        <label class="lbl">Desde <input class="inp inp--sm" type="date" id="f-from" /></label>
+        <label class="lbl">Hasta <input class="inp inp--sm" type="date" id="f-to" /></label>
+        <button class="btn btn--ghost" type="button" id="reload-btn">Actualizar</button>
+      </div>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Pax</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Tel</th>
+              <th>Servicios</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <p class="hint" id="empty">Sin reservas en el rango.</p>
+    </section>
+  </main>
+</Layout>
+
+<script>
+  const $ = (s, r = document) => r.querySelector(s);
+
+  async function api(path, opts = {}) {
+    const r = await fetch(path, { credentials: "include", ...opts });
+    const j = await r.json().catch(() => ({}));
+    return { r, j };
+  }
+
+  async function refreshSession() {
+    const { r, j } = await api("/api/admin/session");
+    const ok = r.ok && j.admin;
+    $("#login-panel").hidden = ok;
+    $("#dash-panel").hidden = !ok;
+    if (ok) await loadList();
+  }
+
+  async function loadList() {
+    const from = /** @type {HTMLInputElement} */ ($("#f-from")).value;
+    const to = /** @type {HTMLInputElement} */ ($("#f-to")).value;
+    const q = new URLSearchParams();
+    if (from) q.set("from", from);
+    if (to) q.set("to", to);
+    const { r, j } = await api(`/api/admin/reservations?${q}`);
+    const tbody = $("#rows");
+    tbody.innerHTML = "";
+    if (!r.ok || !j.reservations?.length) {
+      $("#empty").hidden = false;
+      return;
+    }
+    $("#empty").hidden = true;
+    for (const row of j.reservations) {
+      const tr = document.createElement("tr");
+      const svc = (row.services ?? []).join(", ") || "—";
+      tr.innerHTML = `
+        <td>${row.date}</td>
+        <td>${row.time}</td>
+        <td>${row.partySize}</td>
+        <td>${escapeHtml(row.name)}</td>
+        <td><a href="mailto:${encodeURIComponent(row.email)}">${escapeHtml(row.email)}</a></td>
+        <td>${escapeHtml(row.phone)}</td>
+        <td>${escapeHtml(svc)}</td>
+        <td class="nowrap">${statusSelect(row)}</td>`;
+      tbody.appendChild(tr);
+    }
+    tbody.querySelectorAll("select[data-id]").forEach((sel) => {
+      sel.addEventListener("change", async () => {
+        const id = /** @type {HTMLSelectElement} */ (sel).dataset.id;
+        const status = /** @type {HTMLSelectElement} */ (sel).value;
+        const { r } = await api(`/api/admin/reservations/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status }),
+        });
+        if (!r.ok) alert("No se pudo actualizar");
+      });
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function statusSelect(row) {
+    const opts = ["pending", "confirmed", "cancelled"]
+      .map(
+        (v) =>
+          `<option value="${v}" ${row.status === v ? "selected" : ""}>${v === "pending" ? "Pendiente" : v === "confirmed" ? "Confirmada" : "Cancelada"}</option>`,
+      )
+      .join("");
+    return `<select class="sel" data-id="${row.id}">${opts}</select>`;
+  }
+
+  $("#login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const err = /** @type {HTMLParagraphElement} */ ($("#login-err"));
+    err.hidden = true;
+    const password = /** @type {HTMLInputElement} */ ($("#pwd")).value;
+    const { r, j } = await api("/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    });
+    if (!r.ok) {
+      err.textContent = j.error || "Error";
+      err.hidden = false;
+      return;
+    }
+    await refreshSession();
+  });
+
+  $("#logout-btn").addEventListener("click", async () => {
+    await api("/api/admin/logout", { method: "POST" });
+    await refreshSession();
+  });
+
+  $("#reload-btn").addEventListener("click", () => loadList());
+
+  refreshSession();
+</script>
+
+<style>
+  .adm {
+    min-height: 100vh;
+    padding: 2rem 1rem 3rem;
+    background: var(--bg);
+  }
+
+  .card {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.75rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+  }
+
+  .h1 {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    color: var(--fg);
+  }
+
+  .p {
+    margin: 0 0 1.25rem;
+    color: var(--fg-muted);
+    line-height: 1.55;
+  }
+
+  .lbl {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .inp {
+    padding: 0.55rem 0.65rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-strong);
+    background: var(--bg);
+    color: var(--fg);
+    font: inherit;
+  }
+
+  .inp--sm {
+    max-width: 11rem;
+  }
+
+  .form {
+    max-width: 22rem;
+  }
+
+  .err {
+    color: #fca5a5;
+    font-size: 0.9rem;
+  }
+
+  .btn {
+    margin-top: 0.75rem;
+    padding: 0.65rem 1.25rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--fg);
+    color: var(--bg);
+    font: inherit;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+
+  .btn--ghost {
+    background: transparent;
+    color: var(--fg);
+    border: 1px solid var(--border-strong);
+    margin-top: 0;
+  }
+
+  .head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .link {
+    background: none;
+    border: 0;
+    color: var(--fg-muted);
+    font: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+    align-items: flex-end;
+    margin-bottom: 1rem;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+
+  .tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    color: var(--fg-muted);
+  }
+
+  .tbl th,
+  .tbl td {
+    padding: 0.5rem 0.65rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .tbl th {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+    background: var(--bg);
+  }
+
+  .tbl a {
+    color: var(--fg);
+  }
+
+  .sel {
+    font: inherit;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 0.25rem 0.35rem;
+  }
+
+  .nowrap {
+    white-space: nowrap;
+  }
+
+  .hint {
+    margin: 0.75rem 0 0;
+    font-size: 0.85rem;
+    color: var(--fg-subtle);
+  }
+</style>

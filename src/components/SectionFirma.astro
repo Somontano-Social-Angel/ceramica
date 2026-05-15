@@ -1,0 +1,143 @@
+<section class="section" id="firma" aria-labelledby="firma-title">
+  <div class="wrap">
+    <header class="head">
+      <p class="eyebrow">Lo que petas</p>
+      <h2 id="firma-title" class="h2">Pizzas, smash y brasa de verdad</h2>
+      <p class="sub">
+        Entre lo que más triunfa en La Cerámica están las pizzas al horno de leña y, sobre todo, las hamburguesas.
+        José curra el horno; en cocina, su mujer y el equipo dejan cada plato listo para que no te quedes con hambre.
+      </p>
+    </header>
+    <ul class="cards">
+      <li class="card">
+        <span class="card__num">01</span>
+        <h3 class="card__title">Pizzas al horno de leña</h3>
+        <p class="card__text">
+          Masa, punto de cocción y aromas que solo da la leña. El horno personalizado es el centro del local: ahí
+          está el maestro chef dándole caña a cada servicio.
+        </p>
+      </li>
+      <li class="card">
+        <span class="card__num">02</span>
+        <h3 class="card__title">Hamburguesas que flipas</h3>
+        <p class="card__text">
+          Carnaza jugosa, pan que aguanta y combinaciones sin complejos. Son el plato estrella junto a la carta de
+          pizzas: lo que pides cuando vienes con hambre de verdad.
+        </p>
+      </li>
+      <li class="card">
+        <span class="card__num">03</span>
+        <h3 class="card__title">La Reto: ¿te la juegas?</h3>
+        <p class="card__text">
+          Un bicharraco de pura carne, casi del tamaño de una cabeza: si te la acabas en menos de 30 minutos, la
+          hamburguesa te sale gratis y lo que bebas en ese reto también. ¿Te atreves?
+        </p>
+      </li>
+      <li class="card">
+        <span class="card__num">04</span>
+        <h3 class="card__title">Más que brasa: el equipo</h3>
+        <p class="card__text">
+          Terraza tan grande como el salón, barra con ambiente, fútbol en pantalla y una atención que nos enorgullece.
+          Así se entiende La Cerámica: familia, bar y cocina a la vez.
+        </p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  .section {
+    padding: 5rem 1.5rem;
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg-elevated) 50%, var(--bg) 100%);
+  }
+
+  .wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+  }
+
+  .head {
+    max-width: 40rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .eyebrow {
+    margin: 0 0 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .h2 {
+    margin: 0 0 1rem;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-weight: 600;
+    line-height: 1.15;
+    color: var(--fg);
+  }
+
+  .sub {
+    margin: 0;
+    color: var(--fg-muted);
+    line-height: 1.7;
+  }
+
+  .cards {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 700px) {
+    .cards {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .card {
+    padding: 1.75rem 1.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.02);
+    transition:
+      border-color 0.25s,
+      background 0.25s,
+      transform 0.25s var(--ease-out);
+  }
+
+  .card:hover {
+    border-color: var(--border-strong);
+    background: rgba(255, 255, 255, 0.04);
+    transform: translateY(-3px);
+  }
+
+  .card__num {
+    display: block;
+    margin-bottom: 1rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--fg-subtle);
+  }
+
+  .card__title {
+    margin: 0 0 0.65rem;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--fg);
+    line-height: 1.25;
+  }
+
+  .card__text {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--fg-muted);
+    line-height: 1.65;
+  }
+</style>

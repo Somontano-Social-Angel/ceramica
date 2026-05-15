@@ -1,0 +1,63 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import SectionNosotros from "../components/SectionNosotros.astro";
+import SectionFirma from "../components/SectionFirma.astro";
+import SectionCarta from "../components/SectionCarta.astro";
+import SectionExperiencia from "../components/SectionExperiencia.astro";
+import SectionHorario from "../components/SectionHorario.astro";
+import SectionTestimonios from "../components/SectionTestimonios.astro";
+import SectionUbicacion from "../components/SectionUbicacion.astro";
+import SectionFAQ from "../components/SectionFAQ.astro";
+import SectionReserva from "../components/SectionReserva.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<Layout>
+  <a class="skip" href="#inicio">Saltar al contenido</a>
+  <Header />
+  <main>
+    <Hero />
+    <SectionNosotros />
+    <SectionFirma />
+    <SectionCarta />
+    <SectionExperiencia />
+    <SectionHorario />
+    <SectionTestimonios />
+    <SectionUbicacion />
+    <SectionFAQ />
+    <SectionReserva />
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  const header = document.querySelector(".header");
+  const onScroll = () => {
+    if (header) header.classList.toggle("is-scrolled", window.scrollY > 48);
+  };
+  onScroll();
+  window.addEventListener("scroll", onScroll, { passive: true });
+</script>
+
+<style>
+  .skip {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    z-index: 100;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--bg);
+    background: var(--fg);
+    border-radius: 0 0 8px 8px;
+    transform: translate(-50%, -120%);
+    transition: transform 0.25s var(--ease-out);
+  }
+
+  .skip:focus {
+    transform: translate(-50%, 0);
+  }
+</style>

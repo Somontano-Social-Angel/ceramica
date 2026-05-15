@@ -1,0 +1,147 @@
+{
+    "categorias": [
+      {
+        "categoria": "Raciones",
+        "slug": "raciones",
+        "items": [
+          {
+            "nombre": "Queso",
+            "precio": "6,50€",
+            "ingredientes": ["Queso"],
+            "alergenos_contiene": ["leche"],
+            "dietas_no_apto": ["sin_lactosa"],
+            "buscar_por": "queso",
+            "tags": ["racion", "queso"],
+            "orden": 1,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Jamón serrano",
+            "precio": "5,00€",
+            "ingredientes": ["Jamón serrano"],
+            "buscar_por": "jamon serrano",
+            "tags": ["racion", "embutido"],
+            "orden": 2,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Patatas fritas",
+            "precio": "3,80€",
+            "ingredientes": ["Patatas"],
+            "buscar_por": "patatas fritas",
+            "tags": ["racion", "patatas"],
+            "orden": 3,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Longaniza",
+            "precio": "5,50€",
+            "ingredientes": ["Longaniza"],
+            "buscar_por": "longaniza",
+            "tags": ["racion", "embutido"],
+            "orden": 4,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Patatas Bravas",
+            "precio": "5,00€",
+            "ingredientes": ["Patatas", "salsa brava"],
+            "buscar_por": "patatas bravas",
+            "tags": ["racion", "patatas"],
+            "orden": 5,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Aros de cebolla",
+            "precio": "3,90€",
+            "ingredientes": ["Cebolla", "rebozado"],
+            "alergenos_contiene": ["gluten"],
+            "dietas_no_apto": ["sin_gluten"],
+            "buscar_por": "aros de cebolla",
+            "tags": ["racion", "aperitivo"],
+            "orden": 6,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Patatas Deluxe",
+            "precio": "5,40€",
+            "ingredientes": ["Patatas", "especias"],
+            "buscar_por": "patatas deluxe",
+            "tags": ["racion", "patatas"],
+            "orden": 7,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Calamares a la romana",
+            "precio": "6,50€",
+            "ingredientes": ["Calamares", "rebozado"],
+            "alergenos_contiene": ["moluscos", "gluten"],
+            "dietas_no_apto": ["sin_marisco", "sin_gluten"],
+            "buscar_por": "calamares a la romana",
+            "tags": ["racion", "pescado"],
+            "orden": 8,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Buñuelos de bacalao",
+            "precio": "4,30€",
+            "ingredientes": ["Bacalao", "masa"],
+            "alergenos_contiene": ["pescado", "gluten"],
+            "dietas_no_apto": ["sin_pescado", "sin_gluten"],
+            "buscar_por": "bunuelos de bacalao",
+            "tags": ["racion", "pescado"],
+            "orden": 9,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Callos",
+            "precio": "6,00€",
+            "ingredientes": ["Callos"],
+            "buscar_por": "callos",
+            "tags": ["racion", "guiso"],
+            "orden": 10,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Nuggets de pollo",
+            "precio": "8 U: 4,60€ / 16 U: 8,10€",
+            "ingredientes": ["Pollo", "rebozado"],
+            "alergenos_contiene": ["gluten"],
+            "dietas_no_apto": ["sin_gluten"],
+            "buscar_por": "nuggets de pollo",
+            "tags": ["racion", "pollo"],
+            "orden": 11,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Sepia",
+            "precio": "7,00€",
+            "ingredientes": ["Sepia"],
+            "alergenos_contiene": ["moluscos"],
+            "dietas_no_apto": ["sin_marisco"],
+            "buscar_por": "sepia",
+            "tags": ["racion", "pescado"],
+            "orden": 12,
+            "tipo": "plato"
+          }
+        ],
+        "nota": ""
+      }
+    ],
+    "alergenos_referencia": [
+      "gluten",
+      "crustaceos",
+      "huevo",
+      "pescado",
+      "cacahuetes",
+      "soja",
+      "leche",
+      "frutos_de_cascara",
+      "apio",
+      "mostaza",
+      "sesamo",
+      "sulfitos",
+      "altramuces",
+      "moluscos"
+    ]
+  }

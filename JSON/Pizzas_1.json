@@ -1,0 +1,196 @@
+{
+    "categorias": [
+      {
+        "categoria": "Pizzas 13€",
+        "slug": "pizzas-13",
+        "items": [
+          {
+            "nombre": "Margarita",
+            "descripcion": "Mozzarella y tomate",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate"],
+            "alergenos_contiene": ["gluten", "leche"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa", "vegetariano"],
+            "dietas_apto_si_modifica": ["vegetariano"],
+            "buscar_por": "margarita",
+            "tags": ["pizza"],
+            "orden": 1,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Cuatro estaciones",
+            "descripcion": "Mozzarella, tomate, atún, jamón dulce, champiñones y alcachofas",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "atún", "jamón dulce", "champiñones", "alcachofas"],
+            "alergenos_contiene": ["gluten", "leche", "pescado"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa", "sin_pescado"],
+            "buscar_por": "cuatro estaciones",
+            "tags": ["pizza"],
+            "orden": 2,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Siciliana",
+            "descripcion": "Mozzarella, tomate, atún, champiñones",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "atún", "champiñones"],
+            "alergenos_contiene": ["gluten", "leche", "pescado"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa", "sin_pescado"],
+            "buscar_por": "siciliana",
+            "tags": ["pizza"],
+            "orden": 3,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Atún con pimientos",
+            "descripcion": "Mozzarella, tomate, aceitunas negras, atún y pimientos",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "aceitunas negras", "atún", "pimientos"],
+            "alergenos_contiene": ["gluten", "leche", "pescado"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa", "sin_pescado"],
+            "buscar_por": "atun con pimientos",
+            "tags": ["pizza"],
+            "orden": 4,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Bacon",
+            "descripcion": "Mozzarella, tomate y bacon",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "bacon"],
+            "alergenos_contiene": ["gluten", "leche"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa"],
+            "buscar_por": "bacon",
+            "tags": ["pizza"],
+            "orden": 5,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Jamón",
+            "descripcion": "Mozzarella, tomate y jamón dulce",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "jamón dulce"],
+            "alergenos_contiene": ["gluten", "leche"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa"],
+            "buscar_por": "jamon",
+            "tags": ["pizza"],
+            "orden": 6,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Boloñesa",
+            "descripcion": "Mozzarella, tomate y carne en salsa boloñesa",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "carne en salsa boloñesa"],
+            "alergenos_contiene": ["gluten", "leche"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa"],
+            "buscar_por": "bolonesa",
+            "tags": ["pizza"],
+            "orden": 7,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Carne picante",
+            "descripcion": "Mozzarella, tomate y carne en salsa boloñesa picante",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "carne en salsa boloñesa picante"],
+            "alergenos_contiene": ["gluten", "leche"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa"],
+            "buscar_por": "carne picante",
+            "tags": ["pizza"],
+            "orden": 8,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Cerámica",
+            "descripcion": "Mozzarella, tomate, jamón dulce, bacon, champiñones y huevo",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "jamón dulce", "bacon", "champiñones", "huevo"],
+            "alergenos_contiene": ["gluten", "leche", "huevo"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa", "sin_huevo"],
+            "buscar_por": "ceramica",
+            "tags": ["pizza"],
+            "orden": 9,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Caprichosa",
+            "descripcion": "Mozzarella, tomate, jamón dulce y champiñones",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "jamón dulce", "champiñones"],
+            "alergenos_contiene": ["gluten", "leche"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa"],
+            "buscar_por": "caprichosa",
+            "tags": ["pizza"],
+            "orden": 10,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Tropical",
+            "descripcion": "Mozzarella, tomate, atún, jamón dulce y piña",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "atún", "jamón dulce", "piña"],
+            "alergenos_contiene": ["gluten", "leche", "pescado"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa", "sin_pescado"],
+            "buscar_por": "tropical",
+            "tags": ["pizza"],
+            "orden": 11,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Calzone",
+            "descripcion": "Mozzarella, tomate, atún, jamón dulce, bacon, champiñones y quesos",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "atún", "jamón dulce", "bacon", "champiñones", "quesos"],
+            "alergenos_contiene": ["gluten", "leche", "pescado"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa", "sin_pescado"],
+            "buscar_por": "calzone",
+            "tags": ["pizza"],
+            "orden": 12,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Atún",
+            "descripcion": "Mozzarella, tomate y atún",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "atún"],
+            "alergenos_contiene": ["gluten", "leche", "pescado"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa", "sin_pescado"],
+            "buscar_por": "atun",
+            "tags": ["pizza"],
+            "orden": 13,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Marinera",
+            "descripcion": "Mozzarella, tomate, atún, gambas y mejillones",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "atún", "gambas", "mejillones"],
+            "alergenos_contiene": ["gluten", "leche", "pescado", "crustaceos", "moluscos"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa", "sin_pescado", "sin_marisco"],
+            "buscar_por": "marinera",
+            "tags": ["pizza"],
+            "orden": 14,
+            "tipo": "plato"
+          }
+        ],
+        "nota": ""
+      }
+    ],
+    "alergenos_referencia": [
+      "gluten",
+      "crustaceos",
+      "huevo",
+      "pescado",
+      "cacahuetes",
+      "soja",
+      "leche",
+      "frutos_de_cascara",
+      "apio",
+      "mostaza",
+      "sesamo",
+      "sulfitos",
+      "altramuces",
+      "moluscos"
+    ]
+  }

@@ -1,0 +1,94 @@
+<section class="section" aria-labelledby="faq-title">
+  <div class="wrap">
+    <p class="eyebrow">FAQ</p>
+    <h2 id="faq-title" class="h2">Antes de venir</h2>
+    <dl class="faq">
+      <div class="item">
+        <dt>¿Hay aparcamiento?</dt>
+        <dd>Estamos en el polígono industrial La Cerámica: hay sitio de sobra para aparcar en superficie, sin dar vueltas al centro.</dd>
+      </div>
+      <div class="item">
+        <dt>¿Puedo ir con mascota?</dt>
+        <dd>Sí en terraza (y la terraza es amplísima). En el interior del salón no admitimos animales por normativa y comodidad del resto de mesas.</dd>
+      </div>
+      <div class="item">
+        <dt>¿Qué es La Reto?</dt>
+        <dd>Una hamburguesa de pura carne, tamaño descomunal: si te la acabas en menos de 30 minutos, te sale gratis y también lo que bebas durante el reto. Pregunta en sala por condiciones y disponibilidad.</dd>
+      </div>
+      <div class="item">
+        <dt>Alérgenos y accesibilidad</dt>
+        <dd>Comprometidos con el cumplimiento en carta: pregunta al equipo. El local está pensado para personas con movilidad reducida; si reservas, indícanos lo que necesites y te ubicamos lo mejor posible.</dd>
+      </div>
+      <div class="item">
+        <dt>¿Tarjeta o efectivo?</dt>
+        <dd>Aceptamos tarjeta y efectivo. Para grupos grandes o el reto, mejor avisar con tiempo.</dd>
+      </div>
+      <div class="item">
+        <dt>Política de cancelación</dt>
+        <dd>Para mesas de más de 6 personas agradecemos confirmación con margen. Si no puedes venir, un aviso nos ayuda a cuadrar el servicio.</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<style>
+  .section {
+    padding: 4rem 1.5rem 5rem;
+    border-top: 1px solid var(--border);
+    background: var(--bg-elevated);
+  }
+
+  .wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+  }
+
+  .eyebrow {
+    margin: 0 0 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .h2 {
+    margin: 0 0 2rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .faq {
+    margin: 0;
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 720px) {
+    .faq {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .item {
+    margin: 0;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .item dt {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .item dd {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: var(--fg-muted);
+  }
+</style>

@@ -1,0 +1,302 @@
+<section class="hero" id="inicio" aria-labelledby="hero-title">
+  <div class="hero__bg" aria-hidden="true"></div>
+  <div class="hero__grid" aria-hidden="true"></div>
+  <div class="hero__glow" aria-hidden="true"></div>
+  <div class="hero__inner">
+    <div class="hero__main">
+      <p class="eyebrow">Bar-restaurante · Barbastro</p>
+      <h1 id="hero-title" class="title">Restaurante La Cerámica</h1>
+      <p class="addr">Polígono Industrial La Cerámica VI, 13 · Barbastro, Huesca</p>
+      <ul class="facts" aria-label="Destacados">
+        <li>Horno de leña</li>
+        <li>Terraza amplia</li>
+        <li>Reserva online</li>
+      </ul>
+      <p class="tagline">Cocina de brasas y horno de leña</p>
+      <p class="lead">
+        Pizzas artesanales, carnes a la brasa y hamburguesas premium.
+      </p>
+      <p class="lead">
+        El equipo de La Cerámica perpetúa tres décadas de tradición local con recetas transmitidas y dominio absoluto
+        del horno de leña. Materia prima impecable, servicio cercano y generoso. Menú ejecutivo diario (13,50€ L-V).
+      </p>
+      <div class="actions">
+        <a class="btn btn--primary" href="/reservar">Reservar mesa</a>
+        <a class="btn btn--ghost" href="#carta">Ver carta</a>
+      </div>
+    </div>
+
+    <aside class="hero__visual" aria-label="Ambiente del restaurante">
+      <div class="hero__plate">
+        <img
+          class="hero__img"
+          src="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=960&q=82"
+          alt="Pizza artesanal recién salida del horno, ambiente de mesa"
+          width="640"
+          height="800"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+        />
+        <div class="hero__plate-shade" aria-hidden="true"></div>
+        <div class="hero__plate-meta">
+          <img class="hero__mark" src="/logo.svg" alt="" width="120" height="80" loading="eager" decoding="async" />
+          <p class="hero__plate-tag">Brasas · Masa madre · Barbastro</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    min-height: min(100vh, 900px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6.5rem 1.5rem 3.5rem;
+    overflow: hidden;
+  }
+
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 90% 55% at 50% -15%, rgba(255, 255, 255, 0.14), transparent 55%),
+      radial-gradient(circle at 88% 22%, rgba(255, 160, 80, 0.07), transparent 42%),
+      radial-gradient(circle at 12% 70%, rgba(255, 120, 60, 0.05), transparent 45%),
+      var(--bg);
+  }
+
+  .hero__grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: linear-gradient(to bottom, black 55%, transparent);
+    pointer-events: none;
+  }
+
+  .hero__glow {
+    position: absolute;
+    inset: -20% -10% auto;
+    height: 70%;
+    max-height: 520px;
+    background: radial-gradient(ellipse 50% 60% at 70% 40%, rgba(255, 140, 70, 0.12), transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero__inner {
+    position: relative;
+    z-index: 1;
+    max-width: var(--max);
+    margin: 0 auto;
+    width: 100%;
+    display: grid;
+    gap: 2.75rem;
+    align-items: center;
+  }
+
+  @media (min-width: 960px) {
+    .hero__inner {
+      grid-template-columns: 1fr minmax(300px, 40%);
+      gap: 3.5rem;
+    }
+  }
+
+  .hero__main {
+    min-width: 0;
+  }
+
+  .eyebrow {
+    margin: 0 0 0.85rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .title {
+    margin: 0 0 0.75rem;
+    max-width: 22ch;
+    font-family: var(--font-display);
+    font-size: clamp(2.25rem, 5vw, 3.5rem);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+  }
+
+  .addr {
+    margin: 0 0 1.25rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+    max-width: 36rem;
+    line-height: 1.5;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 0 1.35rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .facts li {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.82);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .tagline {
+    margin: 0 0 1.25rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--fg-muted);
+    font-style: italic;
+  }
+
+  .lead {
+    margin: 0 0 1rem;
+    max-width: 40rem;
+    font-size: 1.02rem;
+    font-weight: 400;
+    line-height: 1.75;
+    color: var(--fg-muted);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.9rem 1.5rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    transition:
+      background 0.25s,
+      color 0.25s,
+      border-color 0.25s,
+      transform 0.2s var(--ease-out);
+  }
+
+  .btn--primary {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  .btn--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 40px rgba(255, 255, 255, 0.1);
+  }
+
+  .btn--ghost {
+    border-color: var(--border-strong);
+    color: var(--fg);
+    background: transparent;
+  }
+
+  .btn--ghost:hover {
+    border-color: var(--fg);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .hero__visual {
+    margin: 0;
+    min-width: 0;
+  }
+
+  .hero__plate {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border-strong);
+    box-shadow:
+      0 32px 80px rgba(0, 0, 0, 0.45),
+      0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+    aspect-ratio: 4 / 5;
+    max-height: min(72vh, 640px);
+    margin-inline: auto;
+    max-width: 420px;
+  }
+
+  @media (min-width: 960px) {
+    .hero__plate {
+      margin-inline: 0;
+      max-width: none;
+      max-height: min(78vh, 680px);
+    }
+  }
+
+  .hero__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: scale(1.02);
+  }
+
+  .hero__plate-shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(27, 27, 27, 0.92) 0%, rgba(27, 27, 27, 0.15) 45%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .hero__plate-meta {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 1.25rem 1.35rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.65rem;
+  }
+
+  .hero__mark {
+    width: min(42%, 140px);
+    height: auto;
+    filter: invert(1) brightness(1.05);
+    opacity: 0.92;
+  }
+
+  .hero__plate-tag {
+    margin: 0;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+    line-height: 1.45;
+    max-width: 28ch;
+  }
+</style>

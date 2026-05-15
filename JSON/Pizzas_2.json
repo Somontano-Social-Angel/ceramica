@@ -1,0 +1,213 @@
+{
+    "categorias": [
+      {
+        "categoria": "Pizzas 13€",
+        "slug": "pizzas-13",
+        "items": [
+          {
+            "nombre": "Tierra y mar",
+            "descripcion": "Mozzarella, tomate, atún, gambas, mejillones y champiñones",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "atún", "gambas", "mejillones", "champiñones"],
+            "alergenos_contiene": ["gluten", "leche", "pescado", "crustaceos", "moluscos"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa", "sin_pescado", "sin_marisco"],
+            "buscar_por": "tierra y mar",
+            "tags": ["pizza"],
+            "orden": 1,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Vegetariana",
+            "descripcion": "Mozzarella, Tomate, champiñones, espinacas y espárragos",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "Tomate", "champiñones", "espinacas", "espárragos"],
+            "alergenos_contiene": ["gluten", "leche"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa"],
+            "dietas_apto_si_modifica": ["vegetariano"],
+            "buscar_por": "vegetariana",
+            "tags": ["pizza", "vegetariana"],
+            "orden": 2,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Espinacas con cabra",
+            "descripcion": "Mozzarella, tomate, espinacas y rulo de cabra",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "espinacas", "rulo de cabra"],
+            "alergenos_contiene": ["gluten", "leche"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa"],
+            "buscar_por": "espinacas con cabra",
+            "tags": ["pizza"],
+            "orden": 3,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "GI-GI",
+            "descripcion": "Mozzarella, tomate, cebolla, nata y nuez moscada",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "cebolla", "nata", "nuez moscada"],
+            "alergenos_contiene": ["gluten", "leche"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa"],
+            "buscar_por": "gi-gi",
+            "tags": ["pizza"],
+            "orden": 4,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Fughi",
+            "descripcion": "Mozzarella, tomate y champiñones",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "champiñones"],
+            "alergenos_contiene": ["gluten", "leche"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa"],
+            "buscar_por": "fughi",
+            "tags": ["pizza"],
+            "orden": 5,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Cuatro quesos",
+            "descripcion": "Mozzarella, tomate, edam, chédar y roquefort",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "edam", "chédar", "roquefort"],
+            "alergenos_contiene": ["gluten", "leche"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa"],
+            "buscar_por": "cuatro quesos",
+            "tags": ["pizza"],
+            "orden": 6,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Roquefort",
+            "descripcion": "Mozzarella, tomate, roquefort y champiñones",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "roquefort", "champiñones"],
+            "alergenos_contiene": ["gluten", "leche"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa"],
+            "buscar_por": "roquefort",
+            "tags": ["pizza"],
+            "orden": 7,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Carbonara",
+            "descripcion": "Mozzarella, tomate, nata, nuez moscada, bacón y cebolla caramelizada",
+            "precio": "13,00€",
+            "ingredientes": ["Mozzarella", "tomate", "nata", "nuez moscada", "bacón", "cebolla caramelizada"],
+            "alergenos_contiene": ["gluten", "leche"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa"],
+            "buscar_por": "carbonara",
+            "tags": ["pizza"],
+            "orden": 8,
+            "tipo": "plato"
+          }
+        ]
+      },
+      {
+        "categoria": "Pizzas 14€",
+        "slug": "pizzas-14",
+        "items": [
+          {
+            "nombre": "Napolitana",
+            "descripcion": "Mozzarella, tomate, anchoas y aceitunas negras",
+            "precio": "14,00€",
+            "ingredientes": ["Mozzarella", "tomate", "anchoas", "aceitunas negras"],
+            "alergenos_contiene": ["gluten", "leche", "pescado"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa", "sin_pescado"],
+            "buscar_por": "napolitana",
+            "tags": ["pizza"],
+            "orden": 1,
+            "tipo": "plato"
+          }
+        ]
+      },
+      {
+        "categoria": "Pizzas 15€",
+        "slug": "pizzas-15",
+        "items": [
+          {
+            "nombre": "Cerámica \"PLUS\"",
+            "descripcion": "Mozzarella, tomate, jamón dulce, bacón, champiñones, huevo, atún, carne longaniza, tomate natural, cheddar y Edam",
+            "precio": "15,00€",
+            "ingredientes": ["Mozzarella", "tomate", "jamón dulce", "bacón", "champiñones", "huevo", "atún", "carne longaniza", "tomate natural", "cheddar", "Edam"],
+            "alergenos_contiene": ["gluten", "leche", "huevo", "pescado"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa", "sin_huevo", "sin_pescado"],
+            "buscar_por": "ceramica plus",
+            "tags": ["pizza"],
+            "orden": 1,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Calzone \"PLUS\"",
+            "descripcion": "Mozzarella, tomate, atún, jamón dulce, bacón, champiñones, cheddar, edam y boloñesa",
+            "precio": "15,00€",
+            "ingredientes": ["Mozzarella", "tomate", "atún", "jamón dulce", "bacón", "champiñones", "cheddar", "edam", "boloñesa"],
+            "alergenos_contiene": ["gluten", "leche", "pescado"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa", "sin_pescado"],
+            "buscar_por": "calzone plus",
+            "tags": ["pizza"],
+            "orden": 2,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Ibérica",
+            "descripcion": "Mozzarella, jamón ibérico y rúcula",
+            "precio": "15,00€",
+            "ingredientes": ["Mozzarella", "jamón ibérico", "rúcula"],
+            "alergenos_contiene": ["gluten", "leche"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa"],
+            "buscar_por": "iberica",
+            "tags": ["pizza"],
+            "orden": 3,
+            "tipo": "plato"
+          },
+          {
+            "nombre": "Pizza Somontano",
+            "descripcion": "Tomate rosa de Barbastro almendra y albahaca",
+            "precio": "15,00€",
+            "ingredientes": ["Tomate rosa de Barbastro", "almendra", "albahaca"],
+            "alergenos_contiene": ["frutos_de_cascara"],
+            "dietas_no_apto": ["sin_frutos_secos"],
+            "buscar_por": "pizza somontano",
+            "tags": ["pizza"],
+            "orden": 4,
+            "tipo": "plato"
+          }
+        ]
+      },
+      {
+        "categoria": "Pizzas 16€",
+        "slug": "pizzas-16",
+        "items": [
+          {
+            "nombre": "Salmón",
+            "descripcion": "Mozzarella, tomate, salmón",
+            "precio": "16,00€",
+            "ingredientes": ["Mozzarella", "tomate", "salmón"],
+            "alergenos_contiene": ["gluten", "leche", "pescado"],
+            "dietas_no_apto": ["sin_gluten", "sin_lactosa", "sin_pescado"],
+            "buscar_por": "salmon",
+            "tags": ["pizza"],
+            "orden": 1,
+            "tipo": "plato"
+          }
+        ]
+      }
+    ],
+    "alergenos_referencia": [
+      "gluten",
+      "crustaceos",
+      "huevo",
+      "pescado",
+      "cacahuetes",
+      "soja",
+      "leche",
+      "frutos_de_cascara",
+      "apio",
+      "mostaza",
+      "sesamo",
+      "sulfitos",
+      "altramuces",
+      "moluscos"
+    ]
+  }

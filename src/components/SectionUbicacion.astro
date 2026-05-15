@@ -1,0 +1,286 @@
+---
+const mapsQuery = encodeURIComponent("C. Cerámica Industrial VI, 13, 22300 Barbastro, Huesca");
+const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
+/** Coordenadas aproximadas del polígono (ficha en guías turísticas); ajusta si hace falta. */
+const embedLat = "42.04223";
+const embedLng = "0.13848";
+const mapsEmbedUrl = `https://www.google.com/maps?q=${embedLat},${embedLng}&hl=es&z=16&output=embed`;
+---
+
+<section class="section" id="contacto" aria-labelledby="contacto-title">
+  <div class="wrap">
+    <div class="info">
+      <p class="eyebrow">Ubicación</p>
+      <h2 id="contacto-title" class="h2">Polígono La Cerámica, Barbastro</h2>
+      <p class="p">
+        C. Cerámica Industrial VI, 13 · 22300 Barbastro (Huesca). Estamos en el polígono industrial homónimo: llegas
+        con el coche, aparcas con holgura y entras directo a comer.
+      </p>
+      <dl class="contact">
+        <div>
+          <dt>Teléfono</dt>
+          <dd><a href="tel:+34974312220">974 31 22 20</a></dd>
+        </div>
+        <div>
+          <dt>Reservas web</dt>
+          <dd><a href="/reservar">/reservar</a></dd>
+        </div>
+      </dl>
+      <a class="maplink" href={mapsUrl} target="_blank" rel="noopener noreferrer">Abrir en Google Maps</a>
+    </div>
+
+    <div class="side">
+      <aside class="reviews" aria-labelledby="reviews-heading">
+        <h3 id="reviews-heading" class="reviews__title">Reseñas en Google Maps</h3>
+        <p class="reviews__lead">
+          La valoración y los textos cambian cada día: lo fiable es leerlas en la ficha oficial del local.
+        </p>
+        <p class="reviews__stars">
+          <span class="sr-only">Opiniones favorables habituales en Google Maps.</span>
+          <span aria-hidden="true">★★★★★</span>
+        </p>
+        <p class="reviews__hint">Temas que suelen repetirse en opiniones públicas:</p>
+        <ul class="reviews__themes">
+          <li>Terraza grande y aparcamiento cómodo en polígono</li>
+          <li>Pizzas al horno de leña y hamburguesas generosas</li>
+          <li>Trato de bar, ambiente relajado</li>
+        </ul>
+        <a class="reviews__cta" href={mapsUrl} target="_blank" rel="noopener noreferrer">
+          Ver opiniones en Google Maps
+        </a>
+      </aside>
+
+      <div class="map">
+        <iframe
+          class="map__iframe"
+          title="Ubicación aproximada de La Cerámica en Google Maps"
+          src={mapsEmbedUrl}
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .section {
+    padding: 5rem 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+    display: grid;
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  @media (min-width: 960px) {
+    .wrap {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+      gap: 3rem;
+    }
+  }
+
+  .eyebrow {
+    margin: 0 0 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .h2 {
+    margin: 0 0 1rem;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 2.5rem);
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .p {
+    margin: 0 0 1.5rem;
+    color: var(--fg-muted);
+    line-height: 1.65;
+    max-width: 28rem;
+  }
+
+  .contact {
+    margin: 0 0 1.5rem;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .contact dt {
+    margin: 0 0 0.25rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .contact dd {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .contact a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .maplink {
+    display: inline-flex;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg);
+    border-bottom: 1px solid var(--fg);
+    padding-bottom: 2px;
+  }
+
+  .maplink:hover {
+    opacity: 0.85;
+  }
+
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    min-width: 0;
+  }
+
+  @media (min-width: 720px) and (max-width: 959px) {
+    .side {
+      flex-direction: row;
+      align-items: stretch;
+    }
+
+    .reviews {
+      flex: 0 0 min(38%, 280px);
+    }
+
+    .map {
+      flex: 1;
+      min-height: 320px;
+    }
+  }
+
+  @media (min-width: 960px) {
+    .side {
+      display: grid;
+      grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+      gap: 1.25rem;
+      align-items: stretch;
+    }
+  }
+
+  .reviews {
+    margin: 0;
+    padding: 1.35rem 1.25rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-strong);
+    background: linear-gradient(165deg, rgba(255, 255, 255, 0.06) 0%, var(--bg-soft) 55%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .reviews__title {
+    margin: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg);
+  }
+
+  .reviews__lead {
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--fg-muted);
+  }
+
+  .reviews__stars {
+    margin: 0.15rem 0 0;
+    font-size: 1rem;
+    letter-spacing: 0.12em;
+    color: rgba(250, 204, 21, 0.95);
+    line-height: 1;
+  }
+
+  .reviews__hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .reviews__themes {
+    margin: 0;
+    padding-left: 1.1rem;
+    font-size: 0.84rem;
+    line-height: 1.55;
+    color: var(--fg-muted);
+  }
+
+  .reviews__themes li {
+    margin-bottom: 0.35rem;
+  }
+
+  .reviews__cta {
+    margin-top: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--bg);
+    background: var(--fg);
+    border-radius: 999px;
+    transition: transform 0.2s var(--ease-out), opacity 0.2s;
+  }
+
+  .reviews__cta:hover {
+    transform: translateY(-1px);
+    opacity: 0.95;
+  }
+
+  .map {
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    background: var(--bg-soft);
+    min-height: 280px;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
+  }
+
+  .map__iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 280px;
+    border: 0;
+  }
+
+  @media (min-width: 960px) {
+    .map,
+    .map__iframe {
+      min-height: 360px;
+    }
+  }
+</style>

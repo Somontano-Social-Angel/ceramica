@@ -1,0 +1,1030 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+---
+
+<Layout title="Reservar | La Cerámica" description="Reserva en el polígono La Cerámica, Barbastro. Elige día, hora y zona: terraza, interior o barra.">
+  <Header />
+  <main class="page">
+    <div class="shell">
+      <header class="page-head">
+        <p class="eyebrow">Reservas</p>
+        <h1 class="h1">Reserva tu mesa</h1>
+        <p class="lead">
+          Elige día y franja; puedes marcar terraza (mascotas), interior o zona barra. Las horas van en
+          <strong>hora de España (Madrid)</strong> y solo verás huecos con margen mínimo respecto a la hora actual.
+        </p>
+      </header>
+
+      <div class="layout">
+        <section class="panel" aria-labelledby="cal-title">
+          <h2 id="cal-title" class="h2">1. Fecha y hora</h2>
+          <p class="api-banner" id="api-banner" hidden>
+            No hay conexión con la API de reservas. Arranca el proyecto con <code>npm run dev</code> (Astro + servidor Node
+            en paralelo). El calendario se muestra en modo local; las franjas horarias necesitan la API.
+          </p>
+          <div class="res-cal" id="res-cal" aria-labelledby="cal-picker-label">
+            <p class="lbl res-cal__lbl" id="cal-picker-label">Elige día</p>
+            <div class="res-cal__toolbar">
+              <button type="button" class="res-cal__nav" id="cal-prev" aria-label="Mes anterior">
+                <span class="res-cal__nav-icon" aria-hidden="true">‹</span>
+              </button>
+              <h3 class="res-cal__month" id="cal-month-label">—</h3>
+              <button type="button" class="res-cal__nav" id="cal-next" aria-label="Mes siguiente">
+                <span class="res-cal__nav-icon" aria-hidden="true">›</span>
+              </button>
+            </div>
+            <div class="res-cal__dow" aria-hidden="true">
+              <span>Lun</span>
+              <span>Mar</span>
+              <span>Mié</span>
+              <span>Jue</span>
+              <span>Vie</span>
+              <span>Sáb</span>
+              <span>Dom</span>
+            </div>
+            <div class="res-cal__grid" id="cal-grid" role="grid" aria-labelledby="cal-picker-label"></div>
+            <input type="hidden" id="date-input" autocomplete="off" />
+          </div>
+          <div class="clock" id="clock-line" hidden>
+            <div class="clock__row">
+              <span class="clock__label">Hora en España</span>
+              <time class="clock__time" id="clock-time" datetime=""></time>
+            </div>
+            <p class="clock__hint" id="clock-hint"></p>
+          </div>
+          <p class="hint" id="closed-msg" hidden>Ese día permanecemos cerrados o la fecha ya pasó. Elige otra fecha.</p>
+          <p class="info-msg" id="no-slots-msg" hidden></p>
+          <div class="slots-wrap" id="slots-wrap" hidden>
+            <div class="slot-groups" id="slots" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="form-title">
+          <h2 id="form-title" class="h2">2. Datos</h2>
+          <form class="form" id="res-form">
+            <input type="hidden" name="time" id="time-hidden" />
+            <label class="lbl"> Hora elegida <span class="picked" id="picked-time">—</span> </label>
+            <label class="lbl" for="party">Personas</label>
+            <input class="inp" type="number" id="party" name="partySize" min="1" max="20" value="2" required />
+
+            <label class="lbl" for="name">Nombre</label>
+            <input class="inp" type="text" id="name" name="name" autocomplete="name" required maxlength="80" />
+
+            <label class="lbl" for="email">Email</label>
+            <input class="inp" type="email" id="email" name="email" autocomplete="email" required />
+
+            <label class="lbl" for="phone">Teléfono</label>
+            <input class="inp" type="tel" id="phone" name="phone" autocomplete="tel" required />
+
+            <fieldset class="fs">
+              <legend class="lbl">Zona preferida (opcional)</legend>
+              <label class="chk"><input type="checkbox" name="svc" value="Terraza" /> Terraza (mascotas)</label>
+              <label class="chk"><input type="checkbox" name="svc" value="Interior" /> Interior</label>
+              <label class="chk"><input type="checkbox" name="svc" value="Zona barra" /> Zona barra</label>
+            </fieldset>
+
+            <label class="lbl" for="notes">Notas</label>
+            <textarea class="inp ta" id="notes" name="notes" maxlength="500" rows="3" placeholder="Alergias, celebración…"></textarea>
+
+            <p class="err" id="form-err" hidden></p>
+            <p class="ok" id="form-ok" hidden></p>
+
+            <button class="submit" type="submit" id="submit-btn">Enviar reserva</button>
+          </form>
+        </section>
+      </div>
+
+      <p class="fine">
+        La Cerámica · C. Cerámica Industrial VI, 13, 22300 Barbastro · <a href="tel:+34974312220">974 31 22 20</a>
+      </p>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<script>
+  const $ = (s, r = document) => r.querySelector(s);
+  const dateInput = /** @type {HTMLInputElement} */ ($("#date-input"));
+  const calGrid = /** @type {HTMLDivElement} */ ($("#cal-grid"));
+  const calMonthLabel = /** @type {HTMLHeadingElement} */ ($("#cal-month-label"));
+  const calPrev = /** @type {HTMLButtonElement} */ ($("#cal-prev"));
+  const calNext = /** @type {HTMLButtonElement} */ ($("#cal-next"));
+  const apiBanner = /** @type {HTMLParagraphElement | null} */ (document.getElementById("api-banner"));
+  const slotsEl = /** @type {HTMLDivElement} */ ($("#slots"));
+  const slotsWrap = /** @type {HTMLDivElement} */ ($("#slots-wrap"));
+  const closedMsg = /** @type {HTMLParagraphElement} */ ($("#closed-msg"));
+  const noSlotsMsg = /** @type {HTMLParagraphElement} */ ($("#no-slots-msg"));
+  const clockLine = /** @type {HTMLDivElement} */ ($("#clock-line"));
+  const clockTime = /** @type {HTMLTimeElement} */ ($("#clock-time"));
+  const clockHint = /** @type {HTMLParagraphElement} */ ($("#clock-hint"));
+  const timeHidden = /** @type {HTMLInputElement} */ ($("#time-hidden"));
+  const pickedTime = /** @type {HTMLSpanElement} */ ($("#picked-time"));
+  const form = /** @type {HTMLFormElement} */ ($("#res-form"));
+  const formErr = /** @type {HTMLParagraphElement} */ ($("#form-err"));
+  const formOk = /** @type {HTMLParagraphElement} */ ($("#form-ok"));
+  const submitBtn = /** @type {HTMLButtonElement} */ ($("#submit-btn"));
+
+  let selectedTime = "";
+  /** @type {string} */
+  let metaToday = "";
+  /** @type {string} */
+  let metaMaxBookable = "";
+  /** @type {number} */
+  let metaMaxAhead = 120;
+  let viewYear = 0;
+  let viewMonth = 0;
+
+  function madridDateStringClient() {
+    return new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Madrid" });
+  }
+
+  function addDaysISO(dateStr, delta) {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d + delta));
+    const yy = dt.getUTCFullYear();
+    const mm = String(dt.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(dt.getUTCDate()).padStart(2, "0");
+    return `${yy}-${mm}-${dd}`;
+  }
+
+  /** 0=dom … 6=sáb (Madrid) */
+  function madridWeekday(dateStr) {
+    const [y, mo, d] = dateStr.split("-").map(Number);
+    const utcNoon = Date.UTC(y, mo - 1, d, 12, 0, 0);
+    const short = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Europe/Madrid",
+      weekday: "short",
+    }).format(new Date(utcNoon));
+    /** @type {Record<string, number>} */
+    const map = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+    return map[short] ?? 0;
+  }
+
+  function mondayFirstColumnClient(firstDateStr) {
+    return (madridWeekday(firstDateStr) + 6) % 7;
+  }
+
+  function diffCalendarDays(a, b) {
+    const [y1, m1, d1] = a.split("-").map(Number);
+    const [y2, m2, d2] = b.split("-").map(Number);
+    return Math.round((Date.UTC(y1, m1 - 1, d1) - Date.UTC(y2, m2 - 1, d2)) / 86400000);
+  }
+
+  function daysInMonthHuman(y, m) {
+    return new Date(y, m, 0).getDate();
+  }
+
+  /** Igual que el servidor: domingo cerrado. */
+  function buildLocalMonthPack(y, m) {
+    const today = metaToday || madridDateStringClient();
+    const dim = daysInMonthHuman(y, m);
+    const first = `${y}-${String(m).padStart(2, "0")}-01`;
+    const leadingEmpty = mondayFirstColumnClient(first);
+    const days = [];
+    for (let d = 1; d <= dim; d++) {
+      const dateStr = `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      const closed = madridWeekday(dateStr) === 0;
+      const past = dateStr < today;
+      const tooFar = diffCalendarDays(dateStr, today) > metaMaxAhead;
+      days.push({ date: dateStr, closed, past, tooFar, disabled: past || closed || tooFar });
+    }
+    return { leadingEmpty, days };
+  }
+
+  const MESES = [
+    "enero",
+    "febrero",
+    "marzo",
+    "abril",
+    "mayo",
+    "junio",
+    "julio",
+    "agosto",
+    "septiembre",
+    "octubre",
+    "noviembre",
+    "diciembre",
+  ];
+
+  function monthKey(y, m) {
+    return y * 12 + (m - 1);
+  }
+
+  function syncViewFromInput() {
+    const v = dateInput.value;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return;
+    viewYear = parseInt(v.slice(0, 4), 10);
+    viewMonth = parseInt(v.slice(5, 7), 10);
+  }
+
+  function updateNavDisabled() {
+    if (!metaToday || !metaMaxBookable || !calPrev || !calNext) return;
+    const viewK = monthKey(viewYear, viewMonth);
+    const minK = monthKey(parseInt(metaToday.slice(0, 4), 10), parseInt(metaToday.slice(5, 7), 10));
+    const maxK = monthKey(parseInt(metaMaxBookable.slice(0, 4), 10), parseInt(metaMaxBookable.slice(5, 7), 10));
+    calPrev.disabled = viewK <= minK;
+    calNext.disabled = viewK >= maxK;
+  }
+
+  async function renderCalendar() {
+    if (!calGrid || !calMonthLabel) return;
+    if (!viewYear || !viewMonth) {
+      const t = metaToday || madridDateStringClient();
+      viewYear = parseInt(t.slice(0, 4), 10);
+      viewMonth = parseInt(t.slice(5, 7), 10);
+    }
+    updateNavDisabled();
+    calMonthLabel.textContent = `${MESES[viewMonth - 1]} ${viewYear}`;
+    let pack = null;
+    try {
+      const r = await fetch(`/api/calendar-month?year=${viewYear}&month=${viewMonth}`);
+      const j = r.ok ? await r.json() : null;
+      if (r.ok && j?.ok && Array.isArray(j.days) && j.days.length > 0) {
+        pack = { leadingEmpty: Number(j.leadingEmpty ?? 0), days: j.days };
+      }
+    } catch {
+      pack = null;
+    }
+    if (!pack) {
+      pack = buildLocalMonthPack(viewYear, viewMonth);
+    }
+    calGrid.innerHTML = "";
+    for (let i = 0; i < pack.leadingEmpty; i++) {
+      const pad = document.createElement("div");
+      pad.className = "res-cal__pad";
+      pad.setAttribute("aria-hidden", "true");
+      calGrid.appendChild(pad);
+    }
+    for (const day of pack.days) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "res-cal__day";
+      b.dataset.date = day.date;
+      const dom = parseInt(day.date.slice(8, 10), 10);
+      b.textContent = String(dom);
+      if (day.disabled) {
+        b.disabled = true;
+        b.classList.add("res-cal__day--off");
+        if (day.closed) b.classList.add("res-cal__day--closed");
+        b.title = day.past ? "Fecha pasada" : day.tooFar ? "Fuera del plazo de reserva" : "Cerrado";
+      } else {
+        b.title = "Elegir este día";
+      }
+      if (day.date === metaToday) b.classList.add("res-cal__day--today");
+      if (day.date === dateInput.value && !day.disabled) b.classList.add("res-cal__day--picked");
+      b.addEventListener("click", () => {
+        if (day.disabled) return;
+        dateInput.value = day.date;
+        syncViewFromInput();
+        renderCalendar().then(() => {
+          loadSlots();
+          armPoll();
+        });
+      });
+      calGrid.appendChild(b);
+    }
+  }
+
+  if (calPrev) {
+    calPrev.addEventListener("click", async () => {
+      if (calPrev.disabled) return;
+      if (viewMonth <= 1) {
+        viewYear -= 1;
+        viewMonth = 12;
+      } else {
+        viewMonth -= 1;
+      }
+      await renderCalendar();
+    });
+  }
+
+  if (calNext) {
+    calNext.addEventListener("click", async () => {
+      if (calNext.disabled) return;
+      if (viewMonth >= 12) {
+        viewYear += 1;
+        viewMonth = 1;
+      } else {
+        viewMonth += 1;
+      }
+      await renderCalendar();
+    });
+  }
+
+  async function loadMeta() {
+    if (apiBanner) apiBanner.hidden = true;
+    try {
+      const r = await fetch("/api/meta");
+      const j = r.ok ? await r.json() : null;
+      if (!r.ok || !j?.ok || !j.today) throw new Error("meta");
+      metaToday = j.today;
+      metaMaxBookable = j.maxBookableDate || addDaysISO(j.today, Number(j.maxBookingDaysAhead ?? 120));
+      metaMaxAhead = Number(j.maxBookingDaysAhead ?? 120);
+      if (!dateInput.value) dateInput.value = j.today;
+      syncViewFromInput();
+      if (j?.nowMadrid && clockTime && clockHint) {
+        clockTime.textContent = j.nowMadrid;
+        clockTime.setAttribute("datetime", new Date().toISOString());
+        const lead = Number(j.minLeadMinutes ?? 30);
+        clockHint.textContent = `Mismo día: solo franjas con al menos ${lead} minutos desde esta hora.`;
+        clockLine.hidden = false;
+      }
+    } catch {
+      metaToday = madridDateStringClient();
+      metaMaxAhead = 120;
+      metaMaxBookable = addDaysISO(metaToday, metaMaxAhead);
+      if (!dateInput.value) dateInput.value = metaToday;
+      syncViewFromInput();
+      if (apiBanner) apiBanner.hidden = false;
+      if (clockTime && clockHint && clockLine) {
+        clockTime.textContent = new Intl.DateTimeFormat("es-ES", {
+          timeZone: "Europe/Madrid",
+          dateStyle: "medium",
+          timeStyle: "short",
+        }).format(new Date());
+        clockHint.textContent =
+          "Sin API no se pueden comprobar franjas reales. Arranca `npm run dev` para ver horas y guardar reservas.";
+        clockLine.hidden = false;
+      }
+    }
+  }
+
+  function setPicked(t) {
+    selectedTime = t;
+    timeHidden.value = t;
+    if (t) {
+      const [hh, mm] = t.split(":");
+      pickedTime.innerHTML = `<span class="picked__big">${hh}<span class="picked__sep">:</span>${mm}</span>`;
+    } else {
+      pickedTime.textContent = "—";
+    }
+  }
+
+  /** @param {string} t */
+  function makeSlotButton(t, full, max, cov) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "slot" + (full ? " slot--full" : "");
+    b.setAttribute("aria-pressed", "false");
+    b.innerHTML = `<span class="slot__time">${t}</span>`;
+    b.disabled = full;
+    b.title = full ? "Aforo completo en esta franja" : cov > 0 ? `${cov}/${max} comensales en esta franja` : "Disponible";
+    b.addEventListener("click", () => {
+      slotsEl.querySelectorAll(".slot").forEach((x) => {
+        x.classList.remove("slot--on");
+        x.setAttribute("aria-pressed", "false");
+      });
+      if (!full) {
+        b.classList.add("slot--on");
+        b.setAttribute("aria-pressed", "true");
+        setPicked(t);
+      }
+    });
+    return b;
+  }
+
+  /** @param {string[]} slots */
+  function splitDayParts(slots) {
+    const day = slots.filter((t) => t < "20:00");
+    const eve = slots.filter((t) => t >= "20:00");
+    return { day, eve };
+  }
+
+  async function loadSlots() {
+    formErr.hidden = true;
+    closedMsg.hidden = true;
+    noSlotsMsg.hidden = true;
+    slotsWrap.hidden = true;
+    slotsEl.innerHTML = "";
+    setPicked("");
+    const d = dateInput.value;
+    if (!d) return;
+    const r = await fetch(`/api/slots?date=${encodeURIComponent(d)}`);
+    if (!r.ok) {
+      noSlotsMsg.textContent =
+        "No se pudieron cargar las franjas. ¿Está la API en marcha? Usa `npm run dev` (Astro + Node) o `npm run dev:api`.";
+      noSlotsMsg.hidden = false;
+      return;
+    }
+    const j = await r.json();
+    if (!j.ok) return;
+
+    if (j.nowMadrid) clockTime.textContent = j.nowMadrid;
+    if (j.minLeadMinutes != null && clockHint) {
+      clockHint.textContent = `Mismo día: solo franjas con al menos ${j.minLeadMinutes} minutos desde esta hora.`;
+    }
+    clockLine.hidden = false;
+
+    if (j.closed) {
+      closedMsg.hidden = false;
+      return;
+    }
+    if (j.noSlotsLeft || !j.slots?.length) {
+      noSlotsMsg.textContent =
+        "Para este día ya no quedan franjas disponibles con el margen mínimo desde ahora (hora España). Prueba otro día u otra hora más tarde.";
+      noSlotsMsg.hidden = false;
+      return;
+    }
+
+    slotsWrap.hidden = false;
+    const booked = j.bookedCovers ?? {};
+    const max = j.maxCoversPerSlot ?? 40;
+    const { day, eve } = splitDayParts(j.slots);
+
+    function appendGroup(title, list) {
+      if (!list.length) return;
+      const grp = document.createElement("div");
+      grp.className = "slot-group";
+      const h = document.createElement("h3");
+      h.className = "slot-group__title";
+      h.textContent = title;
+      const grid = document.createElement("div");
+      grid.className = "slot-grid";
+      for (const t of list) {
+        const cov = booked[t] ?? 0;
+        const full = cov >= max;
+        grid.appendChild(makeSlotButton(t, full, max, cov));
+      }
+      grp.appendChild(h);
+      grp.appendChild(grid);
+      slotsEl.appendChild(grp);
+    }
+
+    appendGroup("Mañana y mediodía", day);
+    appendGroup("Cena", eve);
+  }
+
+  /** @type {ReturnType<typeof setInterval> | null} */
+  let pollId = null;
+  function armPoll() {
+    if (pollId) clearInterval(pollId);
+    pollId = null;
+    if (metaToday && dateInput.value === metaToday) {
+      pollId = setInterval(loadSlots, 60_000);
+    }
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    formErr.hidden = true;
+    formOk.hidden = true;
+    if (!selectedTime) {
+      formErr.textContent = "Selecciona una hora.";
+      formErr.hidden = false;
+      return;
+    }
+    const svc = [...form.querySelectorAll('input[name="svc"]:checked')].map((x) => /** @type {HTMLInputElement} */ (x).value);
+    const body = {
+      date: dateInput.value,
+      time: selectedTime,
+      partySize: Number($("#party").value),
+      name: /** @type {HTMLInputElement} */ ($("#name")).value.trim(),
+      email: /** @type {HTMLInputElement} */ ($("#email")).value.trim(),
+      phone: /** @type {HTMLInputElement} */ ($("#phone")).value.trim(),
+      notes: /** @type {HTMLTextAreaElement} */ ($("#notes")).value.trim(),
+      services: svc,
+    };
+    submitBtn.disabled = true;
+    try {
+      const r = await fetch("/api/reservations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error || "Error al reservar");
+      formOk.textContent = `Reserva registrada (ref. ${j.id}). Revisa tu correo.`;
+      formOk.hidden = false;
+      form.reset();
+      setPicked("");
+      dateInput.value = metaToday;
+      syncViewFromInput();
+      await renderCalendar();
+      await loadSlots();
+      armPoll();
+    } catch (err) {
+      formErr.textContent = err instanceof Error ? err.message : "Error";
+      formErr.hidden = false;
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  if (!dateInput || !calGrid || !calPrev || !calNext || !calMonthLabel) {
+    console.error("[reservar] Faltan nodos del calendario en el DOM.");
+  } else {
+    loadMeta().then(async () => {
+      await renderCalendar();
+      await loadSlots();
+      armPoll();
+    });
+  }
+</script>
+
+<style>
+  .page {
+    padding: 6rem 1.25rem 3rem;
+    min-height: 100vh;
+  }
+
+  .shell {
+    max-width: 920px;
+    margin: 0 auto;
+  }
+
+  .page-head {
+    margin-bottom: 2rem;
+  }
+
+  .eyebrow {
+    margin: 0 0 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .h1 {
+    margin: 0 0 0.75rem;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .lead {
+    margin: 0;
+    max-width: 40rem;
+    color: var(--fg-muted);
+    line-height: 1.65;
+  }
+
+  .h2 {
+    margin: 0 0 1.25rem;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    color: var(--fg);
+  }
+
+  .layout {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 800px) {
+    .layout {
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+  }
+
+  .panel {
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+  }
+
+  .api-banner {
+    margin: 0 0 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    border: 1px solid rgba(252, 165, 165, 0.45);
+    background: rgba(252, 165, 165, 0.08);
+    font-size: 0.88rem;
+    line-height: 1.55;
+    color: #fecaca;
+  }
+
+  .api-banner code {
+    font-size: 0.82em;
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.35);
+    color: #fff;
+  }
+
+  .lbl {
+    display: block;
+    margin: 0 0 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .picked {
+    color: var(--fg);
+    letter-spacing: 0.08em;
+  }
+
+  .inp {
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-strong);
+    background: var(--bg);
+    color: var(--fg);
+    font: inherit;
+  }
+
+  .ta {
+    resize: vertical;
+    min-height: 4.5rem;
+  }
+
+  .res-cal {
+    margin-bottom: 1.25rem;
+  }
+
+  .res-cal__lbl {
+    margin-bottom: 0.65rem;
+  }
+
+  .res-cal__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .res-cal__month {
+    margin: 0;
+    flex: 1;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--fg);
+    text-transform: capitalize;
+  }
+
+  .res-cal__nav {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border-radius: 10px;
+    border: 1px solid var(--border-strong);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--fg);
+    cursor: pointer;
+    transition:
+      background 0.2s,
+      border-color 0.2s,
+      opacity 0.2s;
+  }
+
+  .res-cal__nav:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.35);
+  }
+
+  .res-cal__nav:disabled {
+    opacity: 0.28;
+    cursor: not-allowed;
+  }
+
+  .res-cal__nav-icon {
+    font-size: 1.35rem;
+    line-height: 1;
+    font-weight: 400;
+    margin-top: -2px;
+  }
+
+  .res-cal__dow {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.25rem;
+    margin-bottom: 0.35rem;
+    text-align: center;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .res-cal__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.35rem;
+  }
+
+  /* Nodos del calendario creados en <script>: :global evita que Astro exija data-astro-cid en cada celda. */
+  .res-cal__grid :global(.res-cal__pad) {
+    min-height: 2.75rem;
+  }
+
+  .res-cal__grid :global(button.res-cal__day) {
+    min-height: 2.75rem;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.92);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    transition:
+      background 0.2s var(--ease-out),
+      box-shadow 0.2s,
+      color 0.2s,
+      transform 0.15s var(--ease-out);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .res-cal__grid :global(button.res-cal__day:hover:not(:disabled)) {
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.28);
+    transform: translateY(-1px);
+  }
+
+  .res-cal__grid :global(button.res-cal__day:focus-visible) {
+    outline: 2px solid var(--fg);
+    outline-offset: 2px;
+  }
+
+  .res-cal__grid :global(button.res-cal__day--today:not(:disabled)) {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.45);
+  }
+
+  .res-cal__grid :global(button.res-cal__day--picked) {
+    background: #fff !important;
+    color: var(--bg) !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35) !important;
+    font-weight: 700;
+  }
+
+  .res-cal__grid :global(button.res-cal__day--off) {
+    cursor: not-allowed;
+    opacity: 0.32;
+    background: transparent;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.35);
+    transform: none;
+  }
+
+  .res-cal__grid :global(button.res-cal__day--closed.res-cal__day--off) {
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+    text-decoration-color: rgba(255, 255, 255, 0.25);
+  }
+
+  .clock {
+    margin-bottom: 1.25rem;
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .clock__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 0.75rem;
+  }
+
+  .clock__label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .clock__time {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--fg);
+  }
+
+  .clock__hint {
+    margin: 0.5rem 0 0;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    color: var(--fg-muted);
+  }
+
+  .hint {
+    color: #fca5a5;
+    font-size: 0.9rem;
+    margin: 0 0 1rem;
+  }
+
+  .info-msg {
+    margin: 0 0 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-strong);
+    font-size: 0.9rem;
+    line-height: 1.55;
+    color: var(--fg-muted);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .slots-wrap {
+    margin-top: 0.25rem;
+  }
+
+  .slot-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+  }
+
+  /* Franjas y títulos creados en <script>: :global para que no exijan data-astro-cid en cada nodo. */
+  .slot-groups :global(.slot-group__title) {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin: 0 0 0.9rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+    white-space: nowrap;
+  }
+
+  .slot-groups :global(.slot-group__title::after) {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.18), transparent 92%);
+    min-width: 2rem;
+  }
+
+  .slot-groups :global(.slot-grid) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem 0.5rem;
+    align-items: center;
+  }
+
+  .slot-groups :global(button.slot) {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 5.35rem;
+    padding: 0.58rem 1rem;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    font: inherit;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.1);
+    transition:
+      background 0.2s var(--ease-out),
+      box-shadow 0.2s var(--ease-out),
+      color 0.2s,
+      transform 0.18s var(--ease-out);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .slot-groups :global(button.slot .slot__time) {
+    font-family: var(--font-body);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+
+  .slot-groups :global(button.slot:hover:not(:disabled)) {
+    background: rgba(255, 255, 255, 0.09);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      0 0 0 1px rgba(255, 255, 255, 0.22);
+    transform: translateY(-1px);
+  }
+
+  .slot-groups :global(button.slot:focus-visible) {
+    outline: 2px solid var(--fg);
+    outline-offset: 3px;
+  }
+
+  .slot-groups :global(button.slot.slot--on) {
+    background: #fff;
+    color: var(--bg);
+    box-shadow:
+      0 10px 36px rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(255, 255, 255, 0.35);
+    transform: translateY(-1px);
+  }
+
+  .slot-groups :global(button.slot.slot--on .slot__time) {
+    color: var(--bg);
+    font-weight: 700;
+  }
+
+  .slot-groups :global(button.slot.slot--full) {
+    cursor: not-allowed;
+    opacity: 0.35;
+    transform: none;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .slot-groups :global(button.slot.slot--full .slot__time) {
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+    text-decoration-color: rgba(255, 255, 255, 0.35);
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  #picked-time :global(.picked__big) {
+    font-family: var(--font-body);
+    font-size: 1.35rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+    color: var(--fg);
+  }
+
+  #picked-time :global(.picked__sep) {
+    opacity: 0.35;
+    margin: 0 0.06em;
+    font-weight: 500;
+  }
+
+  .fs {
+    margin: 0 0 1rem;
+    padding: 0;
+    border: 0;
+  }
+
+  .chk {
+    display: block;
+    margin-bottom: 0.35rem;
+    font-size: 0.9rem;
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+
+  .err {
+    color: #fca5a5;
+    font-size: 0.9rem;
+    margin: 0 0 0.75rem;
+  }
+
+  .ok {
+    color: #86efac;
+    font-size: 0.9rem;
+    margin: 0 0 0.75rem;
+  }
+
+  .submit {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.85rem 1rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--fg);
+    color: var(--bg);
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .submit:disabled {
+    opacity: 0.5;
+    cursor: wait;
+  }
+
+  .fine {
+    margin-top: 2rem;
+    font-size: 0.85rem;
+    color: var(--fg-subtle);
+    text-align: center;
+  }
+
+  .fine a {
+    color: var(--fg-muted);
+  }
+</style>

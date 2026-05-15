@@ -1,0 +1,181 @@
+{
+    "categorias": [
+      {
+        "categoria": "Platos Combinados",
+        "slug": "platos-combinados",
+        "subcategorias": [
+          {
+            "nombre": "Platos combinados de carne",
+            "items": [
+              {
+                "nombre": "N°1 Lomo, huevos fritos, patatas y ensalada",
+                "descripcion": "Lomo, huevos fritos, patatas y ensalada",
+                "precio": "9,70€",
+                "ingredientes": ["Lomo", "huevos fritos", "patatas", "ensalada"],
+                "alergenos_contiene": ["huevo"],
+                "alergenos_posibles": [],
+                "dietas_no_apto": ["sin_huevo"],
+                "dietas_apto_si_modifica": ["sin_huevo"],
+                "observaciones": [],
+                "numero": "N°1",
+                "buscar_por": "n1 lomo huevos fritos patatas y ensalada",
+                "tags": ["carne", "plato combinado"],
+                "orden": 1,
+                "tipo": "plato"
+              },
+              {
+                "nombre": "N°2 Lomo, bacon, patatas y ensalada",
+                "descripcion": "Lomo, bacon, patatas y ensalada",
+                "precio": "9,80€",
+                "ingredientes": ["Lomo", "bacon", "patatas", "ensalada"],
+                "alergenos_contiene": [],
+                "alergenos_posibles": [],
+                "dietas_no_apto": [],
+                "dietas_apto_si_modifica": [],
+                "observaciones": [],
+                "numero": "N°2",
+                "buscar_por": "n2 lomo bacon patatas y ensalada",
+                "tags": ["carne", "plato combinado"],
+                "orden": 2,
+                "tipo": "plato"
+              },
+              {
+                "nombre": "N°3 Longaniza, huevos fritos, patatas y ensalada",
+                "descripcion": "Longaniza, huevos fritos, patatas y ensalada",
+                "precio": "10,60€",
+                "ingredientes": ["Longaniza", "huevos fritos", "patatas", "ensalada"],
+                "alergenos_contiene": ["huevo"],
+                "alergenos_posibles": [],
+                "dietas_no_apto": ["sin_huevo"],
+                "dietas_apto_si_modifica": ["sin_huevo"],
+                "observaciones": [],
+                "numero": "N°3",
+                "buscar_por": "n3 longaniza huevos fritos patatas y ensalada",
+                "tags": ["carne", "plato combinado"],
+                "orden": 3,
+                "tipo": "plato"
+              },
+              {
+                "nombre": "N°4 Lomo, bacon, hamburguesa, longaniza, huevos fritos, patatas y ensalada",
+                "descripcion": "Lomo, bacon, hamburguesa, longaniza, huevos fritos, patatas y ensalada",
+                "precio": "16,70€",
+                "ingredientes": ["Lomo", "bacon", "hamburguesa", "longaniza", "huevos fritos", "patatas", "ensalada"],
+                "alergenos_contiene": ["huevo", "gluten"],
+                "alergenos_posibles": [],
+                "dietas_no_apto": ["sin_huevo", "sin_gluten"],
+                "dietas_apto_si_modifica": ["sin_huevo"],
+                "observaciones": [],
+                "numero": "N°4",
+                "buscar_por": "n4 lomo bacon hamburguesa longaniza huevos fritos patatas y ensalada",
+                "tags": ["carne", "plato combinado"],
+                "orden": 4,
+                "tipo": "plato"
+              },
+              {
+                "nombre": "N°5 Chorizo, huevos fritos, patatas y ensalada",
+                "descripcion": "Chorizo, huevos fritos, patatas y ensalada",
+                "precio": "9,00€",
+                "ingredientes": ["Chorizo", "huevos fritos", "patatas", "ensalada"],
+                "alergenos_contiene": ["huevo"],
+                "alergenos_posibles": [],
+                "dietas_no_apto": ["sin_huevo"],
+                "dietas_apto_si_modifica": ["sin_huevo"],
+                "observaciones": [],
+                "numero": "N°5",
+                "buscar_por": "n5 chorizo huevos fritos patatas y ensalada",
+                "tags": ["carne", "plato combinado"],
+                "orden": 5,
+                "tipo": "plato"
+              }
+            ]
+          },
+          {
+            "nombre": "Platos combinados de pescado",
+            "items": [
+              {
+                "nombre": "N°6 Sepia, patatas y ensalada",
+                "descripcion": "Sepia, patatas y ensalada",
+                "precio": "14,50€",
+                "ingredientes": ["Sepia", "patatas", "ensalada"],
+                "alergenos_contiene": ["moluscos"],
+                "alergenos_posibles": [],
+                "dietas_no_apto": ["sin_marisco"],
+                "dietas_apto_si_modifica": [],
+                "observaciones": [],
+                "numero": "N°6",
+                "buscar_por": "n6 sepia patatas y ensalada",
+                "tags": ["pescado", "plato combinado"],
+                "orden": 6,
+                "tipo": "plato"
+              },
+              {
+                "nombre": "N°7 Merluza, patatas y ensalada",
+                "descripcion": "Merluza, patatas y ensalada",
+                "precio": "10,80€",
+                "ingredientes": ["Merluza", "patatas", "ensalada"],
+                "alergenos_contiene": ["pescado"],
+                "alergenos_posibles": [],
+                "dietas_no_apto": ["sin_pescado"],
+                "dietas_apto_si_modifica": [],
+                "observaciones": [],
+                "numero": "N°7",
+                "buscar_por": "n7 merluza patatas y ensalada",
+                "tags": ["pescado", "plato combinado"],
+                "orden": 7,
+                "tipo": "plato"
+              },
+              {
+                "nombre": "N°8 Langostinos y ensalada",
+                "descripcion": "Langostinos y ensalada",
+                "precio": "19,00€",
+                "ingredientes": ["Langostinos", "ensalada"],
+                "alergenos_contiene": ["crustaceos"],
+                "alergenos_posibles": [],
+                "dietas_no_apto": ["sin_marisco"],
+                "dietas_apto_si_modifica": [],
+                "observaciones": [],
+                "numero": "N°8",
+                "buscar_por": "n8 langostinos y ensalada",
+                "tags": ["pescado", "plato combinado"],
+                "orden": 8,
+                "tipo": "plato"
+              },
+              {
+                "nombre": "N°9 Calamares a la romana, patatas y ensalada",
+                "descripcion": "Calamares a la romana, patatas y ensalada",
+                "precio": "11,20€",
+                "ingredientes": ["Calamares a la romana", "patatas", "ensalada"],
+                "alergenos_contiene": ["moluscos", "gluten"],
+                "alergenos_posibles": ["huevo"],
+                "dietas_no_apto": ["sin_marisco", "sin_gluten"],
+                "dietas_apto_si_modifica": [],
+                "observaciones": [],
+                "numero": "N°9",
+                "buscar_por": "n9 calamares a la romana patatas y ensalada",
+                "tags": ["pescado", "plato combinado"],
+                "orden": 9,
+                "tipo": "plato"
+              }
+            ]
+          }
+        ],
+        "nota": ""
+      }
+    ],
+    "alergenos_referencia": [
+      "gluten",
+      "crustaceos",
+      "huevo",
+      "pescado",
+      "cacahuetes",
+      "soja",
+      "leche",
+      "frutos_de_cascara",
+      "apio",
+      "mostaza",
+      "sesamo",
+      "sulfitos",
+      "altramuces",
+      "moluscos"
+    ]
+  }

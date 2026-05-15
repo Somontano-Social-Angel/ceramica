@@ -1,0 +1,1051 @@
+---
+import type { CartaData } from "../data/carta";
+import { ALERGENO_LABELS, ALERGENO_ORDEN, DIETA_LABELS } from "../data/carta";
+
+interface Props {
+  carta: CartaData;
+}
+
+const { carta } = Astro.props;
+const cartaJson = JSON.stringify(carta);
+const alergenoLabelsJson = JSON.stringify(ALERGENO_LABELS);
+const dietaLabelsJson = JSON.stringify(DIETA_LABELS);
+---
+
+<section class="carta-app" id="carta-app" aria-label="Carta interactiva">
+  <details class="carta-filters-panel">
+    <summary class="carta-filters-panel__trigger">
+      <span class="carta-filters-panel__icon" aria-hidden="true">⌕</span>
+      <span class="carta-filters-panel__text">Buscar y filtrar</span>
+      <span class="carta-filters-panel__badge" data-carta-filter-badge hidden>0</span>
+      <span class="carta-filters-panel__chev" aria-hidden="true"></span>
+    </summary>
+
+    <div class="carta-toolbar" aria-label="Filtros de carta">
+      <div class="carta-toolbar__grid">
+        <div class="carta-toolbar__search">
+          <label class="carta-filters__label" for="carta-search">Buscar</label>
+          <input
+            type="search"
+            id="carta-search"
+            class="carta-search"
+            placeholder="Plato o ingrediente…"
+            autocomplete="off"
+            data-carta-search
+          />
+        </div>
+
+        <div class="carta-toolbar__block">
+          <p class="carta-filters__label">Evitar alérgenos</p>
+          <div class="carta-alergenos" data-carta-alergenos role="group" aria-label="Alérgenos a excluir">
+            {
+              ALERGENO_ORDEN.map((id, i) => (
+                <button
+                  type="button"
+                  class="carta-alergeno"
+                  data-alergeno={id}
+                  aria-pressed="false"
+                  title={ALERGENO_LABELS[id]}
+                >
+                  <span class="carta-alergeno__num" aria-hidden="true">
+                    {i + 1}
+                  </span>
+                  <span class="carta-alergeno__name">{ALERGENO_LABELS[id]}</span>
+                </button>
+              ))
+            }
+          </div>
+        </div>
+
+        <div class="carta-toolbar__block">
+          <p class="carta-filters__label">Preferencias</p>
+          <div class="carta-dietas" data-carta-dietas role="group" aria-label="Filtros dietéticos">
+            {
+              ["sin_gluten", "sin_lactosa", "sin_huevo", "sin_pescado", "sin_marisco", "vegetariano"].map((id) => (
+                <button type="button" class="carta-dieta" data-dieta={id} aria-pressed="false">
+                  {DIETA_LABELS[id] ?? id}
+                </button>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="carta-toolbar__foot">
+        <span class="carta-search__count" data-carta-count aria-live="polite"></span>
+        <button type="button" class="carta-clear" data-carta-clear hidden>
+          Limpiar filtros
+        </button>
+      </div>
+    </div>
+  </details>
+
+  <div class="carta-nav-bar">
+    <nav class="carta-tabs" data-carta-tabs aria-label="Categorías">
+      <div class="carta-tabs__fade carta-tabs__fade--l" aria-hidden="true"></div>
+      <div class="carta-tabs__scroll">
+        {
+          carta.categorias.map((cat, i) => (
+            <button
+              type="button"
+              class:list={["carta-tab", { "is-active": i === 0 }]}
+              data-cat-tab={cat.id}
+              aria-selected={i === 0 ? "true" : "false"}
+            >
+              {cat.subcategoria ? cat.subcategoria.replace(/^Platos combinados de /i, "") : cat.categoria}
+            </button>
+          ))
+        }
+        <button type="button" class="carta-tab" data-cat-tab="todas" aria-selected="false">
+          Ver todo
+        </button>
+      </div>
+      <div class="carta-tabs__fade carta-tabs__fade--r" aria-hidden="true"></div>
+    </nav>
+  </div>
+
+  <div class="carta-body">
+    <div class="carta-empty" data-carta-empty hidden>
+      <p class="carta-empty__title">Sin coincidencias</p>
+      <p class="carta-empty__text">Prueba otra categoría o ajusta los filtros.</p>
+      <button type="button" class="carta-clear carta-clear--btn" data-carta-clear-inline>
+        Quitar filtros
+      </button>
+    </div>
+
+    <div class="carta-sections" data-carta-sections>
+      {
+        carta.categorias.map((cat, i) => (
+          <section
+            class="carta-section"
+            data-cat-section={cat.id}
+            aria-labelledby={`cat-${cat.id}`}
+            hidden={i !== 0}
+          >
+            <header class="carta-section__head">
+              <h2 class="carta-section__title" id={`cat-${cat.id}`}>
+                {cat.categoria}
+              </h2>
+              {cat.subcategoria && <p class="carta-section__sub">{cat.subcategoria}</p>}
+              {cat.nota && <p class="carta-section__note">{cat.nota}</p>}
+            </header>
+            <ul class="carta-list">
+              {cat.items.map((item) => (
+                <li
+                  class="carta-item"
+                  data-item
+                  data-buscar={item.buscar_por}
+                  data-nombre={item.nombre.toLowerCase()}
+                  data-ingredientes={item.ingredientes.join(" ").toLowerCase()}
+                  data-alergenos-contiene={item.alergenos_contiene.join(",")}
+                  data-alergenos-posibles={item.alergenos_posibles.join(",")}
+                  data-dietas-no={item.dietas_no_apto.join(",")}
+                  data-dietas-modifica={item.dietas_apto_si_modifica.join(",")}
+                  data-tags={item.tags.join(",")}
+                >
+                  <button type="button" class="carta-item__toggle" aria-expanded="false">
+                    <span class="carta-item__main">
+                      {item.numero && <span class="carta-item__num">{item.numero}</span>}
+                      <span class="carta-item__name">{item.nombre}</span>
+                      {item.descripcion && <span class="carta-item__desc">{item.descripcion}</span>}
+                    </span>
+                    <span class="carta-item__meta">
+                      <span class="carta-item__price">{item.precio}</span>
+                      <span class="carta-item__chev" aria-hidden="true"></span>
+                    </span>
+                  </button>
+                  <div class="carta-item__detail" hidden>
+                    {item.ingredientes.length > 0 && (
+                      <p class="carta-item__ing">
+                        <strong>Ingredientes</strong>
+                        <span>{item.ingredientes.join(", ")}</span>
+                      </p>
+                    )}
+                    {(item.alergenos_contiene.length > 0 || item.alergenos_posibles.length > 0) && (
+                      <div class="carta-item__alerg">
+                        {item.alergenos_contiene.length > 0 && (
+                          <p>
+                            <strong>Contiene</strong>
+                            <span>{item.alergenos_contiene.map((a) => ALERGENO_LABELS[a] ?? a).join(", ")}</span>
+                          </p>
+                        )}
+                        {item.alergenos_posibles.length > 0 && (
+                          <p class="carta-item__alerg--posible">
+                            <strong>Puede contener</strong>
+                            <span>{item.alergenos_posibles.map((a) => ALERGENO_LABELS[a] ?? a).join(", ")}</span>
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {item.dietas_apto_si_modifica.length > 0 && (
+                      <p class="carta-item__mod">
+                        <strong>Consultar en sala</strong>
+                        <span>{item.dietas_apto_si_modifica.map((d) => DIETA_LABELS[d] ?? d).join(", ")}</span>
+                      </p>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+
+  <details class="carta-legend">
+    <summary class="carta-legend__trigger">Leyenda de alérgenos (UE 1169/2011)</summary>
+    <div class="carta-legend__body">
+      <ol class="carta-legend__list">
+        {
+          ALERGENO_ORDEN.map((id, i) => (
+            <li>
+              <span class="carta-legend__n">{i + 1}</span>
+              {ALERGENO_LABELS[id]}
+            </li>
+          ))
+        }
+      </ol>
+      <p class="carta-legend__foot">
+        Información orientativa. Ante alergias graves, avisa siempre al personal antes de pedir.
+      </p>
+    </div>
+  </details>
+</section>
+
+<script define:vars={{ cartaJson, alergenoLabelsJson, dietaLabelsJson }}>
+  const carta = JSON.parse(cartaJson);
+
+  const root = document.getElementById("carta-app");
+  if (!root) throw new Error("Carta app no encontrada");
+
+  const searchEl = root.querySelector("[data-carta-search]");
+  const countEl = root.querySelector("[data-carta-count]");
+  const filterBadge = root.querySelector("[data-carta-filter-badge]");
+  const emptyEl = root.querySelector("[data-carta-empty]");
+  const sectionsWrap = root.querySelector("[data-carta-sections]");
+  const clearBtns = root.querySelectorAll("[data-carta-clear], [data-carta-clear-inline]");
+  const tabBtns = root.querySelectorAll("[data-cat-tab]");
+  const alergenoBtns = root.querySelectorAll("[data-alergeno]");
+  const dietaBtns = root.querySelectorAll("[data-dieta]");
+  const tabsScroll = root.querySelector(".carta-tabs__scroll");
+
+  const state = {
+    search: "",
+    excludeAlergenos: new Set(),
+    dietas: new Set(),
+    activeTab: carta.categorias[0]?.id ?? "todas",
+  };
+
+  function normalize(str) {
+    return str
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  }
+
+  function activeFilterCount() {
+    return state.excludeAlergenos.size + state.dietas.size + (state.search.trim() ? 1 : 0);
+  }
+
+  function itemMatchesFilters(li) {
+    const q = normalize(state.search.trim());
+    if (q) {
+      const hay = [
+        li.dataset.nombre ?? "",
+        li.dataset.buscar ?? "",
+        li.dataset.ingredientes ?? "",
+        li.querySelector(".carta-item__desc")?.textContent ?? "",
+      ]
+        .join(" ")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+      if (!hay.includes(q)) return false;
+    }
+
+    const contiene = (li.dataset.alergenosContiene || "").split(",").filter(Boolean);
+    for (const a of state.excludeAlergenos) {
+      if (contiene.includes(a)) return false;
+    }
+
+    const dietasNo = (li.dataset.dietasNo || "").split(",").filter(Boolean);
+    const tags = (li.dataset.tags || "").split(",").filter(Boolean);
+    const modifica = (li.dataset.dietasModifica || "").split(",").filter(Boolean);
+
+    for (const d of state.dietas) {
+      if (d === "vegetariano") {
+        if (dietasNo.includes("vegetariano_estricto")) return false;
+        if (dietasNo.includes("vegetariano") && !modifica.includes("vegetariano")) return false;
+        const carnes = ["carne", "atun", "pescado", "marisco", "lomo", "pollo", "bacon", "jamon", "embutido", "brasa", "hamburguesa"];
+        if (tags.some((t) => carnes.some((c) => t.includes(c)))) return false;
+        continue;
+      }
+      if (dietasNo.includes(d)) return false;
+    }
+
+    return true;
+  }
+
+  function updateFilterBadge() {
+    const n = activeFilterCount();
+    if (filterBadge) {
+      filterBadge.hidden = n === 0;
+      filterBadge.textContent = String(n);
+    }
+  }
+
+  function updateClearVisibility() {
+    const hasFilters = activeFilterCount() > 0;
+    clearBtns.forEach((btn) => {
+      if (btn.hasAttribute("data-carta-clear")) btn.hidden = !hasFilters;
+    });
+    updateFilterBadge();
+  }
+
+  function scrollActiveTabIntoView() {
+    const active = root.querySelector(".carta-tab.is-active");
+    if (active && tabsScroll) {
+      active.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+  }
+
+  function applyFilters() {
+    let visibleTotal = 0;
+    const sections = root.querySelectorAll("[data-cat-section]");
+
+    sections.forEach((section) => {
+      const catId = section.dataset.catSection;
+      const showSection = state.activeTab === "todas" || state.activeTab === catId;
+      let sectionVisible = 0;
+
+      section.querySelectorAll("[data-item]").forEach((li) => {
+        const match = itemMatchesFilters(li);
+        const visible = match && showSection;
+        li.hidden = !visible;
+
+        const posibles = (li.dataset.alergenosPosibles || "").split(",").filter(Boolean);
+        const hasTrazas =
+          visible && state.excludeAlergenos.size > 0 && [...state.excludeAlergenos].some((a) => posibles.includes(a));
+        li.classList.toggle("has-trazas", hasTrazas);
+
+        if (visible) {
+          sectionVisible++;
+          visibleTotal++;
+        }
+      });
+
+      const sectionHasItems = sectionVisible > 0;
+      if (state.activeTab === "todas") {
+        section.hidden = !sectionHasItems;
+      } else {
+        section.hidden = !showSection || !sectionHasItems;
+      }
+    });
+
+    if (countEl) {
+      const filtering = activeFilterCount() > 0;
+      countEl.textContent = filtering ? `${visibleTotal} plato${visibleTotal === 1 ? "" : "s"}` : "";
+    }
+
+    if (emptyEl) emptyEl.hidden = visibleTotal > 0;
+    if (sectionsWrap) sectionsWrap.hidden = visibleTotal === 0;
+    updateClearVisibility();
+  }
+
+  function setActiveTab(tabId) {
+    state.activeTab = tabId;
+    tabBtns.forEach((btn) => {
+      const active = btn.dataset.catTab === tabId;
+      btn.classList.toggle("is-active", active);
+      btn.setAttribute("aria-selected", String(active));
+    });
+    applyFilters();
+    scrollActiveTabIntoView();
+  }
+
+  searchEl?.addEventListener("input", () => {
+    state.search = searchEl.value;
+    applyFilters();
+  });
+
+  alergenoBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.alergeno;
+      const pressed = btn.getAttribute("aria-pressed") === "true";
+      btn.setAttribute("aria-pressed", String(!pressed));
+      btn.classList.toggle("is-active", !pressed);
+      if (pressed) state.excludeAlergenos.delete(id);
+      else state.excludeAlergenos.add(id);
+      applyFilters();
+    });
+  });
+
+  dietaBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.dieta;
+      const pressed = btn.getAttribute("aria-pressed") === "true";
+      btn.setAttribute("aria-pressed", String(!pressed));
+      btn.classList.toggle("is-active", !pressed);
+      if (pressed) state.dietas.delete(id);
+      else state.dietas.add(id);
+      applyFilters();
+    });
+  });
+
+  tabBtns.forEach((btn) => {
+    btn.addEventListener("click", () => setActiveTab(btn.dataset.catTab));
+  });
+
+  function clearFilters() {
+    state.search = "";
+    state.excludeAlergenos.clear();
+    state.dietas.clear();
+    if (searchEl) searchEl.value = "";
+    alergenoBtns.forEach((btn) => {
+      btn.setAttribute("aria-pressed", "false");
+      btn.classList.remove("is-active");
+    });
+    dietaBtns.forEach((btn) => {
+      btn.setAttribute("aria-pressed", "false");
+      btn.classList.remove("is-active");
+    });
+    setActiveTab(carta.categorias[0]?.id ?? "todas");
+  }
+
+  clearBtns.forEach((btn) => btn.addEventListener("click", clearFilters));
+
+  root.querySelectorAll(".carta-item__toggle").forEach((toggle) => {
+    toggle.addEventListener("click", () => {
+      const expanded = toggle.getAttribute("aria-expanded") === "true";
+      const detail = toggle.parentElement?.querySelector(".carta-item__detail");
+      toggle.setAttribute("aria-expanded", String(!expanded));
+      toggle.parentElement?.classList.toggle("is-open", !expanded);
+      if (detail) detail.hidden = expanded;
+    });
+  });
+
+  if (window.matchMedia("(min-width: 768px)").matches) {
+    const panel = root.querySelector(".carta-filters-panel");
+    if (panel) panel.open = true;
+  }
+
+  applyFilters();
+</script>
+
+<style>
+  .carta-app {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-radius: calc(var(--radius) + 4px);
+    border: 1px solid var(--border-strong);
+    background: var(--bg-soft);
+    overflow: hidden;
+    box-shadow: 0 28px 64px rgba(0, 0, 0, 0.4);
+  }
+
+  /* —— Filtros (plegable en móvil) —— */
+  .carta-filters-panel {
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
+  }
+
+  .carta-filters-panel__trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.9rem 1rem;
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .carta-filters-panel__trigger::-webkit-details-marker {
+    display: none;
+  }
+
+  .carta-filters-panel__icon {
+    font-size: 1.1rem;
+    opacity: 0.7;
+  }
+
+  .carta-filters-panel__text {
+    flex: 1;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .carta-filters-panel__badge {
+    min-width: 1.35rem;
+    padding: 0.1rem 0.45rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--bg);
+    background: #c45c4a;
+    border-radius: 999px;
+  }
+
+  .carta-filters-panel__chev {
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--fg-subtle);
+    border-bottom: 2px solid var(--fg-subtle);
+    transform: rotate(45deg);
+    transition: transform 0.2s var(--ease-out);
+  }
+
+  .carta-filters-panel[open] .carta-filters-panel__chev {
+    transform: rotate(-135deg);
+    margin-top: 4px;
+  }
+
+  @media (min-width: 768px) {
+    .carta-filters-panel__trigger {
+      display: none;
+    }
+
+    .carta-filters-panel {
+      border-bottom: 1px solid var(--border);
+    }
+  }
+
+  .carta-toolbar {
+    padding: 0 1rem 1.1rem;
+  }
+
+  @media (min-width: 768px) {
+    .carta-toolbar {
+      padding: 1.25rem 1.35rem 1.35rem;
+    }
+  }
+
+  .carta-toolbar__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  @media (min-width: 768px) {
+    .carta-toolbar__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem 1.5rem;
+    }
+
+    .carta-toolbar__search {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .carta-filters__label {
+    display: block;
+    margin: 0 0 0.5rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .carta-search {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .carta-search:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+  }
+
+  .carta-search::placeholder {
+    color: var(--fg-subtle);
+  }
+
+  .carta-alergenos,
+  .carta-dietas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .carta-alergeno,
+  .carta-dieta {
+    min-height: 2.5rem;
+    font-family: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      color 0.2s,
+      background 0.2s,
+      border-color 0.2s,
+      transform 0.15s var(--ease-out);
+  }
+
+  .carta-alergeno:active,
+  .carta-dieta:active {
+    transform: scale(0.97);
+  }
+
+  .carta-alergeno {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.65rem;
+    font-size: 0.75rem;
+    color: var(--fg-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+
+  .carta-alergeno.is-active {
+    color: #fff;
+    background: #b85444;
+    border-color: #b85444;
+  }
+
+  .carta-alergeno__num {
+    width: 1.15rem;
+    height: 1.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: 700;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .carta-dieta {
+    padding: 0.45rem 0.9rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--fg-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+
+  .carta-dieta.is-active {
+    color: var(--fg);
+    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .carta-toolbar__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .carta-search__count {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--fg-muted);
+  }
+
+  .carta-clear {
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--fg-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .carta-clear--btn {
+    padding: 0.65rem 1.25rem;
+    text-decoration: none;
+    color: var(--bg);
+    background: var(--fg);
+    border-radius: 999px;
+  }
+
+  /* —— Pestañas categorías —— */
+  .carta-nav-bar {
+    position: sticky;
+    top: 3.75rem;
+    z-index: 12;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border);
+  }
+
+  @media (min-width: 768px) {
+    .carta-nav-bar {
+      top: 4.5rem;
+    }
+  }
+
+  .carta-tabs {
+    position: relative;
+  }
+
+  .carta-tabs__scroll {
+    display: flex;
+    gap: 0.35rem;
+    overflow-x: auto;
+    padding: 0.65rem 1rem;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 1rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .carta-tabs__scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .carta-tabs__fade {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1.5rem;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .carta-tabs__fade--l {
+    left: 0;
+    background: linear-gradient(to right, var(--bg-soft), transparent);
+  }
+
+  .carta-tabs__fade--r {
+    right: 0;
+    background: linear-gradient(to left, var(--bg-soft), transparent);
+  }
+
+  .carta-tab {
+    flex-shrink: 0;
+    scroll-snap-align: center;
+    min-height: 2.75rem;
+    padding: 0.5rem 1rem;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--fg-muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      color 0.2s,
+      background 0.2s,
+      border-color 0.2s,
+      transform 0.15s;
+  }
+
+  .carta-tab:active {
+    transform: scale(0.96);
+  }
+
+  .carta-tab.is-active {
+    color: var(--bg);
+    background: var(--fg);
+    border-color: var(--fg);
+  }
+
+  /* —— Lista de platos —— */
+  .carta-body {
+    background: var(--bg);
+    min-height: 12rem;
+  }
+
+  .carta-empty {
+    text-align: center;
+    padding: 3rem 1.25rem;
+  }
+
+  .carta-empty__title {
+    margin: 0 0 0.4rem;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    color: var(--fg);
+  }
+
+  .carta-empty__text {
+    margin: 0 0 1.25rem;
+    font-size: 0.9rem;
+    color: var(--fg-muted);
+  }
+
+  .carta-sections {
+    padding: 0.25rem 0 1rem;
+  }
+
+  .carta-section[hidden] {
+    display: none !important;
+  }
+
+  .carta-section:not([hidden]) {
+    animation: carta-in 0.35s var(--ease-out);
+  }
+
+  @keyframes carta-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .carta-section__head {
+    padding: 1.25rem 1rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.5rem;
+  }
+
+  .carta-section__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 4vw, 1.75rem);
+    font-weight: 600;
+    color: var(--fg);
+    line-height: 1.15;
+  }
+
+  .carta-section__sub {
+    margin: 0.25rem 0 0;
+    font-size: 0.82rem;
+    color: var(--fg-subtle);
+  }
+
+  .carta-section__note {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--fg-muted);
+  }
+
+  .carta-list {
+    list-style: none;
+    margin: 0;
+    padding: 0 0.65rem;
+  }
+
+  @media (min-width: 640px) {
+    .carta-list {
+      padding: 0 1rem;
+    }
+  }
+
+  .carta-item {
+    margin-bottom: 0.4rem;
+    border-radius: 10px;
+    background: var(--bg-soft);
+    border: 1px solid transparent;
+    overflow: hidden;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .carta-item.has-trazas {
+    border-color: rgba(196, 92, 74, 0.4);
+  }
+
+  .carta-item.is-open {
+    border-color: var(--border-strong);
+    background: var(--bg-elevated);
+  }
+
+  .carta-item__toggle {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem 0.75rem;
+    align-items: start;
+    width: 100%;
+    padding: 0.95rem 0.85rem;
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  @media (max-width: 400px) {
+    .carta-item__toggle {
+      grid-template-columns: 1fr;
+    }
+
+    .carta-item__meta {
+      flex-direction: row;
+      justify-content: space-between;
+      width: 100%;
+    }
+  }
+
+  .carta-item__main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .carta-item__num {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--fg-subtle);
+  }
+
+  .carta-item__name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--fg);
+    line-height: 1.35;
+  }
+
+  .carta-item__desc {
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .carta-item.is-open .carta-item__desc {
+    -webkit-line-clamp: unset;
+  }
+
+  .carta-item__meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.35rem;
+  }
+
+  .carta-item__price {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--fg);
+    white-space: nowrap;
+  }
+
+  .carta-item__chev {
+    width: 7px;
+    height: 7px;
+    border-right: 2px solid var(--fg-subtle);
+    border-bottom: 2px solid var(--fg-subtle);
+    transform: rotate(45deg);
+    transition: transform 0.2s var(--ease-out);
+  }
+
+  .carta-item.is-open .carta-item__chev {
+    transform: rotate(-135deg);
+  }
+
+  .carta-item__detail {
+    padding: 0 0.85rem 1rem;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--fg-muted);
+    border-top: 1px solid var(--border);
+  }
+
+  .carta-item__detail p {
+    display: grid;
+    gap: 0.2rem;
+    margin: 0.75rem 0 0;
+  }
+
+  .carta-item__detail strong {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .carta-item__alerg--posible span {
+    color: #d4a574;
+  }
+
+  .carta-item__mod {
+    font-style: italic;
+  }
+
+  /* —— Leyenda —— */
+  .carta-legend {
+    border-top: 1px solid var(--border);
+    background: var(--bg-elevated);
+  }
+
+  .carta-legend__trigger {
+    padding: 0.85rem 1rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--fg-muted);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .carta-legend__trigger::-webkit-details-marker {
+    display: none;
+  }
+
+  .carta-legend__body {
+    padding: 0 1rem 1.1rem;
+  }
+
+  .carta-legend__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: 0.35rem 0.75rem;
+    font-size: 0.76rem;
+    color: var(--fg-muted);
+  }
+
+  @media (max-width: 480px) {
+    .carta-legend__list {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .carta-legend__n {
+    display: inline-flex;
+    width: 1.1rem;
+    justify-content: center;
+    font-size: 0.62rem;
+    font-weight: 700;
+    margin-right: 0.2rem;
+    opacity: 0.65;
+  }
+
+  .carta-legend__foot {
+    margin: 0.85rem 0 0;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--fg-subtle);
+  }
+</style>

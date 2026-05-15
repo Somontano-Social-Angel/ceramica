@@ -1,0 +1,76 @@
+<section class="section" aria-labelledby="test-title">
+  <div class="wrap">
+    <h2 id="test-title" class="sr-only">Opiniones de comensales</h2>
+    <ul class="quotes">
+      <li>
+        <blockquote>
+          <p>«La hamburguesa es un espectáculo y el horno de leña se nota en la pizza. Buen rollo y terraza para ir con el perro.»</p>
+          <footer>— Lucía, Barbastro</footer>
+        </blockquote>
+      </li>
+      <li>
+        <blockquote>
+          <p>«Vinimos en grupo: interior enorme, aparcamiento sin drama en el polígono y el partido en pantalla. Repetimos seguro.»</p>
+          <footer>— Dani y compañía, Huesca</footer>
+        </blockquote>
+      </li>
+      <li>
+        <blockquote>
+          <p>«Se nota el trato de bar de toda la vida, pero con cocina que mola. José y el equipo te hacen sentir en casa.»</p>
+          <footer>— Marcos R., Zaragoza</footer>
+        </blockquote>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  .section {
+    padding: 4rem 1.5rem;
+    border-top: 1px solid var(--border);
+    background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.02));
+  }
+
+  .wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+  }
+
+  .quotes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 900px) {
+    .quotes {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  blockquote {
+    margin: 0;
+    padding: 1.5rem 1.35rem;
+    height: 100%;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+  }
+
+  blockquote p {
+    margin: 0 0 1rem;
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--fg-muted);
+  }
+
+  footer {
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    color: var(--fg-subtle);
+  }
+</style>
