@@ -17,6 +17,7 @@ import {
   madridNowDisplay,
   addCalendarDays,
   mondayFirstColumnIndex,
+  isTooFarAhead,
 } from "./schedule.js";
 import {
   addReservation,
@@ -50,16 +51,25 @@ const app = express();
 app.set("trust proxy", 1);
 app.use(express.json({ limit: "32kb" }));
 
+/** HTTPS detrás de Coolify/Traefik: "auto" usa X-Forwarded-Proto. Forzar con COOKIE_SECURE=true|false */
+function sessionCookieSecure() {
+  const mode = String(process.env.COOKIE_SECURE ?? "").trim().toLowerCase();
+  if (mode === "true") return true;
+  if (mode === "false") return false;
+  return "auto";
+}
+
 app.use(
   session({
     name: "laceramica.sid",
     secret: process.env.SESSION_SECRET || "cambia-session-secret-en-produccion",
     resave: false,
     saveUninitialized: false,
+    proxy: true,
     cookie: {
       httpOnly: true,
       sameSite: "lax",
-      secure: process.env.COOKIE_SECURE === "true",
+      secure: sessionCookieSecure(),
       maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   }),
@@ -93,15 +103,24 @@ function envSecret(key) {
   return v;
 }
 
+function looksLikeBcrypt(hash) {
+  return /^\$2[aby]?\$\d{2}\$/.test(hash);
+}
+
 async function verifyAdminPassword(plain) {
   const hash = envSecret("ADMIN_PASSWORD_HASH");
-  if (hash) {
+  if (hash && looksLikeBcrypt(hash)) {
     try {
       return await bcrypt.compare(plain, hash);
     } catch {
       console.error("[api] ADMIN_PASSWORD_HASH no es un hash bcrypt válido");
       return false;
     }
+  }
+  if (hash && !looksLikeBcrypt(hash)) {
+    console.warn(
+      "[api] ADMIN_PASSWORD_HASH ignorado (no parece bcrypt). Usa ADMIN_PASSWORD o genera hash con npm run admin:hash",
+    );
   }
   const pwd = envSecret("ADMIN_PASSWORD");
   if (!pwd) return false;
@@ -254,7 +273,13 @@ app.post("/api/admin/login", async (req, res) => {
     return res.status(401).json({ ok: false, error: "Contraseña incorrecta" });
   }
   req.session.admin = true;
-  return res.json({ ok: true });
+  req.session.save((err) => {
+    if (err) {
+      console.error("[api/admin/login] session save", err);
+      return res.status(500).json({ ok: false, error: "No se pudo guardar la sesión" });
+    }
+    return res.json({ ok: true });
+  });
 });
 
 app.post("/api/admin/logout", (req, res) => {

@@ -670,6 +670,13 @@ const calI18nJson = JSON.stringify(calI18n);
       return;
     }
     await refreshSession();
+    const { r: sr, j: sj } = await api("/api/admin/session");
+    if (!sr?.ok || !sj.admin) {
+      err.textContent =
+        "La contraseña fue aceptada pero la sesión no se guardó. Entra siempre por https (mismo dominio que la web), define SESSION_SECRET en Coolify y deja COOKIE_SECURE vacío o en true. Si sigue fallando, prueba COOKIE_SECURE=false solo para diagnosticar.";
+      err.hidden = false;
+      setAuthUi(false);
+    }
   });
 
   $("#logout-btn").addEventListener("click", async () => {
