@@ -1,0 +1,53 @@
+---
+import type { Locale } from "../i18n/types";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+---
+
+<span class="flag" aria-hidden="true">
+  {
+    locale === "es" && (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 16" width="20" height="14" role="img">
+        <rect width="24" height="16" fill="#AA151B" />
+        <rect y="4" width="24" height="8" fill="#F1BF00" />
+      </svg>
+    )
+  }
+  {
+    locale === "en" && (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 16" width="20" height="14" role="img">
+        <rect width="24" height="16" fill="#012169" />
+        <path fill="#FFF" d="M0 0l24 16M24 0L0 16M10 0v16M0 6h24" stroke="#FFF" stroke-width="2.2" />
+        <path fill="none" d="M0 0l24 16M24 0L0 16" stroke="#C8102E" stroke-width="1.2" />
+        <path fill="none" d="M10 0v16M0 6h24" stroke="#C8102E" stroke-width="1.8" />
+      </svg>
+    )
+  }
+  {
+    locale === "fr" && (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 16" width="20" height="14" role="img">
+        <rect width="8" height="16" fill="#002395" />
+        <rect x="8" width="8" height="16" fill="#FFF" />
+        <rect x="16" width="8" height="16" fill="#ED2939" />
+      </svg>
+    )
+  }
+</span>
+
+<style>
+  .flag {
+    display: inline-flex;
+    flex-shrink: 0;
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+  }
+
+  .flag svg {
+    display: block;
+  }
+</style>

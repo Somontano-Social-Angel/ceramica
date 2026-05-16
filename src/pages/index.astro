@@ -1,10 +1,15 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { useTranslations } from "../i18n";
+
+const locale = Astro.currentLocale ?? "es";
+const t = useTranslations(locale);
 import Header from "../components/Header.astro";
 import Hero from "../components/Hero.astro";
 import SectionNosotros from "../components/SectionNosotros.astro";
 import SectionFirma from "../components/SectionFirma.astro";
 import SectionCarta from "../components/SectionCarta.astro";
+import SectionNovedades from "../components/SectionNovedades.astro";
 import SectionExperiencia from "../components/SectionExperiencia.astro";
 import SectionHorario from "../components/SectionHorario.astro";
 import SectionTestimonios from "../components/SectionTestimonios.astro";
@@ -14,14 +19,19 @@ import SectionReserva from "../components/SectionReserva.astro";
 import Footer from "../components/Footer.astro";
 ---
 
-<Layout>
-  <a class="skip" href="#inicio">Saltar al contenido</a>
+<Layout
+  title={t("meta.homeTitle")}
+  description={t("meta.homeDesc")}
+  canonicalPath="/"
+>
+  <a class="skip" href="#inicio">{t("skip")}</a>
   <Header />
-  <main>
+  <main transition:animate="fade">
     <Hero />
     <SectionNosotros />
     <SectionFirma />
     <SectionCarta />
+    <SectionNovedades />
     <SectionExperiencia />
     <SectionHorario />
     <SectionTestimonios />
@@ -31,15 +41,6 @@ import Footer from "../components/Footer.astro";
   </main>
   <Footer />
 </Layout>
-
-<script>
-  const header = document.querySelector(".header");
-  const onScroll = () => {
-    if (header) header.classList.toggle("is-scrolled", window.scrollY > 48);
-  };
-  onScroll();
-  window.addEventListener("scroll", onScroll, { passive: true });
-</script>
 
 <style>
   .skip {

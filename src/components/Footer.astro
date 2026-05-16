@@ -1,4 +1,8 @@
 ---
+import { lpath, useTranslations } from "../i18n";
+
+const locale = Astro.currentLocale ?? "es";
+const t = useTranslations(locale);
 const year = new Date().getFullYear();
 ---
 
@@ -6,13 +10,13 @@ const year = new Date().getFullYear();
   <div class="inner">
     <div class="brand">
       <span class="brand__name">La Cerámica</span>
-      <span class="brand__tag">Bar-restaurante · Polígono La Cerámica</span>
+      <span class="brand__tag">{t("footer.tag")}</span>
     </div>
-    <nav class="legal" aria-label="Legal">
-      <a href="#">Aviso legal</a>
-      <a href="#">Privacidad</a>
-      <a href="#">Cookies</a>
-      <a href="/admin" class="staff">Staff</a>
+    <nav class="legal" aria-label={t("footer.legal")}>
+      <a href="#">{t("footer.legalNotice")}</a>
+      <a href="#">{t("footer.privacy")}</a>
+      <a href="#">{t("footer.cookies")}</a>
+      <a href={lpath(locale, "/admin")} class="staff">{t("footer.staff")}</a>
     </nav>
     <p class="copy">© {year} La Cerámica · Barbastro</p>
   </div>

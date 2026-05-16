@@ -4,106 +4,185 @@ import Layout from "../layouts/Layout.astro";
 
 <Layout title="Admin reservas | La Cerámica" description="Panel de reservas (personal autorizado)." robots="noindex, nofollow">
   <main class="adm">
-    <section class="card" id="login-panel">
-      <h1 class="h1">La Cerámica — Admin</h1>
-      <p class="p">Acceso restringido. Introduce la contraseña configurada en el servidor.</p>
-      <form class="form" id="login-form">
-        <label class="lbl" for="pwd">Contraseña</label>
-        <input class="inp" type="password" id="pwd" autocomplete="current-password" required />
-        <p class="err" id="login-err" hidden></p>
-        <button class="btn" type="submit">Entrar</button>
+    <section class="adm-card adm-card--login" id="login-panel">
+      <p class="adm-brand">La Cerámica</p>
+      <h1 class="adm-title">Panel de reservas</h1>
+      <p class="adm-lead">Acceso restringido al personal.</p>
+      <p class="adm-warn" id="api-warn" hidden>
+        No hay conexión con la API. Arranca <code>npm run dev</code> o el servidor en producción.
+      </p>
+      <form class="adm-form" id="login-form">
+        <label class="adm-lbl" for="pwd">Contraseña</label>
+        <input class="adm-inp" type="password" id="pwd" autocomplete="current-password" required />
+        <p class="adm-err" id="login-err" hidden></p>
+        <button class="adm-btn" type="submit">Entrar</button>
       </form>
     </section>
 
-    <section class="card" id="dash-panel" hidden>
-      <header class="head">
-        <h1 class="h1">Reservas</h1>
-        <button class="link" type="button" id="logout-btn">Salir</button>
-      </header>
-      <div class="filters">
-        <label class="lbl">Desde <input class="inp inp--sm" type="date" id="f-from" /></label>
-        <label class="lbl">Hasta <input class="inp inp--sm" type="date" id="f-to" /></label>
-        <button class="btn btn--ghost" type="button" id="reload-btn">Actualizar</button>
+    <div class="adm-shell" id="dash-panel" hidden>
+      <aside class="adm-side">
+        <p class="adm-brand">La Cerámica</p>
+        <nav class="adm-nav" aria-label="Secciones">
+          <button class="adm-nav__btn is-active" type="button" data-nav="overview">Resumen</button>
+          <button class="adm-nav__btn" type="button" data-nav="list">Todas</button>
+          <button class="adm-nav__btn" type="button" data-nav="new">Nueva · teléfono</button>
+        </nav>
+        <button class="adm-link" type="button" id="logout-btn">Cerrar sesión</button>
+      </aside>
+
+      <div class="adm-main">
+        <!-- Resumen del día -->
+        <section class="adm-panel is-active" id="panel-overview" data-panel="overview">
+          <header class="adm-head">
+            <div>
+              <h1 class="adm-title adm-title--sm">Resumen</h1>
+              <p class="adm-sub" id="overview-now"></p>
+            </div>
+            <div class="adm-date-nav">
+              <button class="adm-icon-btn" type="button" id="ov-prev" aria-label="Día anterior">‹</button>
+              <input class="adm-inp adm-inp--date" type="date" id="ov-date" />
+              <button class="adm-icon-btn" type="button" id="ov-next" aria-label="Día siguiente">›</button>
+              <button class="adm-btn adm-btn--ghost adm-btn--compact" type="button" id="ov-today">Hoy</button>
+            </div>
+          </header>
+
+          <div class="adm-stats" id="stats-row" aria-live="polite"></div>
+
+          <h2 class="adm-h2">Por franja</h2>
+          <div class="adm-timeline" id="timeline"></div>
+          <p class="adm-empty" id="timeline-empty" hidden>Sin reservas activas este día.</p>
+
+          <h2 class="adm-h2">Próximos 7 días</h2>
+          <div class="adm-week" id="week-strip"></div>
+        </section>
+
+        <!-- Listado -->
+        <section class="adm-panel" id="panel-list" data-panel="list" hidden>
+          <header class="adm-head">
+            <h1 class="adm-title adm-title--sm">Todas las reservas</h1>
+          </header>
+          <div class="adm-filters">
+            <label class="adm-lbl">Desde <input class="adm-inp adm-inp--date" type="date" id="f-from" /></label>
+            <label class="adm-lbl">Hasta <input class="adm-inp adm-inp--date" type="date" id="f-to" /></label>
+            <label class="adm-lbl">Estado
+              <select class="adm-inp" id="f-status">
+                <option value="">Todas</option>
+                <option value="pending">Pendiente</option>
+                <option value="confirmed">Confirmada</option>
+                <option value="cancelled">Cancelada</option>
+              </select>
+            </label>
+            <button class="adm-btn adm-btn--ghost adm-btn--compact" type="button" id="reload-btn">Actualizar</button>
+          </div>
+          <div class="adm-cards" id="list-cards"></div>
+          <p class="adm-empty" id="list-empty" hidden>Sin reservas en el rango.</p>
+        </section>
+
+        <!-- Alta manual -->
+        <section class="adm-panel" id="panel-new" data-panel="new" hidden>
+          <header class="adm-head">
+            <h1 class="adm-title adm-title--sm">Nueva reserva por teléfono</h1>
+            <p class="adm-sub">Se guarda como confirmada y aparece en el resumen del día.</p>
+          </header>
+          <form class="adm-form adm-form--wide" id="new-form">
+            <div class="adm-grid">
+              <label class="adm-lbl">Fecha
+                <input class="adm-inp" type="date" name="date" id="new-date" required />
+              </label>
+              <label class="adm-lbl">Hora
+                <select class="adm-inp" name="time" id="new-time" required disabled>
+                  <option value="">Cargando franjas…</option>
+                </select>
+              </label>
+              <label class="adm-lbl">Personas
+                <input class="adm-inp" type="number" name="partySize" min="1" max="20" value="2" required />
+              </label>
+              <label class="adm-lbl">Estado
+                <select class="adm-inp" name="status" id="new-status">
+                  <option value="confirmed" selected>Confirmada</option>
+                  <option value="pending">Pendiente</option>
+                </select>
+              </label>
+            </div>
+            <div class="adm-grid">
+              <label class="adm-lbl">Nombre
+                <input class="adm-inp" name="name" autocomplete="name" required />
+              </label>
+              <label class="adm-lbl">Teléfono
+                <input class="adm-inp" name="phone" type="tel" autocomplete="tel" required />
+              </label>
+              <label class="adm-lbl">Email <span class="adm-opt">(opcional)</span>
+                <input class="adm-inp" name="email" type="email" autocomplete="email" placeholder="Si quieres enviar confirmación" />
+              </label>
+            </div>
+            <fieldset class="adm-fieldset">
+              <legend class="adm-lbl">Zona preferida</legend>
+              <div class="adm-chips" id="new-services"></div>
+            </fieldset>
+            <label class="adm-lbl">Notas
+              <textarea class="adm-inp adm-textarea" name="notes" rows="2" placeholder="Alergias, celebración…"></textarea>
+            </label>
+            <label class="adm-check">
+              <input type="checkbox" name="sendEmail" id="new-send-email" />
+              Enviar email de confirmación (solo si hay email)
+            </label>
+            <p class="adm-err" id="new-err" hidden></p>
+            <p class="adm-ok" id="new-ok" hidden></p>
+            <button class="adm-btn" type="submit">Guardar reserva</button>
+          </form>
+        </section>
       </div>
-      <div class="table-wrap">
-        <table class="tbl">
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Hora</th>
-              <th>Pax</th>
-              <th>Nombre</th>
-              <th>Email</th>
-              <th>Tel</th>
-              <th>Servicios</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody id="rows"></tbody>
-        </table>
-      </div>
-      <p class="hint" id="empty">Sin reservas en el rango.</p>
-    </section>
+    </div>
   </main>
 </Layout>
 
 <script>
   const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+  const STATUS = {
+    pending: { label: "Pendiente", cls: "st-pending" },
+    confirmed: { label: "Confirmada", cls: "st-confirmed" },
+    cancelled: { label: "Cancelada", cls: "st-cancelled" },
+  };
+
+  let meta = null;
+  let overviewDate = "";
+
+  function madridToday() {
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Madrid",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+  }
+
+  function addDays(iso, n) {
+    const [y, m, d] = iso.split("-").map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d + n));
+    return dt.toISOString().slice(0, 10);
+  }
+
+  function formatDay(iso) {
+    const [y, m, d] = iso.split("-").map(Number);
+    const dt = new Date(y, m - 1, d);
+    return new Intl.DateTimeFormat("es-ES", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    }).format(dt);
+  }
 
   async function api(path, opts = {}) {
-    const r = await fetch(path, { credentials: "include", ...opts });
+    let r;
+    try {
+      r = await fetch(path, { credentials: "include", ...opts });
+    } catch {
+      return { r: null, j: { error: "Sin conexión con la API" } };
+    }
     const j = await r.json().catch(() => ({}));
     return { r, j };
-  }
-
-  async function refreshSession() {
-    const { r, j } = await api("/api/admin/session");
-    const ok = r.ok && j.admin;
-    $("#login-panel").hidden = ok;
-    $("#dash-panel").hidden = !ok;
-    if (ok) await loadList();
-  }
-
-  async function loadList() {
-    const from = /** @type {HTMLInputElement} */ ($("#f-from")).value;
-    const to = /** @type {HTMLInputElement} */ ($("#f-to")).value;
-    const q = new URLSearchParams();
-    if (from) q.set("from", from);
-    if (to) q.set("to", to);
-    const { r, j } = await api(`/api/admin/reservations?${q}`);
-    const tbody = $("#rows");
-    tbody.innerHTML = "";
-    if (!r.ok || !j.reservations?.length) {
-      $("#empty").hidden = false;
-      return;
-    }
-    $("#empty").hidden = true;
-    for (const row of j.reservations) {
-      const tr = document.createElement("tr");
-      const svc = (row.services ?? []).join(", ") || "—";
-      tr.innerHTML = `
-        <td>${row.date}</td>
-        <td>${row.time}</td>
-        <td>${row.partySize}</td>
-        <td>${escapeHtml(row.name)}</td>
-        <td><a href="mailto:${encodeURIComponent(row.email)}">${escapeHtml(row.email)}</a></td>
-        <td>${escapeHtml(row.phone)}</td>
-        <td>${escapeHtml(svc)}</td>
-        <td class="nowrap">${statusSelect(row)}</td>`;
-      tbody.appendChild(tr);
-    }
-    tbody.querySelectorAll("select[data-id]").forEach((sel) => {
-      sel.addEventListener("change", async () => {
-        const id = /** @type {HTMLSelectElement} */ (sel).dataset.id;
-        const status = /** @type {HTMLSelectElement} */ (sel).value;
-        const { r } = await api(`/api/admin/reservations/${id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status }),
-        });
-        if (!r.ok) alert("No se pudo actualizar");
-      });
-    });
   }
 
   function escapeHtml(s) {
@@ -114,15 +193,288 @@ import Layout from "../layouts/Layout.astro";
       .replace(/"/g, "&quot;");
   }
 
+  function sourceBadge(row) {
+    const phone = row.source === "phone";
+    return `<span class="adm-badge adm-badge--${phone ? "phone" : "web"}">${phone ? "Teléfono" : "Web"}</span>`;
+  }
+
+  function statusBadge(status) {
+    const s = STATUS[status] ?? { label: status, cls: "" };
+    return `<span class="adm-badge adm-badge--status ${s.cls}">${s.label}</span>`;
+  }
+
   function statusSelect(row) {
     const opts = ["pending", "confirmed", "cancelled"]
+      .map((v) => {
+        const s = STATUS[v];
+        return `<option value="${v}" ${row.status === v ? "selected" : ""}>${s.label}</option>`;
+      })
+      .join("");
+    return `<select class="adm-sel" data-id="${row.id}" aria-label="Estado de reserva">${opts}</select>`;
+  }
+
+  function renderCard(row, opts = {}) {
+    const { compact = false } = opts;
+    const svc = (row.services ?? []).join(", ") || "Sin preferencia";
+    const email = row.email
+      ? `<a href="mailto:${encodeURIComponent(row.email)}">${escapeHtml(row.email)}</a>`
+      : '<span class="adm-muted">—</span>';
+    const notes = row.notes
+      ? `<p class="adm-card__notes">${escapeHtml(row.notes)}</p>`
+      : "";
+    return `
+      <article class="adm-card-item" data-id="${row.id}">
+        <header class="adm-card-item__head">
+          <time class="adm-card-item__time" datetime="${row.date}T${row.time}">${row.time}</time>
+          <span class="adm-card-item__pax">${row.partySize} pax</span>
+          ${sourceBadge(row)}
+          ${statusBadge(row.status)}
+        </header>
+        <h3 class="adm-card-item__name">${escapeHtml(row.name)}</h3>
+        <ul class="adm-card-item__meta">
+          <li><span>Fecha</span> ${row.date}</li>
+          ${compact ? "" : `<li><span>Tel</span> <a href="tel:${encodeURIComponent(row.phone)}">${escapeHtml(row.phone)}</a></li>`}
+          ${compact ? "" : `<li><span>Email</span> ${email}</li>`}
+          <li><span>Zona</span> ${escapeHtml(svc)}</li>
+        </ul>
+        ${notes}
+        <footer class="adm-card-item__foot">
+          <label class="adm-lbl adm-lbl--inline">Estado ${statusSelect(row)}</label>
+          <span class="adm-ref">#${row.id.slice(0, 8)}</span>
+        </footer>
+      </article>`;
+  }
+
+  function bindStatusSelects(root) {
+    root.querySelectorAll("select[data-id]").forEach((sel) => {
+      sel.addEventListener("change", async () => {
+        const id = /** @type {HTMLSelectElement} */ (sel).dataset.id;
+        const status = /** @type {HTMLSelectElement} */ (sel).value;
+        const { r } = await api(`/api/admin/reservations/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status }),
+        });
+        if (!r?.ok) {
+          alert("No se pudo actualizar");
+          return;
+        }
+        await loadOverview();
+        await loadList();
+      });
+    });
+  }
+
+  function setNav(panel) {
+    $$(".adm-nav__btn").forEach((b) => b.classList.toggle("is-active", b.dataset.nav === panel));
+    $$(".adm-panel").forEach((p) => {
+      const on = p.dataset.panel === panel;
+      p.classList.toggle("is-active", on);
+      p.hidden = !on;
+    });
+    if (panel === "overview") loadOverview();
+    if (panel === "list") loadList();
+    if (panel === "new") loadNewSlots();
+  }
+
+  async function checkApi() {
+    const warn = /** @type {HTMLParagraphElement} */ ($("#api-warn"));
+    const { r } = await api("/api/health");
+    const ok = r?.ok;
+    warn.hidden = Boolean(ok);
+    return ok;
+  }
+
+  async function ensureMeta() {
+    if (meta) return meta;
+    const { r, j } = await api("/api/meta");
+    if (r?.ok) meta = j;
+    return meta;
+  }
+
+  function renderStats(stats, isToday) {
+    const el = $("#stats-row");
+    const items = [
+      { k: "Activas", v: stats.active, hint: isToday ? "hoy" : "día seleccionado" },
+      { k: "Comensales", v: stats.covers, hint: "no canceladas" },
+      { k: "Pendientes", v: stats.pending, hint: "por confirmar" },
+      { k: "Teléfono", v: stats.phone, hint: "entrada manual" },
+    ];
+    el.innerHTML = items
       .map(
-        (v) =>
-          `<option value="${v}" ${row.status === v ? "selected" : ""}>${v === "pending" ? "Pendiente" : v === "confirmed" ? "Confirmada" : "Cancelada"}</option>`,
+        (i) => `
+      <div class="adm-stat">
+        <span class="adm-stat__val">${i.v}</span>
+        <span class="adm-stat__lbl">${i.k}</span>
+        <span class="adm-stat__hint">${i.hint}</span>
+      </div>`,
       )
       .join("");
-    return `<select class="sel" data-id="${row.id}">${opts}</select>`;
   }
+
+  async function loadOverview() {
+    const date = /** @type {HTMLInputElement} */ ($("#ov-date")).value || overviewDate || madridToday();
+    overviewDate = date;
+    /** @type {HTMLInputElement} */ ($("#ov-date")).value = date;
+
+    const { r, j } = await api(`/api/admin/dashboard?date=${encodeURIComponent(date)}`);
+    if (!r?.ok) return;
+
+    $("#overview-now").textContent = `${formatDay(date)}${j.isToday ? " · hoy" : ""} — ${j.nowMadrid}`;
+    renderStats(j.stats, j.isToday);
+
+    const tl = $("#timeline");
+    const active = (j.timeline ?? []).filter((t) => t.reservations?.length);
+    if (!active.length) {
+      tl.innerHTML = "";
+      $("#timeline-empty").hidden = false;
+    } else {
+      $("#timeline-empty").hidden = true;
+      tl.innerHTML = active
+        .map(
+          (slot) => `
+        <section class="adm-slot">
+          <header class="adm-slot__head">
+            <span class="adm-slot__time">${slot.time}</span>
+            <span class="adm-slot__covers">${slot.covers} comensales</span>
+          </header>
+          <div class="adm-cards adm-cards--dense">
+            ${slot.reservations.map((row) => renderCard(row, { compact: true })).join("")}
+          </div>
+        </section>`,
+        )
+        .join("");
+      bindStatusSelects(tl);
+    }
+
+    const week = $("#week-strip");
+    const summary = j.weekSummary ?? [];
+    if (!summary.length) {
+      week.innerHTML = '<p class="adm-muted">Sin reservas en los próximos días.</p>';
+    } else {
+      week.innerHTML = summary
+        .map(
+          (d) => `
+        <button type="button" class="adm-week__chip ${d.date === date ? "is-active" : ""}" data-date="${d.date}">
+          <span class="adm-week__day">${d.date.slice(8, 10)}/${d.date.slice(5, 7)}</span>
+          <span class="adm-week__n">${d.count}</span>
+        </button>`,
+        )
+        .join("");
+      week.querySelectorAll("[data-date]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          overviewDate = /** @type {HTMLButtonElement} */ (btn).dataset.date ?? "";
+          loadOverview();
+        });
+      });
+    }
+  }
+
+  async function loadList() {
+    const from = /** @type {HTMLInputElement} */ ($("#f-from")).value;
+    const to = /** @type {HTMLInputElement} */ ($("#f-to")).value;
+    const statusFilter = /** @type {HTMLSelectElement} */ ($("#f-status")).value;
+    const q = new URLSearchParams();
+    if (from) q.set("from", from);
+    if (to) q.set("to", to);
+    const { r, j } = await api(`/api/admin/reservations?${q}`);
+    const wrap = $("#list-cards");
+    wrap.innerHTML = "";
+    if (!r?.ok) return;
+    let rows = j.reservations ?? [];
+    if (statusFilter) rows = rows.filter((row) => row.status === statusFilter);
+    if (!rows.length) {
+      $("#list-empty").hidden = false;
+      return;
+    }
+    $("#list-empty").hidden = true;
+    wrap.innerHTML = rows.map((row) => renderCard(row)).join("");
+    bindStatusSelects(wrap);
+  }
+
+  async function loadNewSlots() {
+    const dateInp = /** @type {HTMLInputElement} */ ($("#new-date"));
+    if (!dateInp.value) dateInp.value = madridToday();
+    const sel = /** @type {HTMLSelectElement} */ ($("#new-time"));
+    sel.disabled = true;
+    sel.innerHTML = '<option value="">Cargando…</option>';
+    const { r, j } = await api(`/api/slots?date=${encodeURIComponent(dateInp.value)}`);
+    if (!r?.ok) {
+      sel.innerHTML = `<option value="">${escapeHtml(j.error || "Error")}</option>`;
+      return;
+    }
+    if (j.closed || !j.slots?.length) {
+      sel.innerHTML = '<option value="">Sin franjas ese día</option>';
+      return;
+    }
+    const max = j.maxCoversPerSlot ?? 40;
+    sel.innerHTML = j.slots
+      .map((t) => {
+        const booked = j.bookedCovers?.[t] ?? 0;
+        const left = max - booked;
+        const full = left < 1 ? " (lleno)" : ` (${left} plazas)`;
+        return `<option value="${t}">${t}${full}</option>`;
+      })
+      .join("");
+    sel.disabled = false;
+  }
+
+  function setupNewForm() {
+    const m = meta;
+    const box = $("#new-services");
+    const opts = m?.serviceOptions ?? ["Terraza", "Interior", "Zona barra"];
+    box.innerHTML = opts
+      .map(
+        (s) => `
+      <label class="adm-chip">
+        <input type="checkbox" name="services" value="${escapeHtml(s)}" />
+        ${escapeHtml(s)}
+      </label>`,
+      )
+      .join("");
+
+    /** @type {HTMLInputElement} */ ($("#new-date")).addEventListener("change", loadNewSlots);
+  }
+
+  async function refreshSession() {
+    await checkApi();
+    await ensureMeta();
+    const { r, j } = await api("/api/admin/session");
+    if (!r) return;
+    const ok = r.ok && j.admin;
+    $("#login-panel").hidden = ok;
+    $("#dash-panel").hidden = !ok;
+    if (ok) {
+      const today = madridToday();
+      overviewDate = today;
+      /** @type {HTMLInputElement} */ ($("#ov-date")).value = today;
+      /** @type {HTMLInputElement} */ ($("#f-from")).value = today;
+      /** @type {HTMLInputElement} */ ($("#f-to")).value = addDays(today, 30);
+      /** @type {HTMLInputElement} */ ($("#new-date")).value = today;
+      setupNewForm();
+      setNav("overview");
+    }
+  }
+
+  $$(".adm-nav__btn").forEach((btn) => {
+    btn.addEventListener("click", () => setNav(/** @type {HTMLButtonElement} */ (btn).dataset.nav ?? "overview"));
+  });
+
+  $("#ov-prev").addEventListener("click", () => {
+    const d = /** @type {HTMLInputElement} */ ($("#ov-date")).value;
+    /** @type {HTMLInputElement} */ ($("#ov-date")).value = addDays(d, -1);
+    loadOverview();
+  });
+  $("#ov-next").addEventListener("click", () => {
+    const d = /** @type {HTMLInputElement} */ ($("#ov-date")).value;
+    /** @type {HTMLInputElement} */ ($("#ov-date")).value = addDays(d, 1);
+    loadOverview();
+  });
+  $("#ov-today").addEventListener("click", () => {
+    /** @type {HTMLInputElement} */ ($("#ov-date")).value = madridToday();
+    loadOverview();
+  });
+  $("#ov-date").addEventListener("change", loadOverview);
 
   $("#login-form").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -134,8 +486,8 @@ import Layout from "../layouts/Layout.astro";
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password }),
     });
-    if (!r.ok) {
-      err.textContent = j.error || "Error";
+    if (!r?.ok) {
+      err.textContent = j.error || "Sin conexión";
       err.hidden = false;
       return;
     }
@@ -149,168 +501,633 @@ import Layout from "../layouts/Layout.astro";
 
   $("#reload-btn").addEventListener("click", () => loadList());
 
+  $("#new-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const err = /** @type {HTMLParagraphElement} */ ($("#new-err"));
+    const ok = /** @type {HTMLParagraphElement} */ ($("#new-ok"));
+    err.hidden = true;
+    ok.hidden = true;
+    const fd = new FormData(/** @type {HTMLFormElement} */ (e.target));
+    const services = $$('input[name="services"]:checked', e.target).map((el) => el.value);
+    const body = {
+      date: fd.get("date"),
+      time: fd.get("time"),
+      partySize: Number(fd.get("partySize")),
+      name: fd.get("name"),
+      phone: fd.get("phone"),
+      email: fd.get("email") || "",
+      notes: fd.get("notes") || "",
+      status: fd.get("status"),
+      services,
+      source: "phone",
+      sendEmail: fd.get("sendEmail") === "on",
+    };
+    const { r, j } = await api("/api/admin/reservations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!r?.ok) {
+      err.textContent = j.error || "No se pudo guardar";
+      err.hidden = false;
+      return;
+    }
+    ok.textContent = `Reserva guardada (${j.id?.slice(0, 8) ?? "ok"}).`;
+    ok.hidden = false;
+    /** @type {HTMLFormElement} */ (e.target).reset();
+    /** @type {HTMLInputElement} */ ($("#new-date")).value = madridToday();
+    await loadNewSlots();
+    await loadOverview();
+  });
+
   refreshSession();
 </script>
 
 <style>
   .adm {
     min-height: 100vh;
-    padding: 2rem 1rem 3rem;
+    padding: 1.5rem 1rem 3rem;
     background: var(--bg);
   }
 
-  .card {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 1.75rem;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    background: var(--bg-elevated);
-  }
-
-  .h1 {
-    margin: 0 0 0.5rem;
-    font-family: var(--font-display);
-    font-size: 1.75rem;
-    color: var(--fg);
-  }
-
-  .p {
-    margin: 0 0 1.25rem;
-    color: var(--fg-muted);
-    line-height: 1.55;
-  }
-
-  .lbl {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    font-size: 0.72rem;
+  .adm-brand {
+    margin: 0 0 0.25rem;
+    font-size: 0.7rem;
     font-weight: 600;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--fg-subtle);
   }
 
-  .inp {
-    padding: 0.55rem 0.65rem;
+  .adm-title {
+    margin: 0 0 0.35rem;
+    font-family: var(--font-display);
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--fg);
+    line-height: 1.15;
+  }
+
+  .adm-title--sm {
+    font-size: 1.65rem;
+  }
+
+  .adm-lead,
+  .adm-sub {
+    margin: 0 0 1.25rem;
+    color: var(--fg-muted);
+    line-height: 1.55;
+    font-size: 0.95rem;
+  }
+
+  .adm-sub {
+    margin: -0.25rem 0 1rem;
+    font-size: 0.88rem;
+  }
+
+  .adm-card {
+    max-width: 24rem;
+    margin: 0 auto;
+    padding: 2rem 1.75rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
+  }
+
+  .adm-card--login {
+    margin-top: 4vh;
+  }
+
+  .adm-warn {
+    margin: 0 0 1rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    color: #fde68a;
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.25);
+    border-radius: 8px;
+  }
+
+  .adm-lbl {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .adm-lbl--inline {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 0.8rem;
+  }
+
+  .adm-opt {
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+    color: var(--fg-subtle);
+  }
+
+  .adm-inp {
+    padding: 0.6rem 0.75rem;
     border-radius: 8px;
     border: 1px solid var(--border-strong);
     background: var(--bg);
     color: var(--fg);
     font: inherit;
+    font-size: 0.95rem;
   }
 
-  .inp--sm {
+  .adm-inp--date {
     max-width: 11rem;
   }
 
-  .form {
-    max-width: 22rem;
+  .adm-textarea {
+    resize: vertical;
+    min-height: 4rem;
   }
 
-  .err {
+  .adm-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .adm-form--wide {
+    max-width: 40rem;
+  }
+
+  .adm-err {
+    margin: 0;
     color: #fca5a5;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
   }
 
-  .btn {
-    margin-top: 0.75rem;
-    padding: 0.65rem 1.25rem;
+  .adm-ok {
+    margin: 0;
+    color: #86efac;
+    font-size: 0.88rem;
+  }
+
+  .adm-btn {
+    padding: 0.7rem 1.35rem;
     border: 0;
     border-radius: 999px;
     background: var(--fg);
     color: var(--bg);
     font: inherit;
     font-weight: 600;
+    font-size: 0.78rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    font-size: 0.75rem;
     cursor: pointer;
+    align-self: flex-start;
   }
 
-  .btn--ghost {
+  .adm-btn--ghost {
     background: transparent;
     color: var(--fg);
     border: 1px solid var(--border-strong);
-    margin-top: 0;
   }
 
-  .head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
+  .adm-btn--compact {
+    padding: 0.5rem 1rem;
+    font-size: 0.72rem;
   }
 
-  .link {
-    background: none;
+  .adm-link {
+    margin-top: auto;
+    padding: 0;
     border: 0;
+    background: none;
     color: var(--fg-muted);
     font: inherit;
+    font-size: 0.88rem;
     cursor: pointer;
     text-decoration: underline;
     text-underline-offset: 3px;
   }
 
-  .filters {
+  .adm-shell {
+    display: grid;
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  @media (min-width: 900px) {
+    .adm-shell {
+      grid-template-columns: 200px 1fr;
+      align-items: start;
+    }
+  }
+
+  .adm-side {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+  }
+
+  .adm-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .adm-nav__btn {
+    padding: 0.65rem 0.85rem;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--fg-muted);
+    font: inherit;
+    font-size: 0.9rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .adm-nav__btn:hover,
+  .adm-nav__btn.is-active {
+    background: var(--bg-soft);
+    color: var(--fg);
+  }
+
+  .adm-nav__btn.is-active {
+    box-shadow: inset 3px 0 0 var(--fg);
+  }
+
+  .adm-main {
+    min-width: 0;
+  }
+
+  .adm-panel {
+    display: none;
+  }
+
+  .adm-panel.is-active {
+    display: block;
+  }
+
+  .adm-head {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem 1.5rem;
-    align-items: flex-end;
-    margin-bottom: 1rem;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
   }
 
-  .table-wrap {
-    overflow-x: auto;
-    border: 1px solid var(--border);
+  .adm-date-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .adm-icon-btn {
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--border-strong);
     border-radius: 8px;
+    background: var(--bg-elevated);
+    color: var(--fg);
+    font-size: 1.25rem;
+    cursor: pointer;
+    line-height: 1;
   }
 
-  .tbl {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.82rem;
+  .adm-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .adm-stats {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .adm-stat {
+    padding: 1rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+  }
+
+  .adm-stat__val {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--fg);
+    line-height: 1;
+  }
+
+  .adm-stat__lbl {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     color: var(--fg-muted);
   }
 
-  .tbl th,
-  .tbl td {
-    padding: 0.5rem 0.65rem;
-    border-bottom: 1px solid var(--border);
-    text-align: left;
-    vertical-align: top;
-  }
-
-  .tbl th {
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+  .adm-stat__hint {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.72rem;
     color: var(--fg-subtle);
-    background: var(--bg);
   }
 
-  .tbl a {
+  .adm-h2 {
+    margin: 1.5rem 0 0.75rem;
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 500;
     color: var(--fg);
   }
 
-  .sel {
+  .adm-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .adm-slot {
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    overflow: hidden;
+  }
+
+  .adm-slot__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.65rem 1rem;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .adm-slot__time {
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    color: var(--fg);
+  }
+
+  .adm-slot__covers {
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+  }
+
+  .adm-week {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .adm-week__chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 3.25rem;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-elevated);
+    color: var(--fg-muted);
     font: inherit;
+    cursor: pointer;
+  }
+
+  .adm-week__chip.is-active {
+    border-color: var(--fg);
     color: var(--fg);
+    background: var(--bg-soft);
+  }
+
+  .adm-week__n {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--fg);
+  }
+
+  .adm-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.25rem;
+    align-items: flex-end;
+    margin-bottom: 1.25rem;
+  }
+
+  .adm-cards {
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  @media (min-width: 700px) {
+    .adm-cards {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .adm-cards--dense {
+    padding: 0.75rem;
+  }
+
+  .adm-card-item {
+    padding: 1rem 1.1rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
     background: var(--bg);
+  }
+
+  .adm-card-item__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.65rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .adm-card-item__time {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--fg);
+  }
+
+  .adm-card-item__pax {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--fg-muted);
+  }
+
+  .adm-card-item__name {
+    margin: 0 0 0.5rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .adm-card-item__meta {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+  }
+
+  .adm-card-item__meta li {
+    margin: 0.2rem 0;
+  }
+
+  .adm-card-item__meta span {
+    color: var(--fg-subtle);
+    margin-right: 0.35rem;
+  }
+
+  .adm-card-item__notes {
+    margin: 0.5rem 0 0;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--fg-muted);
+    background: var(--bg-soft);
+    border-radius: 6px;
+  }
+
+  .adm-card-item__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .adm-ref {
+    font-size: 0.72rem;
+    color: var(--fg-subtle);
+    font-family: ui-monospace, monospace;
+  }
+
+  .adm-badge {
+    display: inline-block;
+    padding: 0.15rem 0.45rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: 4px;
+  }
+
+  .adm-badge--web {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--fg-muted);
+  }
+
+  .adm-badge--phone {
+    background: rgba(134, 239, 172, 0.12);
+    color: #86efac;
+  }
+
+  .adm-badge--status.st-pending {
+    background: rgba(250, 204, 21, 0.12);
+    color: #fde68a;
+  }
+
+  .adm-badge--status.st-confirmed {
+    background: rgba(134, 239, 172, 0.12);
+    color: #86efac;
+  }
+
+  .adm-badge--status.st-cancelled {
+    background: rgba(248, 113, 113, 0.12);
+    color: #fca5a5;
+  }
+
+  .adm-sel {
+    font: inherit;
+    font-size: 0.85rem;
+    color: var(--fg);
+    background: var(--bg-elevated);
     border: 1px solid var(--border-strong);
     border-radius: 6px;
-    padding: 0.25rem 0.35rem;
+    padding: 0.3rem 0.4rem;
   }
 
-  .nowrap {
-    white-space: nowrap;
+  .adm-grid {
+    display: grid;
+    gap: 0.85rem;
   }
 
-  .hint {
-    margin: 0.75rem 0 0;
+  @media (min-width: 600px) {
+    .adm-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .adm-fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .adm-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.35rem;
+  }
+
+  .adm-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
     font-size: 0.85rem;
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+
+  .adm-chip:has(:checked) {
+    border-color: var(--fg);
+    color: var(--fg);
+    background: var(--bg-soft);
+  }
+
+  .adm-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.88rem;
+    color: var(--fg-muted);
+    cursor: pointer;
+  }
+
+  .adm-empty,
+  .adm-muted {
+    font-size: 0.9rem;
     color: var(--fg-subtle);
   }
 </style>

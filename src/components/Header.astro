@@ -1,74 +1,191 @@
 ---
-const nav = [
-  { href: "/#inicio", label: "Inicio" },
-  { href: "/#nosotros", label: "Nosotros" },
-  { href: "/#firma", label: "Firma" },
-  { href: "/carta", label: "Carta" },
-  { href: "/#experiencia", label: "Experiencia" },
-  { href: "/#horario", label: "Horario" },
-  { href: "/#contacto", label: "Contacto" },
-];
+import {
+  getLandingSections,
+  getPageLinks,
+  getReservarCta,
+  isNavActive,
+} from "../data/nav";
+import { getLocaleFromPath, isHomePath, lpath, useTranslations } from "../i18n";
+import LanguageSwitcher from "./LanguageSwitcher.astro";
+
+const locale = Astro.currentLocale ?? getLocaleFromPath(Astro.url.pathname);
+const t = useTranslations(locale);
+const pathname = Astro.url.pathname;
+const isHome = isHomePath(pathname, locale);
+const landingSections = getLandingSections(locale);
+const pageLinks = getPageLinks(locale);
+const reservarCta = getReservarCta(locale);
+const homeHref = lpath(locale, "/");
 ---
 
-<header class="header">
-  <div class="inner">
-    <a class="brand" href="/">
-      <img class="brand__logo" src="/logo.svg" alt="" width="44" height="29" loading="eager" decoding="async" />
-      <span class="brand__text">
-        <span class="brand__name">La Cerámica</span>
-        <span class="brand__loc">Polígono · Barbastro</span>
-      </span>
-    </a>
-    <nav class="nav" aria-label="Principal">
-      <ul>
-        {
-          nav.map((item) => (
-            <li>
-              <a href={item.href}>{item.label}</a>
-            </li>
-          ))
-        }
-      </ul>
-    </nav>
-    <a class="cta" href="/reservar">Reservar</a>
-    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="mobile-nav" data-menu-btn>
-      <span class="sr-only">Abrir menú</span>
-      <span class="menu-btn__bar"></span>
-      <span class="menu-btn__bar"></span>
-    </button>
+<header class="header" data-site-header>
+  <div class="header__bar">
+    <div class="inner">
+      <a class="brand" href={homeHref}>
+        <img class="brand__logo" src="/logo.svg" alt="" width="44" height="29" loading="eager" decoding="async" />
+        <span class="brand__text">
+          <span class="brand__name">La Cerámica</span>
+          <span class="brand__loc">Polígono · Barbastro</span>
+        </span>
+      </a>
+
+      <nav class="nav" aria-label="Principal">
+        <ul class="nav__list" data-nav-list>
+          <li>
+            <a class:list={["nav__link", { "is-active": isHome }]} href={homeHref}>{t("nav.home")}</a>
+          </li>
+
+          <li class="nav__dropdown-wrap">
+            <details class="nav__dropdown" data-nav-dropdown>
+              <summary class="nav__link nav__summary">
+                <span>{t("nav.onSite")}</span>
+                <span class="nav__chev" aria-hidden="true"></span>
+              </summary>
+              <div class="nav__panel">
+                <p class="nav__panel-title">{t("nav.sectionsTitle")}</p>
+                <ul>
+                  {
+                    landingSections.map((item) => (
+                      <li>
+                        <a class="nav__panel-link" href={item.href}>{item.label}</a>
+                      </li>
+                    ))
+                  }
+                </ul>
+              </div>
+            </details>
+          </li>
+
+          {
+            pageLinks
+              .filter((p) => !p.href.includes("/reservar"))
+              .map((item) => (
+                <li>
+                  <a
+                    class:list={["nav__link", { "is-active": isNavActive(item.href, pathname, locale) }]}
+                    href={item.href}
+                  >
+                    {item.label === t("nav.cartaFull") ? t("nav.carta") : item.label}
+                  </a>
+                </li>
+              ))
+          }
+        </ul>
+      </nav>
+
+      <div class="header__actions">
+        <LanguageSwitcher />
+        <a class="cta" href={reservarCta.href}>{reservarCta.label}</a>
+      </div>
+
+      <button
+        class="menu-btn"
+        type="button"
+        aria-expanded="false"
+        aria-controls="mobile-nav"
+        data-menu-btn
+        data-open-label={t("nav.openMenu")}
+        data-close-label={t("nav.closeMenu")}
+      >
+        <span class="sr-only">{t("nav.openMenu")}</span>
+        <span class="menu-btn__bars" aria-hidden="true">
+          <span class="menu-btn__bar"></span>
+          <span class="menu-btn__bar"></span>
+          <span class="menu-btn__bar"></span>
+        </span>
+      </button>
+    </div>
   </div>
+
   <div class="mobile" id="mobile-nav" hidden data-mobile-nav>
-    <nav aria-label="Móvil">
-      <ul>
+    <nav class="mobile__nav" aria-label="Móvil">
+      <LanguageSwitcher variant="mobile" />
+      <ul class="mobile__top">
+        <li>
+          <a class="mobile__link" href={homeHref}>{t("nav.home")}</a>
+        </li>
         {
-          nav.map((item) => (
-            <li>
-              <a href={item.href}>{item.label}</a>
-            </li>
-          ))
+          pageLinks
+            .filter((p) => !p.href.includes("/reservar"))
+            .map((item) => (
+              <li>
+                <a class="mobile__link" href={item.href}>{item.label}</a>
+              </li>
+            ))
         }
       </ul>
-      <a class="cta cta--block" href="/reservar">Reservar mesa</a>
+
+      <details class="mobile__group" open={isHome}>
+        <summary class="mobile__group-trigger">{t("nav.mobileSections")}</summary>
+        <ul class="mobile__group-list">
+          {
+            landingSections.map((item) => (
+              <li>
+                <a class="mobile__sublink" href={item.href}>{item.label}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </details>
+
+      <a class="cta cta--block" href={reservarCta.href}>{t("nav.bookTable")}</a>
     </nav>
   </div>
 </header>
 
 <script>
+  const header = document.querySelector("[data-site-header]");
   const btn = document.querySelector("[data-menu-btn]");
   const panel = document.querySelector("[data-mobile-nav]");
-  if (btn && panel) {
-    btn.addEventListener("click", () => {
-      const open = panel.hasAttribute("hidden");
-      panel.toggleAttribute("hidden", !open);
-      btn.setAttribute("aria-expanded", String(open));
-    });
-    panel.querySelectorAll("a").forEach((a) => {
-      a.addEventListener("click", () => {
-        panel.setAttribute("hidden", "");
-        btn.setAttribute("aria-expanded", "false");
+  const dropdowns = document.querySelectorAll("[data-nav-dropdown]");
+
+  function onScroll() {
+    if (header) header.classList.toggle("is-scrolled", window.scrollY > 24);
+  }
+
+  onScroll();
+  window.addEventListener("scroll", onScroll, { passive: true });
+
+  function setMobileOpen(open) {
+    if (!btn || !panel) return;
+    panel.toggleAttribute("hidden", !open);
+    btn.setAttribute("aria-expanded", String(open));
+    document.body.classList.toggle("nav-open", open);
+    btn.querySelector(".sr-only")!.textContent = open
+      ? btn.getAttribute("data-close-label") || "Close menu"
+      : btn.getAttribute("data-open-label") || "Open menu";
+  }
+
+  btn?.addEventListener("click", () => {
+    setMobileOpen(panel?.hasAttribute("hidden") ?? false);
+  });
+
+  panel?.querySelectorAll("a").forEach((a) => {
+    a.addEventListener("click", () => setMobileOpen(false));
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      setMobileOpen(false);
+      dropdowns.forEach((d) => d.removeAttribute("open"));
+    }
+  });
+
+  dropdowns.forEach((details) => {
+    details.addEventListener("toggle", () => {
+      if (!details.open) return;
+      dropdowns.forEach((other) => {
+        if (other !== details) other.removeAttribute("open");
       });
     });
-  }
+  });
+
+  document.addEventListener("click", (e) => {
+    const target = e.target;
+    if (!(target instanceof Element)) return;
+    if (target.closest("[data-nav-dropdown]") || target.closest("[data-lang-switcher]")) return;
+    dropdowns.forEach((d) => d.removeAttribute("open"));
+  });
 </script>
 
 <style>
@@ -76,32 +193,40 @@ const nav = [
     position: fixed;
     inset: 0 0 auto;
     z-index: 50;
-    background: linear-gradient(to bottom, rgba(27, 27, 27, 0.95), rgba(27, 27, 27, 0.75) 70%, transparent);
-    border-bottom: 1px solid transparent;
-    transition: background 0.35s var(--ease-out), border-color 0.35s;
   }
 
-  .header.is-scrolled {
+  .header__bar {
+    background: linear-gradient(to bottom, rgba(27, 27, 27, 0.95), rgba(27, 27, 27, 0.75) 70%, transparent);
+    border-bottom: 1px solid transparent;
+    transition:
+      background 0.35s var(--ease-out),
+      border-color 0.35s,
+      box-shadow 0.35s;
+  }
+
+  .header.is-scrolled .header__bar {
     background: rgba(27, 27, 27, 0.92);
     backdrop-filter: blur(12px);
     border-bottom-color: var(--border);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
   }
 
   .inner {
     max-width: var(--max);
     margin: 0 auto;
-    padding: 1rem 1.5rem;
+    padding: 0.85rem 1.25rem;
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 0.75rem 1rem;
   }
 
   .brand {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.65rem;
     color: var(--fg);
     flex-shrink: 0;
+    min-width: 0;
   }
 
   .brand__logo {
@@ -121,48 +246,147 @@ const nav = [
 
   .brand__name {
     font-family: var(--font-display);
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 600;
     letter-spacing: 0.02em;
+    white-space: nowrap;
   }
 
   .brand__loc {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     text-transform: uppercase;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.18em;
     color: var(--fg-subtle);
+    white-space: nowrap;
+  }
+
+  .header__actions {
+    display: none;
+    align-items: center;
+    gap: 0.65rem;
+    flex-shrink: 0;
   }
 
   .nav {
-    margin-left: auto;
     display: none;
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
   }
 
-  .nav ul {
+  .nav__list {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
-    gap: 1.75rem;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.25rem;
   }
 
-  .nav a {
-    font-size: 0.8rem;
+  .nav__link,
+  .nav__summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0;
+    font-size: 0.76rem;
     font-weight: 500;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     color: var(--fg-muted);
+    white-space: nowrap;
     transition: color 0.2s;
   }
 
-  .nav a:hover {
+  .nav__link:hover,
+  .nav__summary:hover {
     color: var(--fg);
   }
 
-  .cta {
+  .nav__link.is-active {
+    color: var(--fg);
+  }
+
+  .nav__dropdown {
+    position: relative;
+  }
+
+  .nav__summary {
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .nav__summary::-webkit-details-marker {
     display: none;
-    padding: 0.65rem 1.25rem;
-    font-size: 0.75rem;
+  }
+
+  .nav__chev {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg) translateY(-1px);
+    transition: transform 0.2s var(--ease-out);
+  }
+
+  .nav__dropdown[open] .nav__chev {
+    transform: rotate(-135deg) translateY(1px);
+  }
+
+  .nav__panel {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 15rem;
+    padding: 0.65rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-strong);
+    background: rgba(30, 30, 30, 0.98);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45);
+  }
+
+  .nav__panel-title {
+    margin: 0 0 0.5rem;
+    padding: 0.35rem 0.5rem 0;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .nav__panel ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: min(60vh, 22rem);
+    overflow-y: auto;
+  }
+
+  .nav__panel-link {
+    display: block;
+    padding: 0.5rem 0.65rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--fg-muted);
+    border-radius: 8px;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .nav__panel-link:hover {
+    color: var(--fg);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .cta {
+    flex-shrink: 0;
+    padding: 0.6rem 1.1rem;
+    font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -186,10 +410,10 @@ const nav = [
 
   .menu-btn {
     margin-left: auto;
+    flex-shrink: 0;
     display: flex;
-    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    gap: 6px;
     width: 44px;
     height: 44px;
     padding: 0;
@@ -200,44 +424,129 @@ const nav = [
     color: var(--fg);
   }
 
+  .menu-btn__bars {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 18px;
+  }
+
   .menu-btn__bar {
     display: block;
-    width: 18px;
     height: 2px;
-    margin: 0 auto;
     background: currentColor;
     border-radius: 1px;
+    transition: transform 0.25s var(--ease-out), opacity 0.2s;
+  }
+
+  .menu-btn[aria-expanded="true"] .menu-btn__bar:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .menu-btn[aria-expanded="true"] .menu-btn__bar:nth-child(2) {
+    opacity: 0;
+  }
+
+  .menu-btn[aria-expanded="true"] .menu-btn__bar:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
   }
 
   .mobile {
     border-top: 1px solid var(--border);
-    background: var(--bg);
-    padding: 1rem 1.5rem 1.5rem;
+    background: rgba(27, 27, 27, 0.98);
+    backdrop-filter: blur(14px);
+    max-height: calc(100dvh - 4.5rem);
+    overflow-y: auto;
   }
 
-  .mobile ul {
+  .mobile[hidden] {
+    display: none;
+  }
+
+  .mobile__nav {
+    padding: 1rem 1.25rem 1.5rem;
+  }
+
+  .mobile__nav :global(.lang--mobile) {
+    margin-bottom: 1.25rem;
+  }
+
+  .mobile__top {
     list-style: none;
-    margin: 0;
+    margin: 0 0 0.75rem;
     padding: 0;
   }
 
-  .mobile a {
+  .mobile__link {
     display: block;
     padding: 0.65rem 0;
     font-size: 0.9rem;
     font-weight: 500;
-    border-bottom: 1px solid var(--border);
     color: var(--fg-muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .mobile__link:hover {
+    color: var(--fg);
+  }
+
+  .mobile__group {
+    margin: 0 0 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .mobile__group-trigger {
+    padding: 0.85rem 1rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .mobile__group-trigger::-webkit-details-marker {
+    display: none;
+  }
+
+  .mobile__group-list {
+    list-style: none;
+    margin: 0;
+    padding: 0 0.5rem 0.75rem;
+  }
+
+  .mobile__sublink {
+    display: block;
+    padding: 0.55rem 0.65rem;
+    font-size: 0.9rem;
+    color: var(--fg-muted);
+    border-radius: 8px;
+  }
+
+  .mobile__sublink:hover {
+    color: var(--fg);
+    background: rgba(255, 255, 255, 0.04);
   }
 
   @media (min-width: 960px) {
-    .nav,
-    .cta {
-      display: block;
+    .inner {
+      display: grid;
+      grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 1rem 1.5rem;
+      padding: 0.9rem 1.5rem;
     }
 
-    .cta:not(.cta--block) {
-      display: inline-block;
+    .nav {
+      display: flex;
+    }
+
+    .header__actions {
+      display: flex;
     }
 
     .menu-btn {
@@ -246,6 +555,27 @@ const nav = [
 
     .mobile {
       display: none !important;
+    }
+  }
+
+  @media (min-width: 960px) and (max-width: 1080px) {
+    .brand__loc {
+      display: none;
+    }
+
+    .nav__list {
+      gap: 0.35rem 0.85rem;
+    }
+
+    .nav__link,
+    .nav__summary {
+      font-size: 0.7rem;
+    }
+  }
+
+  @media (max-width: 959px) {
+    .header__actions {
+      display: none;
     }
   }
 </style>

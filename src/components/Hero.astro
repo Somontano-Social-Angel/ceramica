@@ -1,47 +1,55 @@
+---
+import { Image } from "astro:assets";
+import { siteImages } from "../data/images";
+import { lpath, sectionHref, useTranslations } from "../i18n";
+
+const locale = Astro.currentLocale ?? "es";
+const t = useTranslations(locale);
+const hero = siteImages.heroPizza;
+---
+
 <section class="hero" id="inicio" aria-labelledby="hero-title">
   <div class="hero__bg" aria-hidden="true"></div>
   <div class="hero__grid" aria-hidden="true"></div>
   <div class="hero__glow" aria-hidden="true"></div>
   <div class="hero__inner">
     <div class="hero__main">
-      <p class="eyebrow">Bar-restaurante · Barbastro</p>
-      <h1 id="hero-title" class="title">Restaurante La Cerámica</h1>
-      <p class="addr">Polígono Industrial La Cerámica VI, 13 · Barbastro, Huesca</p>
-      <ul class="facts" aria-label="Destacados">
-        <li>Horno de leña</li>
-        <li>Terraza amplia</li>
-        <li>Reserva online</li>
+      <p class="eyebrow">{t("hero.eyebrow")}</p>
+      <h1 id="hero-title" class="title">{t("hero.title")}</h1>
+      <p class="addr">{t("hero.addr")}</p>
+      <ul class="facts" aria-label={t("hero.factsLabel")}>
+        <li>{t("hero.fact1")}</li>
+        <li>{t("hero.fact2")}</li>
+        <li>{t("hero.fact3")}</li>
       </ul>
-      <p class="tagline">Cocina de brasas y horno de leña</p>
-      <p class="lead">
-        Pizzas artesanales, carnes a la brasa y hamburguesas premium.
-      </p>
-      <p class="lead">
-        El equipo de La Cerámica perpetúa tres décadas de tradición local con recetas transmitidas y dominio absoluto
-        del horno de leña. Materia prima impecable, servicio cercano y generoso. Menú ejecutivo diario (13,50€ L-V).
-      </p>
+      <p class="tagline">{t("hero.tagline")}</p>
+      <p class="lead">{t("hero.lead1")}</p>
+      <p class="lead">{t("hero.lead2")}</p>
       <div class="actions">
-        <a class="btn btn--primary" href="/reservar">Reservar mesa</a>
-        <a class="btn btn--ghost" href="#carta">Ver carta</a>
+        <a class="btn btn--primary" href={lpath(locale, "/reservar")}>{t("hero.book")}</a>
+        <a class="btn btn--ghost" href={sectionHref(locale, "carta")}>{t("hero.menu")}</a>
       </div>
     </div>
 
-    <aside class="hero__visual" aria-label="Ambiente del restaurante">
+    <aside class="hero__visual" aria-label={t("hero.visual")}>
       <div class="hero__plate">
-        <img
+        <Image
           class="hero__img"
-          src="https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=960&q=82"
-          alt="Pizza artesanal recién salida del horno, ambiente de mesa"
-          width="640"
-          height="800"
+          src={hero.src}
+          alt={t("hero.imgAlt")}
+          width={hero.width}
+          height={hero.height}
+          widths={[640, 960, 1280]}
+          sizes="(min-width: 900px) 42vw, 88vw"
           loading="eager"
           fetchpriority="high"
           decoding="async"
+          quality={82}
         />
         <div class="hero__plate-shade" aria-hidden="true"></div>
         <div class="hero__plate-meta">
           <img class="hero__mark" src="/logo.svg" alt="" width="120" height="80" loading="eager" decoding="async" />
-          <p class="hero__plate-tag">Brasas · Masa madre · Barbastro</p>
+          <p class="hero__plate-tag">{t("hero.plateTag")}</p>
         </div>
       </div>
     </aside>

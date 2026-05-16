@@ -1,0 +1,210 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { loadCarta } from "../../data/carta";
+import { absoluteUrl } from "../../data/site";
+import { resolveSiteUrl } from "../../data/site-url";
+import { lpath, useTranslations } from "../../i18n";
+import type { Locale } from "../../i18n/types";
+
+const locale = Astro.currentLocale ?? "es";
+const t = useTranslations(locale);
+const carta = loadCarta(locale as Locale);
+const site = resolveSiteUrl(Astro.site);
+const cartaUrl = absoluteUrl(lpath(locale, "/carta"), site);
+const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(cartaUrl)}`;
+---
+
+<Layout
+  title={t("meta.cartaPrintTitle")}
+  description={t("meta.cartaPrintDesc")}
+  canonicalPath="/carta/imprimir"
+  robots="noindex, follow"
+>
+  <main class="print-page">
+    <header class="print-head">
+      <p class="brand">{t("cartaPrint.brand")}</p>
+      <h1>{t("cartaPrint.title")}</h1>
+      <p class="meta">C. Cerámica Industrial VI, 13 · 974 31 22 20 · {cartaUrl.replace(/^https?:\/\//, "")}</p>
+      <div class="qr-block screen-only">
+        <img src={qrUrl} width="160" height="160" alt="Código QR a la carta digital" />
+        <p>{t("cartaPrint.scan")}</p>
+        <button type="button" class="btn-print" onclick="window.print()">{t("cartaPrint.print")}</button>
+        <a class="back" href={lpath(locale, "/carta")}>{t("cartaPrint.back")}</a>
+      </div>
+    </header>
+
+    {
+      carta.categorias.map((cat) => (
+        <section class="cat">
+          <h2>{cat.categoria}</h2>
+          {cat.subcategoria && <p class="sub">{cat.subcategoria}</p>}
+          {cat.nota && <p class="note">{cat.nota}</p>}
+          <ul>
+            {cat.items.map((item) => (
+              <li>
+                <span class="name">
+                  {item.numero && <span class="num">{item.numero} </span>}
+                  <span class="name-main">{item.nombre}</span>
+                  {item.nombreEs && <span class="name-es">({item.nombreEs})</span>}
+                </span>
+                <span class="price">{item.precio}</span>
+                {item.descripcion && <span class="desc">{item.descripcion}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+
+    <footer class="print-foot">
+      <p>{t("cartaPrint.foot")}</p>
+    </footer>
+  </main>
+</Layout>
+
+<style>
+  .print-page {
+    max-width: 48rem;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 3rem;
+    color: #1b1b1b;
+    background: #fff;
+    font-family: system-ui, sans-serif;
+    font-size: 11pt;
+    line-height: 1.4;
+  }
+
+  .print-head {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #1b1b1b;
+  }
+
+  .brand {
+    margin: 0 0 0.25rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0 0 0.35rem;
+    font-size: 1.75rem;
+  }
+
+  .meta {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #444;
+  }
+
+  .qr-block {
+    margin-top: 1.25rem;
+    text-align: center;
+  }
+
+  .qr-block p {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    color: #555;
+  }
+
+  .btn-print {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid #1b1b1b;
+    border-radius: 6px;
+    background: #1b1b1b;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .back {
+    display: block;
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: #333;
+  }
+
+  .cat {
+    margin-bottom: 1.25rem;
+    break-inside: avoid;
+  }
+
+  .cat h2 {
+    margin: 0 0 0.35rem;
+    font-size: 1.1rem;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 0.2rem;
+  }
+
+  .sub,
+  .note {
+    margin: 0 0 0.5rem;
+    font-size: 0.85rem;
+    color: #555;
+  }
+
+  .cat ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .cat li {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.15rem 1rem;
+    padding: 0.35rem 0;
+    border-bottom: 1px dotted #ddd;
+  }
+
+  .name {
+    font-weight: 600;
+  }
+
+  .name-es {
+    display: block;
+    margin-top: 0.1rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #555;
+  }
+
+  .price {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .desc {
+    grid-column: 1 / -1;
+    font-size: 0.85rem;
+    color: #555;
+  }
+
+  .print-foot {
+    margin-top: 2rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #ccc;
+    font-size: 0.8rem;
+    color: #666;
+  }
+
+  @media print {
+    .screen-only {
+      display: none !important;
+    }
+
+    .print-page {
+      padding: 0;
+      max-width: none;
+    }
+
+    .cat {
+      break-inside: avoid;
+    }
+  }
+</style>

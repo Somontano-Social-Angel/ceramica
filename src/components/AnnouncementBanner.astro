@@ -1,0 +1,102 @@
+---
+import { getCollection, render } from "astro:content";
+
+const now = new Date();
+const entries = await getCollection("avisos", ({ data }) => {
+  if (data.hasta && data.hasta < now) return false;
+  return data.destacado;
+});
+
+const sorted = entries.sort((a, b) => b.data.publicado.getTime() - a.data.publicado.getTime());
+const entry = sorted[0];
+if (!entry) return null;
+
+const { Content } = await render(entry);
+const tipoLabel =
+  entry.data.tipo === "menu" ? "Menú del día" : entry.data.tipo === "evento" ? "Evento" : "Aviso";
+---
+
+<aside class="banner" role="status" aria-labelledby="banner-title">
+  <div class="banner__inner">
+    <p class="banner__eyebrow">{tipoLabel}</p>
+    <h2 id="banner-title" class="banner__title">{entry.data.title}</h2>
+    <div class="banner__body">
+      <Content />
+    </div>
+    <a class="banner__cta" href="/reservar">Reservar</a>
+  </div>
+</aside>
+
+<style>
+  .banner {
+    position: relative;
+    z-index: 2;
+    padding: 0.75rem 1.5rem 0;
+    max-width: var(--max);
+    margin: 5.5rem auto 0;
+  }
+
+  @media (min-width: 960px) {
+    .banner {
+      margin-top: 6rem;
+    }
+  }
+
+  .banner__inner {
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-strong);
+    background: linear-gradient(135deg, rgba(255, 140, 70, 0.12), rgba(255, 255, 255, 0.04));
+  }
+
+  .banner__eyebrow {
+    margin: 0 0 0.35rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .banner__title {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .banner__body :global(p) {
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--fg-muted);
+  }
+
+  .banner__body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .banner__body :global(a) {
+    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .banner__cta {
+    display: inline-flex;
+    margin-top: 0.85rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--fg);
+    border-radius: 999px;
+  }
+
+  .banner__cta:hover {
+    color: var(--bg);
+  }
+</style>

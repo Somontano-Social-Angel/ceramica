@@ -2,59 +2,61 @@
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import OfflineNotice from "../components/OfflineNotice.astro";
+import { getReservarClientI18n, useTranslations } from "../i18n";
+
+const locale = Astro.currentLocale ?? "es";
+const t = useTranslations(locale);
+const ri18n = getReservarClientI18n(locale);
+const reservarI18nJson = JSON.stringify(ri18n);
 ---
 
-<Layout title="Reservar | La Cerámica" description="Reserva en el polígono La Cerámica, Barbastro. Elige día, hora y zona: terraza, interior o barra.">
+<Layout
+  title={t("meta.reservarTitle")}
+  description={t("meta.reservarDesc")}
+  canonicalPath="/reservar"
+>
   <Header />
-  <main class="page">
+  <main class="page" id="reservar-app" transition:animate="fade">
     <div class="shell">
+      <OfflineNotice message={t("reservar.offlineNotice")} />
       <header class="page-head">
-        <p class="eyebrow">Reservas</p>
-        <h1 class="h1">Reserva tu mesa</h1>
-        <p class="lead">
-          Elige día y franja; puedes marcar terraza (mascotas), interior o zona barra. Las horas van en
-          <strong>hora de España (Madrid)</strong> y solo verás huecos con margen mínimo respecto a la hora actual.
-        </p>
+        <p class="eyebrow">{t("reservar.eyebrow")}</p>
+        <h1 class="h1">{t("reservar.title")}</h1>
+        <p class="lead">{t("reservar.lead")}</p>
       </header>
 
       <div class="layout">
         <section class="panel" aria-labelledby="cal-title">
-          <h2 id="cal-title" class="h2">1. Fecha y hora</h2>
+          <h2 id="cal-title" class="h2">{t("reservar.step1")}</h2>
           <p class="api-banner" id="api-banner" hidden>
-            No hay conexión con la API de reservas. Arranca el proyecto con <code>npm run dev</code> (Astro + servidor Node
-            en paralelo). El calendario se muestra en modo local; las franjas horarias necesitan la API.
+            {t("reservar.apiBanner")}
           </p>
           <div class="res-cal" id="res-cal" aria-labelledby="cal-picker-label">
-            <p class="lbl res-cal__lbl" id="cal-picker-label">Elige día</p>
+            <p class="lbl res-cal__lbl" id="cal-picker-label">{t("reservar.pickDay")}</p>
             <div class="res-cal__toolbar">
-              <button type="button" class="res-cal__nav" id="cal-prev" aria-label="Mes anterior">
+              <button type="button" class="res-cal__nav" id="cal-prev" aria-label={t("reservar.prevMonth")}>
                 <span class="res-cal__nav-icon" aria-hidden="true">‹</span>
               </button>
               <h3 class="res-cal__month" id="cal-month-label">—</h3>
-              <button type="button" class="res-cal__nav" id="cal-next" aria-label="Mes siguiente">
+              <button type="button" class="res-cal__nav" id="cal-next" aria-label={t("reservar.nextMonth")}>
                 <span class="res-cal__nav-icon" aria-hidden="true">›</span>
               </button>
             </div>
             <div class="res-cal__dow" aria-hidden="true">
-              <span>Lun</span>
-              <span>Mar</span>
-              <span>Mié</span>
-              <span>Jue</span>
-              <span>Vie</span>
-              <span>Sáb</span>
-              <span>Dom</span>
+              {ri18n.dow.map((d) => <span>{d}</span>)}
             </div>
             <div class="res-cal__grid" id="cal-grid" role="grid" aria-labelledby="cal-picker-label"></div>
             <input type="hidden" id="date-input" autocomplete="off" />
           </div>
           <div class="clock" id="clock-line" hidden>
             <div class="clock__row">
-              <span class="clock__label">Hora en España</span>
+              <span class="clock__label">{t("reservar.spainTime")}</span>
               <time class="clock__time" id="clock-time" datetime=""></time>
             </div>
             <p class="clock__hint" id="clock-hint"></p>
           </div>
-          <p class="hint" id="closed-msg" hidden>Ese día permanecemos cerrados o la fecha ya pasó. Elige otra fecha.</p>
+          <p class="hint" id="closed-msg" hidden>{t("reservar.closed")}</p>
           <p class="info-msg" id="no-slots-msg" hidden></p>
           <div class="slots-wrap" id="slots-wrap" hidden>
             <div class="slot-groups" id="slots" aria-live="polite"></div>
@@ -62,36 +64,39 @@ import Footer from "../components/Footer.astro";
         </section>
 
         <section class="panel" aria-labelledby="form-title">
-          <h2 id="form-title" class="h2">2. Datos</h2>
+          <h2 id="form-title" class="h2">{t("reservar.step2")}</h2>
           <form class="form" id="res-form">
             <input type="hidden" name="time" id="time-hidden" />
-            <label class="lbl"> Hora elegida <span class="picked" id="picked-time">—</span> </label>
-            <label class="lbl" for="party">Personas</label>
+            <label class="lbl"> {t("reservar.pickedTime")} <span class="picked" id="picked-time">—</span> </label>
+            <label class="lbl" for="party">{t("reservar.party")}</label>
             <input class="inp" type="number" id="party" name="partySize" min="1" max="20" value="2" required />
 
-            <label class="lbl" for="name">Nombre</label>
+            <label class="lbl" for="name">{t("reservar.name")}</label>
             <input class="inp" type="text" id="name" name="name" autocomplete="name" required maxlength="80" />
 
-            <label class="lbl" for="email">Email</label>
+            <label class="lbl" for="email">{t("reservar.email")}</label>
             <input class="inp" type="email" id="email" name="email" autocomplete="email" required />
 
-            <label class="lbl" for="phone">Teléfono</label>
+            <label class="lbl" for="phone">{t("reservar.phone")}</label>
             <input class="inp" type="tel" id="phone" name="phone" autocomplete="tel" required />
 
             <fieldset class="fs">
-              <legend class="lbl">Zona preferida (opcional)</legend>
-              <label class="chk"><input type="checkbox" name="svc" value="Terraza" /> Terraza (mascotas)</label>
-              <label class="chk"><input type="checkbox" name="svc" value="Interior" /> Interior</label>
-              <label class="chk"><input type="checkbox" name="svc" value="Zona barra" /> Zona barra</label>
+              <legend class="lbl">{t("reservar.zone")}</legend>
+              <label class="chk"><input type="checkbox" name="svc" value="Terraza" /> {t("reservar.terrace")}</label>
+              <label class="chk"><input type="checkbox" name="svc" value="Interior" /> {t("reservar.interior")}</label>
+              <label class="chk"><input type="checkbox" name="svc" value="Zona barra" /> {t("reservar.bar")}</label>
             </fieldset>
 
-            <label class="lbl" for="notes">Notas</label>
-            <textarea class="inp ta" id="notes" name="notes" maxlength="500" rows="3" placeholder="Alergias, celebración…"></textarea>
+            <label class="lbl" for="notes">{t("reservar.notes")}</label>
+            <textarea class="inp ta" id="notes" name="notes" maxlength="500" rows="3" placeholder={t("reservar.notesPh")}></textarea>
 
             <p class="err" id="form-err" hidden></p>
             <p class="ok" id="form-ok" hidden></p>
+            <p class="ok-actions" id="form-ok-actions" hidden>
+              <button type="button" class="ics-btn" id="ics-btn">{t("reservar.ics")}</button>
+            </p>
 
-            <button class="submit" type="submit" id="submit-btn">Enviar reserva</button>
+            <button class="submit" type="submit" id="submit-btn">{t("reservar.submit")}</button>
           </form>
         </section>
       </div>
@@ -104,27 +109,86 @@ import Footer from "../components/Footer.astro";
   <Footer />
 </Layout>
 
-<script>
-  const $ = (s, r = document) => r.querySelector(s);
-  const dateInput = /** @type {HTMLInputElement} */ ($("#date-input"));
-  const calGrid = /** @type {HTMLDivElement} */ ($("#cal-grid"));
-  const calMonthLabel = /** @type {HTMLHeadingElement} */ ($("#cal-month-label"));
-  const calPrev = /** @type {HTMLButtonElement} */ ($("#cal-prev"));
-  const calNext = /** @type {HTMLButtonElement} */ ($("#cal-next"));
-  const apiBanner = /** @type {HTMLParagraphElement | null} */ (document.getElementById("api-banner"));
-  const slotsEl = /** @type {HTMLDivElement} */ ($("#slots"));
-  const slotsWrap = /** @type {HTMLDivElement} */ ($("#slots-wrap"));
-  const closedMsg = /** @type {HTMLParagraphElement} */ ($("#closed-msg"));
-  const noSlotsMsg = /** @type {HTMLParagraphElement} */ ($("#no-slots-msg"));
-  const clockLine = /** @type {HTMLDivElement} */ ($("#clock-line"));
-  const clockTime = /** @type {HTMLTimeElement} */ ($("#clock-time"));
-  const clockHint = /** @type {HTMLParagraphElement} */ ($("#clock-hint"));
-  const timeHidden = /** @type {HTMLInputElement} */ ($("#time-hidden"));
-  const pickedTime = /** @type {HTMLSpanElement} */ ($("#picked-time"));
-  const form = /** @type {HTMLFormElement} */ ($("#res-form"));
-  const formErr = /** @type {HTMLParagraphElement} */ ($("#form-err"));
-  const formOk = /** @type {HTMLParagraphElement} */ ($("#form-ok"));
-  const submitBtn = /** @type {HTMLButtonElement} */ ($("#submit-btn"));
+<script define:vars={{ reservarI18nJson }} data-astro-rerun>
+  const i18n = JSON.parse(reservarI18nJson);
+
+  /** Referencias al DOM actuales (se refrescan en cada visita por View Transitions). */
+  /** @type {ReturnType<typeof syncDom> | null} */
+  let dom = null;
+
+  function syncDom() {
+    const root = document.getElementById("reservar-app");
+    if (!root) return null;
+    const dateInput = /** @type {HTMLInputElement | null} */ (root.querySelector("#date-input"));
+    const calGrid = /** @type {HTMLDivElement | null} */ (root.querySelector("#cal-grid"));
+    const calMonthLabel = /** @type {HTMLHeadingElement | null} */ (root.querySelector("#cal-month-label"));
+    const calPrev = /** @type {HTMLButtonElement | null} */ (root.querySelector("#cal-prev"));
+    const calNext = /** @type {HTMLButtonElement | null} */ (root.querySelector("#cal-next"));
+    const slotsEl = root.querySelector("#slots");
+    const slotsWrap = root.querySelector("#slots-wrap");
+    const form = root.querySelector("#res-form");
+    const submitBtn = root.querySelector("#submit-btn");
+    const closedMsg = root.querySelector("#closed-msg");
+    const noSlotsMsg = root.querySelector("#no-slots-msg");
+    const clockLine = root.querySelector("#clock-line");
+    const clockTime = root.querySelector("#clock-time");
+    const clockHint = root.querySelector("#clock-hint");
+    const timeHidden = root.querySelector("#time-hidden");
+    const pickedTime = root.querySelector("#picked-time");
+    const formErr = root.querySelector("#form-err");
+    const formOk = root.querySelector("#form-ok");
+    const formOkActions = root.querySelector("#form-ok-actions");
+    if (
+      !dateInput ||
+      !calGrid ||
+      !calMonthLabel ||
+      !calPrev ||
+      !calNext ||
+      !slotsEl ||
+      !slotsWrap ||
+      !form ||
+      !submitBtn ||
+      !closedMsg ||
+      !noSlotsMsg ||
+      !clockLine ||
+      !clockTime ||
+      !clockHint ||
+      !timeHidden ||
+      !pickedTime ||
+      !formErr ||
+      !formOk ||
+      !formOkActions
+    ) {
+      return null;
+    }
+    return {
+      root,
+      dateInput,
+      calGrid,
+      calMonthLabel,
+      calPrev,
+      calNext,
+      apiBanner: /** @type {HTMLParagraphElement | null} */ (root.querySelector("#api-banner")),
+      slotsEl: /** @type {HTMLDivElement} */ (slotsEl),
+      slotsWrap: /** @type {HTMLDivElement} */ (slotsWrap),
+      closedMsg: /** @type {HTMLParagraphElement} */ (closedMsg),
+      noSlotsMsg: /** @type {HTMLParagraphElement} */ (noSlotsMsg),
+      clockLine: /** @type {HTMLDivElement} */ (clockLine),
+      clockTime: /** @type {HTMLTimeElement} */ (clockTime),
+      clockHint: /** @type {HTMLParagraphElement} */ (clockHint),
+      timeHidden: /** @type {HTMLInputElement} */ (timeHidden),
+      pickedTime: /** @type {HTMLSpanElement} */ (pickedTime),
+      form: /** @type {HTMLFormElement} */ (form),
+      formErr: /** @type {HTMLParagraphElement} */ (formErr),
+      formOk: /** @type {HTMLParagraphElement} */ (formOk),
+      formOkActions: /** @type {HTMLParagraphElement} */ (formOkActions),
+      icsBtn: /** @type {HTMLButtonElement | null} */ (root.querySelector("#ics-btn")),
+      submitBtn: /** @type {HTMLButtonElement} */ (submitBtn),
+    };
+  }
+
+  /** @type {{ id: string; date: string; time: string; partySize: number; name: string; notes: string; services: string[] } | null} */
+  let lastReservation = null;
 
   let selectedTime = "";
   /** @type {string} */
@@ -172,6 +236,20 @@ import Footer from "../components/Footer.astro";
     return Math.round((Date.UTC(y1, m1 - 1, d1) - Date.UTC(y2, m2 - 1, d2)) / 86400000);
   }
 
+  /** Primer día no domingo ≥ today (sin API). */
+  function suggestedDateClient(today) {
+    let d = today;
+    for (let i = 0; i < 14; i++) {
+      if (madridWeekday(d) !== 0 && d >= today) return d;
+      d = addDaysISO(d, 1);
+    }
+    return today;
+  }
+
+  function isReservarPage() {
+    return location.pathname.includes("/reservar");
+  }
+
   function daysInMonthHuman(y, m) {
     return new Date(y, m, 0).getDate();
   }
@@ -193,50 +271,43 @@ import Footer from "../components/Footer.astro";
     return { leadingEmpty, days };
   }
 
-  const MESES = [
-    "enero",
-    "febrero",
-    "marzo",
-    "abril",
-    "mayo",
-    "junio",
-    "julio",
-    "agosto",
-    "septiembre",
-    "octubre",
-    "noviembre",
-    "diciembre",
-  ];
+  const MESES = i18n.months;
 
   function monthKey(y, m) {
     return y * 12 + (m - 1);
   }
 
+  function requireDom() {
+    dom = syncDom();
+    return dom;
+  }
+
   function syncViewFromInput() {
-    const v = dateInput.value;
+    if (!dom) return;
+    const v = dom.dateInput.value;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return;
     viewYear = parseInt(v.slice(0, 4), 10);
     viewMonth = parseInt(v.slice(5, 7), 10);
   }
 
   function updateNavDisabled() {
-    if (!metaToday || !metaMaxBookable || !calPrev || !calNext) return;
+    if (!dom || !metaToday || !metaMaxBookable) return;
     const viewK = monthKey(viewYear, viewMonth);
     const minK = monthKey(parseInt(metaToday.slice(0, 4), 10), parseInt(metaToday.slice(5, 7), 10));
     const maxK = monthKey(parseInt(metaMaxBookable.slice(0, 4), 10), parseInt(metaMaxBookable.slice(5, 7), 10));
-    calPrev.disabled = viewK <= minK;
-    calNext.disabled = viewK >= maxK;
+    dom.calPrev.disabled = viewK <= minK;
+    dom.calNext.disabled = viewK >= maxK;
   }
 
   async function renderCalendar() {
-    if (!calGrid || !calMonthLabel) return;
+    if (!requireDom()) return;
     if (!viewYear || !viewMonth) {
       const t = metaToday || madridDateStringClient();
       viewYear = parseInt(t.slice(0, 4), 10);
       viewMonth = parseInt(t.slice(5, 7), 10);
     }
     updateNavDisabled();
-    calMonthLabel.textContent = `${MESES[viewMonth - 1]} ${viewYear}`;
+    dom.calMonthLabel.textContent = `${MESES[viewMonth - 1]} ${viewYear}`;
     let pack = null;
     try {
       const r = await fetch(`/api/calendar-month?year=${viewYear}&month=${viewMonth}`);
@@ -250,71 +321,47 @@ import Footer from "../components/Footer.astro";
     if (!pack) {
       pack = buildLocalMonthPack(viewYear, viewMonth);
     }
-    calGrid.innerHTML = "";
+    dom.calGrid.innerHTML = "";
     for (let i = 0; i < pack.leadingEmpty; i++) {
       const pad = document.createElement("div");
       pad.className = "res-cal__pad";
       pad.setAttribute("aria-hidden", "true");
-      calGrid.appendChild(pad);
+      dom.calGrid.appendChild(pad);
     }
     for (const day of pack.days) {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "res-cal__day";
       b.dataset.date = day.date;
-      const dom = parseInt(day.date.slice(8, 10), 10);
-      b.textContent = String(dom);
+      const dayNum = parseInt(day.date.slice(8, 10), 10);
+      b.textContent = String(dayNum);
       if (day.disabled) {
         b.disabled = true;
         b.classList.add("res-cal__day--off");
         if (day.closed) b.classList.add("res-cal__day--closed");
-        b.title = day.past ? "Fecha pasada" : day.tooFar ? "Fuera del plazo de reserva" : "Cerrado";
+        b.title = day.past ? i18n.calendarPast : day.tooFar ? i18n.calendarTooFar : i18n.calendarClosed;
       } else {
-        b.title = "Elegir este día";
+        b.title = i18n.calendarPick;
       }
       if (day.date === metaToday) b.classList.add("res-cal__day--today");
-      if (day.date === dateInput.value && !day.disabled) b.classList.add("res-cal__day--picked");
+      if (day.date === dom.dateInput.value && !day.disabled) b.classList.add("res-cal__day--picked");
       b.addEventListener("click", () => {
         if (day.disabled) return;
-        dateInput.value = day.date;
+        if (!requireDom()) return;
+        dom.dateInput.value = day.date;
         syncViewFromInput();
         renderCalendar().then(() => {
           loadSlots();
           armPoll();
         });
       });
-      calGrid.appendChild(b);
+      dom.calGrid.appendChild(b);
     }
   }
 
-  if (calPrev) {
-    calPrev.addEventListener("click", async () => {
-      if (calPrev.disabled) return;
-      if (viewMonth <= 1) {
-        viewYear -= 1;
-        viewMonth = 12;
-      } else {
-        viewMonth -= 1;
-      }
-      await renderCalendar();
-    });
-  }
-
-  if (calNext) {
-    calNext.addEventListener("click", async () => {
-      if (calNext.disabled) return;
-      if (viewMonth >= 12) {
-        viewYear += 1;
-        viewMonth = 1;
-      } else {
-        viewMonth += 1;
-      }
-      await renderCalendar();
-    });
-  }
-
   async function loadMeta() {
-    if (apiBanner) apiBanner.hidden = true;
+    if (!requireDom()) return;
+    if (dom.apiBanner) dom.apiBanner.hidden = true;
     try {
       const r = await fetch("/api/meta");
       const j = r.ok ? await r.json() : null;
@@ -322,43 +369,41 @@ import Footer from "../components/Footer.astro";
       metaToday = j.today;
       metaMaxBookable = j.maxBookableDate || addDaysISO(j.today, Number(j.maxBookingDaysAhead ?? 120));
       metaMaxAhead = Number(j.maxBookingDaysAhead ?? 120);
-      if (!dateInput.value) dateInput.value = j.today;
+      dom.dateInput.value = j.suggestedDate || j.today;
       syncViewFromInput();
-      if (j?.nowMadrid && clockTime && clockHint) {
-        clockTime.textContent = j.nowMadrid;
-        clockTime.setAttribute("datetime", new Date().toISOString());
+      if (j?.nowMadrid) {
+        dom.clockTime.textContent = j.nowMadrid;
+        dom.clockTime.setAttribute("datetime", new Date().toISOString());
         const lead = Number(j.minLeadMinutes ?? 30);
-        clockHint.textContent = `Mismo día: solo franjas con al menos ${lead} minutos desde esta hora.`;
-        clockLine.hidden = false;
+        dom.clockHint.textContent = i18n.clockHintLead.replace("{lead}", String(lead));
+        dom.clockLine.hidden = false;
       }
     } catch {
       metaToday = madridDateStringClient();
       metaMaxAhead = 120;
       metaMaxBookable = addDaysISO(metaToday, metaMaxAhead);
-      if (!dateInput.value) dateInput.value = metaToday;
+      dom.dateInput.value = suggestedDateClient(metaToday);
       syncViewFromInput();
-      if (apiBanner) apiBanner.hidden = false;
-      if (clockTime && clockHint && clockLine) {
-        clockTime.textContent = new Intl.DateTimeFormat("es-ES", {
-          timeZone: "Europe/Madrid",
-          dateStyle: "medium",
-          timeStyle: "short",
-        }).format(new Date());
-        clockHint.textContent =
-          "Sin API no se pueden comprobar franjas reales. Arranca `npm run dev` para ver horas y guardar reservas.";
-        clockLine.hidden = false;
-      }
+      if (dom.apiBanner) dom.apiBanner.hidden = false;
+      dom.clockTime.textContent = new Intl.DateTimeFormat("es-ES", {
+        timeZone: "Europe/Madrid",
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date());
+      dom.clockHint.textContent = i18n.clockHintNoApi;
+      dom.clockLine.hidden = false;
     }
   }
 
   function setPicked(t) {
+    if (!dom) return;
     selectedTime = t;
-    timeHidden.value = t;
+    dom.timeHidden.value = t;
     if (t) {
       const [hh, mm] = t.split(":");
-      pickedTime.innerHTML = `<span class="picked__big">${hh}<span class="picked__sep">:</span>${mm}</span>`;
+      dom.pickedTime.innerHTML = `<span class="picked__big">${hh}<span class="picked__sep">:</span>${mm}</span>`;
     } else {
-      pickedTime.textContent = "—";
+      dom.pickedTime.textContent = "—";
     }
   }
 
@@ -370,9 +415,14 @@ import Footer from "../components/Footer.astro";
     b.setAttribute("aria-pressed", "false");
     b.innerHTML = `<span class="slot__time">${t}</span>`;
     b.disabled = full;
-    b.title = full ? "Aforo completo en esta franja" : cov > 0 ? `${cov}/${max} comensales en esta franja` : "Disponible";
+    b.title = full
+      ? i18n.slotFull
+      : cov > 0
+        ? i18n.slotCovers.replace("{cov}", String(cov)).replace("{max}", String(max))
+        : i18n.slotAvail;
     b.addEventListener("click", () => {
-      slotsEl.querySelectorAll(".slot").forEach((x) => {
+      if (!dom) return;
+      dom.slotsEl.querySelectorAll(".slot").forEach((x) => {
         x.classList.remove("slot--on");
         x.setAttribute("aria-pressed", "false");
       });
@@ -392,43 +442,69 @@ import Footer from "../components/Footer.astro";
     return { day, eve };
   }
 
-  async function loadSlots() {
-    formErr.hidden = true;
-    closedMsg.hidden = true;
-    noSlotsMsg.hidden = true;
-    slotsWrap.hidden = true;
-    slotsEl.innerHTML = "";
+  async function loadSlots(allowSuggest = true) {
+    if (!requireDom()) return;
+    dom.formErr.hidden = true;
+    dom.closedMsg.hidden = true;
+    dom.noSlotsMsg.hidden = true;
+    dom.slotsWrap.hidden = true;
+    dom.slotsEl.innerHTML = "";
     setPicked("");
-    const d = dateInput.value;
-    if (!d) return;
-    const r = await fetch(`/api/slots?date=${encodeURIComponent(d)}`);
-    if (!r.ok) {
-      noSlotsMsg.textContent =
-        "No se pudieron cargar las franjas. ¿Está la API en marcha? Usa `npm run dev` (Astro + Node) o `npm run dev:api`.";
-      noSlotsMsg.hidden = false;
+    const d = dom.dateInput.value;
+    if (!d) {
+      dom.noSlotsMsg.textContent = i18n.pickDay;
+      dom.noSlotsMsg.hidden = false;
       return;
     }
-    const j = await r.json();
-    if (!j.ok) return;
-
-    if (j.nowMadrid) clockTime.textContent = j.nowMadrid;
-    if (j.minLeadMinutes != null && clockHint) {
-      clockHint.textContent = `Mismo día: solo franjas con al menos ${j.minLeadMinutes} minutos desde esta hora.`;
+    let j;
+    try {
+      const r = await fetch(`/api/slots?date=${encodeURIComponent(d)}`);
+      if (!r.ok) {
+        dom.noSlotsMsg.textContent = i18n.slotsLoad;
+        dom.noSlotsMsg.hidden = false;
+        return;
+      }
+      j = await r.json();
+    } catch {
+      dom.noSlotsMsg.textContent = i18n.slotsLoad;
+      dom.noSlotsMsg.hidden = false;
+      return;
     }
-    clockLine.hidden = false;
+    if (!j?.ok) {
+      dom.noSlotsMsg.textContent = j?.error || i18n.slotsLoad;
+      dom.noSlotsMsg.hidden = false;
+      return;
+    }
+
+    if (j.nowMadrid) dom.clockTime.textContent = j.nowMadrid;
+    if (j.minLeadMinutes != null) {
+      dom.clockHint.textContent = i18n.clockHintLead.replace("{lead}", String(j.minLeadMinutes));
+    }
+    dom.clockLine.hidden = false;
 
     if (j.closed) {
-      closedMsg.hidden = false;
+      if (allowSuggest && j.suggestedDate && j.suggestedDate !== d) {
+        dom.dateInput.value = j.suggestedDate;
+        syncViewFromInput();
+        await renderCalendar();
+        return loadSlots(false);
+      }
+      dom.closedMsg.hidden = false;
       return;
     }
     if (j.noSlotsLeft || !j.slots?.length) {
-      noSlotsMsg.textContent =
-        "Para este día ya no quedan franjas disponibles con el margen mínimo desde ahora (hora España). Prueba otro día u otra hora más tarde.";
-      noSlotsMsg.hidden = false;
+      if (allowSuggest && j.suggestedDate && j.suggestedDate !== d) {
+        dom.dateInput.value = j.suggestedDate;
+        syncViewFromInput();
+        await renderCalendar();
+        return loadSlots(false);
+      }
+      dom.noSlotsMsg.textContent = i18n.noSlots;
+      dom.noSlotsMsg.hidden = false;
       return;
     }
 
-    slotsWrap.hidden = false;
+    dom.slotsWrap.hidden = false;
     const booked = j.bookedCovers ?? {};
     const max = j.maxCoversPerSlot ?? 40;
     const { day, eve } = splitDayParts(j.slots);
@@ -449,11 +525,11 @@ import Footer from "../components/Footer.astro";
       }
       grp.appendChild(h);
       grp.appendChild(grid);
-      slotsEl.appendChild(grp);
+      dom.slotsEl.appendChild(grp);
     }
 
-    appendGroup("Mañana y mediodía", day);
-    appendGroup("Cena", eve);
+    appendGroup(i18n.morning, day);
+    appendGroup(i18n.evening, eve);
   }
 
   /** @type {ReturnType<typeof setInterval> | null} */
@@ -461,66 +537,146 @@ import Footer from "../components/Footer.astro";
   function armPoll() {
     if (pollId) clearInterval(pollId);
     pollId = null;
-    if (metaToday && dateInput.value === metaToday) {
+    if (dom && metaToday && dom.dateInput.value === metaToday) {
       pollId = setInterval(loadSlots, 60_000);
     }
   }
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    formErr.hidden = true;
-    formOk.hidden = true;
-    if (!selectedTime) {
-      formErr.textContent = "Selecciona una hora.";
-      formErr.hidden = false;
-      return;
-    }
-    const svc = [...form.querySelectorAll('input[name="svc"]:checked')].map((x) => /** @type {HTMLInputElement} */ (x).value);
-    const body = {
-      date: dateInput.value,
-      time: selectedTime,
-      partySize: Number($("#party").value),
-      name: /** @type {HTMLInputElement} */ ($("#name")).value.trim(),
-      email: /** @type {HTMLInputElement} */ ($("#email")).value.trim(),
-      phone: /** @type {HTMLInputElement} */ ($("#phone")).value.trim(),
-      notes: /** @type {HTMLTextAreaElement} */ ($("#notes")).value.trim(),
-      services: svc,
-    };
-    submitBtn.disabled = true;
+  async function bootstrapReservar() {
     try {
-      const r = await fetch("/api/reservations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error || "Error al reservar");
-      formOk.textContent = `Reserva registrada (ref. ${j.id}). Revisa tu correo.`;
-      formOk.hidden = false;
-      form.reset();
-      setPicked("");
-      dateInput.value = metaToday;
-      syncViewFromInput();
+      if (!requireDom()) {
+        requestAnimationFrame(() => bootstrapReservar());
+        return;
+      }
+      await loadMeta();
       await renderCalendar();
       await loadSlots();
       armPoll();
     } catch (err) {
-      formErr.textContent = err instanceof Error ? err.message : "Error";
-      formErr.hidden = false;
-    } finally {
-      submitBtn.disabled = false;
+      console.error("[reservar] bootstrap:", err);
     }
-  });
+  }
 
-  if (!dateInput || !calGrid || !calPrev || !calNext || !calMonthLabel) {
-    console.error("[reservar] Faltan nodos del calendario en el DOM.");
-  } else {
-    loadMeta().then(async () => {
-      await renderCalendar();
-      await loadSlots();
-      armPoll();
+  function setupReservarUi() {
+    const win = /** @type {Window & { __reservarUiBound?: boolean }} */ (window);
+    if (win.__reservarUiBound) return;
+    win.__reservarUiBound = true;
+
+    document.addEventListener("click", async (e) => {
+      if (!isReservarPage()) return;
+      const t = e.target;
+      if (!(t instanceof Element)) return;
+
+      if (t.closest("#cal-prev")) {
+        if (!requireDom() || dom.calPrev.disabled) return;
+        if (viewMonth <= 1) {
+          viewYear -= 1;
+          viewMonth = 12;
+        } else {
+          viewMonth -= 1;
+        }
+        await renderCalendar();
+        return;
+      }
+      if (t.closest("#cal-next")) {
+        if (!requireDom() || dom.calNext.disabled) return;
+        if (viewMonth >= 12) {
+          viewYear += 1;
+          viewMonth = 1;
+        } else {
+          viewMonth += 1;
+        }
+        await renderCalendar();
+      }
+    });
+
+    document.addEventListener("submit", async (e) => {
+      if (!isReservarPage()) return;
+      const formEl = e.target;
+      if (!(formEl instanceof HTMLFormElement) || formEl.id !== "res-form") return;
+      e.preventDefault();
+      if (!requireDom()) return;
+      dom.formErr.hidden = true;
+      dom.formOk.hidden = true;
+      dom.formOkActions.hidden = true;
+      if (!selectedTime) {
+        dom.formErr.textContent = i18n.pickTime;
+        dom.formErr.hidden = false;
+        return;
+      }
+      const svc = [...formEl.querySelectorAll('input[name="svc"]:checked')].map(
+        (x) => /** @type {HTMLInputElement} */ (x).value,
+      );
+      const body = {
+        date: dom.dateInput.value,
+        time: selectedTime,
+        partySize: Number(/** @type {HTMLInputElement} */ (dom.root.querySelector("#party")).value),
+        name: /** @type {HTMLInputElement} */ (dom.root.querySelector("#name")).value.trim(),
+        email: /** @type {HTMLInputElement} */ (dom.root.querySelector("#email")).value.trim(),
+        phone: /** @type {HTMLInputElement} */ (dom.root.querySelector("#phone")).value.trim(),
+        notes: /** @type {HTMLTextAreaElement} */ (dom.root.querySelector("#notes")).value.trim(),
+        services: svc,
+      };
+      dom.submitBtn.disabled = true;
+      try {
+        const r = await fetch("/api/reservations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || i18n.submitError);
+        lastReservation = {
+          id: j.id,
+          date: body.date,
+          time: body.time,
+          partySize: body.partySize,
+          name: body.name,
+          notes: body.notes,
+          services: body.services,
+        };
+        dom.formOk.textContent = i18n.ok.replace("{id}", j.id);
+        dom.formOk.hidden = false;
+        dom.formOkActions.hidden = false;
+        formEl.reset();
+        setPicked("");
+        try {
+          const mr = await fetch("/api/meta");
+          const mj = mr.ok ? await mr.json() : null;
+          dom.dateInput.value = mj?.suggestedDate || mj?.today || metaToday;
+        } catch {
+          dom.dateInput.value = suggestedDateClient(metaToday || madridDateStringClient());
+        }
+        syncViewFromInput();
+        await renderCalendar();
+        await loadSlots();
+        armPoll();
+      } catch (err) {
+        dom.formErr.textContent = err instanceof Error ? err.message : i18n.genericError;
+        dom.formErr.hidden = false;
+      } finally {
+        dom.submitBtn.disabled = false;
+      }
+    });
+
+    document.addEventListener("click", async (e) => {
+      if (!isReservarPage()) return;
+      const t = e.target;
+      if (!(t instanceof Element)) return;
+      if (t.closest("#ics-btn") && lastReservation) {
+        const { buildReservationIcs, downloadIcs } = await import("../utils/ics");
+        const content = buildReservationIcs(lastReservation);
+        downloadIcs(content, `reserva-la-ceramica-${lastReservation.id}.ics`);
+      }
+    });
+
+    document.addEventListener("astro:page-load", () => {
+      if (isReservarPage()) bootstrapReservar();
     });
   }
+
+  setupReservarUi();
+  if (isReservarPage()) bootstrapReservar();
 </script>
 
 <style>
@@ -994,6 +1150,28 @@ import Footer from "../components/Footer.astro";
     color: #86efac;
     font-size: 0.9rem;
     margin: 0 0 0.75rem;
+  }
+
+  .ok-actions {
+    margin: 0 0 1rem;
+  }
+
+  .ics-btn {
+    padding: 0.65rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--fg);
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .ics-btn:hover {
+    border-color: var(--fg);
+    background: rgba(255, 255, 255, 0.04);
   }
 
   .submit {

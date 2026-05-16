@@ -1,55 +1,57 @@
+---
+import { Image } from "astro:assets";
+import { siteImages } from "../data/images";
+import { lpath, useTranslations } from "../i18n";
+
+const locale = Astro.currentLocale ?? "es";
+const t = useTranslations(locale);
+const shot = siteImages.sectionCarta;
+---
+
 <section class="section" id="carta" aria-labelledby="carta-title">
   <div class="wrap">
     <div class="intro">
       <div class="intro__text">
-        <p class="eyebrow">Carta</p>
-        <h2 id="carta-title" class="h2">Brasa, smash y lo que te apetezca</h2>
-        <p class="p">
-          La carta gira en torno a la <strong class="strong">pizza al horno de leña</strong> y las
-          <strong class="strong">hamburguesas</strong>, con opciones para compartir, picar o ir a lo grande. Si tienes
-          <strong class="strong">alergias o intolerancias</strong>, dímelo al pedir o al reservar: estamos comprometidos
-          con el cumplimiento y te orientamos con claridad.
-        </p>
-        <a class="carta-cta" href="/carta">Ver carta interactiva</a>
+        <p class="eyebrow">{t("cartaSection.eyebrow")}</p>
+        <h2 id="carta-title" class="h2">{t("cartaSection.title")}</h2>
+        <p class="p">{t("cartaSection.p")}</p>
+        <a class="carta-cta" href={lpath(locale, "/carta")}>{t("cartaSection.cta")}</a>
       </div>
       <figure class="intro__shot">
-        <img
+        <Image
           class="intro__img"
-          src="https://images.unsplash.com/photo-1568904223864-a4b2bfe4d539?auto=format&fit=crop&w=880&q=82"
-          alt="Hamburguesa jugosa y pan tostado, ambiente de carta"
-          width="440"
-          height="520"
+          src={shot.src}
+          alt={t("cartaSection.imgAlt")}
+          width={shot.width}
+          height={shot.height}
+          widths={[440, 880]}
+          sizes="(min-width: 900px) 440px, 90vw"
           loading="lazy"
           decoding="async"
+          quality={82}
         />
-        <figcaption class="intro__cap">Sustituye por foto propia del local cuando la tengas.</figcaption>
+        <figcaption class="intro__cap">{t("cartaSection.cap")}</figcaption>
       </figure>
     </div>
     <div class="cols">
       <div class="panel">
-        <h3 class="h3">Pizzas & entrantes</h3>
+        <h3 class="h3">{t("cartaSection.col1t")}</h3>
         <ul>
-          <li>Pizzas redondas y al corte, con masas trabajadas y topping sin recato</li>
-          <li>Para picar: croquetas, patatas bravas, ensaladas… según temporada</li>
-          <li>Pregunta por opciones sin gluten u otros alérgenos — lo vemos en sala</li>
+          <li>{t("cartaSection.col1a")}</li>
+          <li>{t("cartaSection.col1b")}</li>
+          <li>{t("cartaSection.col1c")}</li>
         </ul>
       </div>
       <div class="panel">
-        <h3 class="h3">Hamburguesas & carnaza</h3>
+        <h3 class="h3">{t("cartaSection.col2t")}</h3>
         <ul>
-          <li>Smash burgers, dobles y combinaciones con queso fundido y salsas caseras</li>
-          <li><strong class="strong">La Reto</strong>: reto de tamaño XL; si la bajas en menos de 30 minutos, gratis la burger y lo que bebas en el reto</li>
-          <li>Extras y guarniciones para rematar el festín</li>
+          <li>{t("cartaSection.col2a")}</li>
+          <li>{t("cartaSection.col2b")}</li>
+          <li>{t("cartaSection.col2c")}</li>
         </ul>
       </div>
       <div class="panel panel--highlight">
-        <h3 class="h3">Bebida & plan</h3>
-        <p class="panel__note">
-          Cervezas, refrescos, vinos y combinados para acompañar el partido: tenemos fútbol en pantalla y un equipo
-          que te mira a los ojos cuando pides la cuenta. Pide carta completa en barra o mesa.
-        </p>
-        <p class="price">La Reto</p>
-        <p class="price-hint">Consulta en sala condiciones del reto y disponibilidad.</p>
+        <p class="panel__note">{t("cartaSection.note")}</p>
       </div>
     </div>
   </div>

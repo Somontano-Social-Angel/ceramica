@@ -3,42 +3,54 @@ import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import CartaApp from "../components/CartaApp.astro";
+import OfflineNotice from "../components/OfflineNotice.astro";
 import { loadCarta } from "../data/carta";
+import {
+  getAlergenoLabels,
+  getCartaUiStrings,
+  getDietaLabels,
+  lpath,
+  useTranslations,
+} from "../i18n";
+import type { Locale } from "../i18n/types";
 
-const carta = loadCarta();
+const locale = Astro.currentLocale ?? "es";
+const t = useTranslations(locale);
+const carta = loadCarta(locale as Locale);
+const alergenoLabelsJson = JSON.stringify(getAlergenoLabels(locale));
+const dietaLabelsJson = JSON.stringify(getDietaLabels(locale));
+const uiStringsJson = JSON.stringify(getCartaUiStrings(locale));
 ---
 
 <Layout
-  title="Carta | La Cerámica"
-  description="Carta completa de La Cerámica en Barbastro: pizzas, hamburguesas, brasa, ensaladas y más. Filtra por alérgenos e intolerancias."
+  title={t("meta.cartaTitle")}
+  description={t("meta.cartaDesc")}
+  canonicalPath="/carta"
 >
-  <a class="skip" href="#carta-app">Saltar a la carta</a>
+  <a class="skip" href="#carta-app">{t("cartaPage.skip")}</a>
   <Header />
-  <main class="page">
+  <main class="page" transition:animate="fade">
     <div class="shell">
+      <OfflineNotice message={t("cartaPage.offlineNotice")} />
       <header class="page-head">
-        <p class="eyebrow">Carta</p>
-        <h1 class="h1">Nuestra carta</h1>
-        <p class="lead">
-          Explora platos por categoría, busca por nombre o ingrediente y marca los <strong>alérgenos</strong> que
-          quieras evitar. Los platos con trazas posibles se indican aparte. Ante dudas, consúltanos en sala o al
-          reservar.
+        <p class="eyebrow">{t("cartaPage.eyebrow")}</p>
+        <h1 class="h1">{t("cartaPage.title")}</h1>
+        <p class="lead">{t("cartaPage.lead")}</p>
+        <p class="menu-lang-note">{t("cartaPage.menuLangNote")}</p>
+        <p class="print-link">
+          <a href={lpath(locale, "/carta/imprimir")}>{t("cartaPage.print")}</a>
         </p>
       </header>
-      <CartaApp carta={carta} />
+      <CartaApp
+        carta={carta}
+        alergenoLabelsJson={alergenoLabelsJson}
+        dietaLabelsJson={dietaLabelsJson}
+        uiStringsJson={uiStringsJson}
+      />
     </div>
   </main>
   <Footer />
 </Layout>
-
-<script>
-  const header = document.querySelector(".header");
-  const onScroll = () => {
-    if (header) header.classList.toggle("is-scrolled", window.scrollY > 48);
-  };
-  onScroll();
-  window.addEventListener("scroll", onScroll, { passive: true });
-</script>
 
 <style>
   .skip {
@@ -120,8 +132,25 @@ const carta = loadCarta();
     line-height: 1.75;
   }
 
-  .lead strong {
+  .menu-lang-note {
+    margin: 0.75rem 0 0;
+    font-size: 0.85rem;
+    color: var(--fg-subtle);
+    line-height: 1.55;
+  }
+
+  .print-link {
+    margin: 1rem 0 0;
+    font-size: 0.9rem;
+  }
+
+  .print-link a {
+    color: var(--fg-muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .print-link a:hover {
     color: var(--fg);
-    font-weight: 600;
   }
 </style>

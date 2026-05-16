@@ -1,12 +1,16 @@
+---
+import { lpath, useTranslations } from "../i18n";
+
+const locale = Astro.currentLocale ?? "es";
+const t = useTranslations(locale);
+---
+
 <section class="cta" id="reserva" aria-labelledby="reserva-title">
   <div class="inner">
-    <h2 id="reserva-title" class="title">Reserva tu mesa</h2>
-    <p class="text">
-      Elige día y hora, indica si prefieres terraza (mascotas bienvenidas), salón o zona barra, y te confirmamos por
-      correo cuando el servidor de email esté activo. Si lo tienes claro al momento, llama al 974 31 22 20.
-    </p>
+    <h2 id="reserva-title" class="title">{t("reservaSection.title")}</h2>
+    <p class="text">{t("reservaSection.text")}</p>
     <div class="actions">
-      <a class="btn" href="/reservar">Reservar online</a>
+      <a class="btn" href={lpath(locale, "/reservar")}>{t("reservaSection.cta")}</a>
       <a class="btn btn--ghost" href="tel:+34974312220">Llamar: 974 31 22 20</a>
     </div>
   </div>

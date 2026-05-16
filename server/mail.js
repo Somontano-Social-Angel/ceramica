@@ -1,15 +1,37 @@
 import nodemailer from "nodemailer";
 
+/** Igma que envSecret() en index.js: quita comillas y espacios alrededor. */
+function envVar(key) {
+  const raw = process.env[key];
+  if (raw == null || raw === "") return "";
+  let v = String(raw).trim();
+  if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
+    v = v.slice(1, -1);
+  }
+  return v;
+}
+
+function smtpPass() {
+  return envVar("SMTP_PASS").replace(/\s/g, "");
+}
+
+function smtpUser() {
+  return envVar("SMTP_USER");
+}
+
 function getTransport() {
   const host = process.env.SMTP_HOST;
   if (!host) return null;
+  const port = Number(process.env.SMTP_PORT ?? "587");
+  const secure =
+    process.env.SMTP_SECURE === "true" || (process.env.SMTP_SECURE !== "false" && port === 465);
   return nodemailer.createTransport({
     host,
-    port: Number(process.env.SMTP_PORT ?? "587"),
-    secure: process.env.SMTP_SECURE === "true",
+    port,
+    secure,
     auth:
-      process.env.SMTP_USER && process.env.SMTP_PASS
-        ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+      smtpUser() && smtpPass()
+        ? { user: smtpUser(), pass: smtpPass() }
         : undefined,
   });
 }
@@ -66,7 +88,7 @@ export async function sendReservationEmails(r) {
     return { sent: false, logged: true };
   }
 
-  await transport.sendMail({
+  const info = await transport.sendMail({
     from,
     to: r.email,
     bcc: bcc || undefined,
@@ -75,7 +97,46 @@ export async function sendReservationEmails(r) {
     html,
   });
 
+  console.info("[mail] Enviado a", r.email, "· messageId:", info.messageId);
   return { sent: true };
+}
+
+/** Comprueba SMTP al arrancar (solo log, no bloquea). */
+export function logSmtpStatus() {
+  const transport = getTransport();
+  if (!transport) {
+    console.info("[mail] SMTP no configurado (falta SMTP_HOST). Los correos solo se imprimen en consola.");
+    return;
+  }
+  const passLen = smtpPass().length;
+  const user = smtpUser();
+  if (passLen > 0 && passLen !== 16) {
+    console.warn(
+      `[mail] SMTP_PASS tiene ${passLen} caracteres (Gmail suele dar 16). Revisa copia/pega o genera otra contraseña de aplicación.`,
+    );
+  }
+  if (!user.includes("@")) {
+    console.warn("[mail] SMTP_USER no parece un email válido.");
+  }
+  transport
+    .verify()
+    .then(() =>
+      console.info(
+        "[mail] SMTP OK —",
+        envVar("SMTP_HOST"),
+        envVar("SMTP_PORT") || "587",
+        "· usuario",
+        user,
+      ),
+    )
+    .catch((err) => {
+      console.error("[mail] SMTP verify falló:", err.message);
+      if (String(err.message).includes("535") || String(err.message).includes("BadCredentials")) {
+        console.error(
+          "[mail] Gmail rechazó usuario/contraseña. Usa contraseña de aplicación (no la normal), 16 caracteres, y MAIL_FROM = mismo email que SMTP_USER.",
+        );
+      }
+    });
 }
 
 function escapeHtml(s) {

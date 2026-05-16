@@ -1,48 +1,53 @@
+---
+import { Image } from "astro:assets";
+import { siteImages } from "../data/images";
+import { useTranslations } from "../i18n";
+
+const locale = Astro.currentLocale ?? "es";
+const t = useTranslations(locale);
+const shot = siteImages.sectionExperiencia;
+---
+
 <section class="section" id="experiencia" aria-labelledby="exp-title">
   <div class="wrap">
     <div class="row">
       <div class="text">
-        <p class="eyebrow">El local</p>
-        <h2 id="exp-title" class="h2">Tres ambientes, un solo espíritu</h2>
-        <p class="p">
-          En la entrada, junto a la barra, tienes unas <strong class="strong">seis mesas de cuatro</strong> para
-          quien quiere estar en el meollo: pedidos, cañas y conversación. El <strong class="strong">interior</strong>
-          engulle a mucha gente a la vez: ideal para grupos, celebraciones o cenar con calma.
-        </p>
-        <p class="p">
-          La <strong class="strong">terraza</strong> es tan grande como el salón: aire, sombra según hora y
-          <strong class="strong">mascotas bienvenidas</strong> (en terraza; en interior no). Encima, fútbol en
-          pantalla y un trato que nos gusta presumir: atención de verdad, sin postureo.
-        </p>
+        <p class="eyebrow">{t("experiencia.eyebrow")}</p>
+        <h2 id="exp-title" class="h2">{t("experiencia.title")}</h2>
+        <p class="p">{t("experiencia.p1")}</p>
+        <p class="p">{t("experiencia.p2")}</p>
       </div>
       <figure class="shot">
-        <img
+        <Image
           class="shot__img"
-          src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=880&q=82"
-          alt="Terraza de restaurante con mesas al aire libre"
-          width="440"
-          height="560"
+          src={shot.src}
+          alt={t("experiencia.imgAlt")}
+          width={shot.width}
+          height={shot.height}
+          widths={[440, 880]}
+          sizes="(min-width: 900px) 440px, 90vw"
           loading="lazy"
           decoding="async"
+          quality={82}
         />
-        <figcaption class="shot__cap">Imagen de ambiente; sustituye por foto real de la terraza o el salón.</figcaption>
+        <figcaption class="shot__cap">{t("experiencia.cap")}</figcaption>
       </figure>
       <ul class="tiles" aria-label="Detalles del servicio">
         <li>
-          <span class="tiles__label">Aparcamiento</span>
-          <span class="tiles__val">Polígono industrial: sitio de sobra para aparcar sin dramas</span>
+          <span class="tiles__label">{t("experiencia.t1l")}</span>
+          <span class="tiles__val">{t("experiencia.t1v")}</span>
         </li>
         <li>
-          <span class="tiles__label">Accesibilidad</span>
-          <span class="tiles__val">Plenamente accesible para movilidad reducida — avisa al reservar si necesitas mesa concreta</span>
+          <span class="tiles__label">{t("experiencia.t2l")}</span>
+          <span class="tiles__val">{t("experiencia.t2v")}</span>
         </li>
         <li>
-          <span class="tiles__label">Alérgenos</span>
-          <span class="tiles__val">Comprometidos con el cumplimiento en carta; pregunta al equipo</span>
+          <span class="tiles__label">{t("experiencia.t3l")}</span>
+          <span class="tiles__val">{t("experiencia.t3v")}</span>
         </li>
         <li>
-          <span class="tiles__label">Mascotas</span>
-          <span class="tiles__val">Sí en terraza · no en interior</span>
+          <span class="tiles__label">{t("experiencia.t4l")}</span>
+          <span class="tiles__val">{t("experiencia.t4v")}</span>
         </li>
       </ul>
     </div>

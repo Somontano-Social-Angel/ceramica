@@ -1,4 +1,8 @@
 ---
+import { lpath, useTranslations } from "../i18n";
+
+const locale = Astro.currentLocale ?? "es";
+const t = useTranslations(locale);
 const mapsQuery = encodeURIComponent("C. Cerámica Industrial VI, 13, 22300 Barbastro, Huesca");
 const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
 /** Coordenadas aproximadas del polígono (ficha en guías turísticas); ajusta si hace falta. */
@@ -10,50 +14,45 @@ const mapsEmbedUrl = `https://www.google.com/maps?q=${embedLat},${embedLng}&hl=e
 <section class="section" id="contacto" aria-labelledby="contacto-title">
   <div class="wrap">
     <div class="info">
-      <p class="eyebrow">Ubicación</p>
-      <h2 id="contacto-title" class="h2">Polígono La Cerámica, Barbastro</h2>
-      <p class="p">
-        C. Cerámica Industrial VI, 13 · 22300 Barbastro (Huesca). Estamos en el polígono industrial homónimo: llegas
-        con el coche, aparcas con holgura y entras directo a comer.
-      </p>
+      <p class="eyebrow">{t("ubicacion.eyebrow")}</p>
+      <h2 id="contacto-title" class="h2">{t("ubicacion.title")}</h2>
+      <p class="p">{t("ubicacion.p")}</p>
       <dl class="contact">
         <div>
-          <dt>Teléfono</dt>
+          <dt>{t("ubicacion.phone")}</dt>
           <dd><a href="tel:+34974312220">974 31 22 20</a></dd>
         </div>
         <div>
-          <dt>Reservas web</dt>
-          <dd><a href="/reservar">/reservar</a></dd>
+          <dt>{t("ubicacion.webBook")}</dt>
+          <dd><a href={lpath(locale, "/reservar")}>{lpath(locale, "/reservar")}</a></dd>
         </div>
       </dl>
-      <a class="maplink" href={mapsUrl} target="_blank" rel="noopener noreferrer">Abrir en Google Maps</a>
+      <a class="maplink" href={mapsUrl} target="_blank" rel="noopener noreferrer">{t("ubicacion.maps")}</a>
     </div>
 
     <div class="side">
       <aside class="reviews" aria-labelledby="reviews-heading">
-        <h3 id="reviews-heading" class="reviews__title">Reseñas en Google Maps</h3>
-        <p class="reviews__lead">
-          La valoración y los textos cambian cada día: lo fiable es leerlas en la ficha oficial del local.
-        </p>
+        <h3 id="reviews-heading" class="reviews__title">{t("ubicacion.reviews")}</h3>
+        <p class="reviews__lead">{t("ubicacion.reviewsLead")}</p>
         <p class="reviews__stars">
           <span class="sr-only">Opiniones favorables habituales en Google Maps.</span>
           <span aria-hidden="true">★★★★★</span>
         </p>
-        <p class="reviews__hint">Temas que suelen repetirse en opiniones públicas:</p>
+        <p class="reviews__hint">{t("ubicacion.reviewsHint")}</p>
         <ul class="reviews__themes">
-          <li>Terraza grande y aparcamiento cómodo en polígono</li>
-          <li>Pizzas al horno de leña y hamburguesas generosas</li>
-          <li>Trato de bar, ambiente relajado</li>
+          <li>{t("ubicacion.r1")}</li>
+          <li>{t("ubicacion.r2")}</li>
+          <li>{t("ubicacion.r3")}</li>
         </ul>
         <a class="reviews__cta" href={mapsUrl} target="_blank" rel="noopener noreferrer">
-          Ver opiniones en Google Maps
+          {t("ubicacion.reviewsCta")}
         </a>
       </aside>
 
       <div class="map">
         <iframe
           class="map__iframe"
-          title="Ubicación aproximada de La Cerámica en Google Maps"
+          title={t("ubicacion.mapTitle")}
           src={mapsEmbedUrl}
           loading="lazy"
           referrerpolicy="no-referrer-when-downgrade"

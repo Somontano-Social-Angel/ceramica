@@ -1,0 +1,137 @@
+---
+import { getCollection, render } from "astro:content";
+import { useTranslations } from "../i18n";
+
+const locale = Astro.currentLocale ?? "es";
+const t = useTranslations(locale);
+
+if (locale !== "es") return null;
+
+const now = new Date();
+const entries = await getCollection("avisos", ({ data }) => !data.hasta || data.hasta >= now);
+const sorted = entries.sort((a, b) => b.data.publicado.getTime() - a.data.publicado.getTime()).slice(0, 4);
+
+if (sorted.length === 0) return null;
+
+const rendered = await Promise.all(
+  sorted.map(async (entry) => {
+    const { Content } = await render(entry);
+    return { entry, Content };
+  }),
+);
+---
+
+<section class="section" id="novedades" aria-labelledby="novedades-title">
+  <div class="wrap">
+    <header class="head">
+      <p class="eyebrow">{t("novedades.eyebrow")}</p>
+      <h2 id="novedades-title" class="h2">{t("novedades.title")}</h2>
+    </header>
+    <ul class="list">
+      {
+        rendered.map(({ entry, Content }) => (
+          <li class="item">
+            <p class="item__meta">
+              <span class="item__tipo">{entry.data.tipo}</span>
+              <time datetime={entry.data.publicado.toISOString()}>
+                {entry.data.publicado.toLocaleDateString("es-ES", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </time>
+            </p>
+            <h3 class="item__title">{entry.data.title}</h3>
+            <div class="item__body">
+              <Content />
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .section {
+    padding: 5rem 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+  }
+
+  .head {
+    margin-bottom: 2rem;
+  }
+
+  .eyebrow {
+    margin: 0 0 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 720px) {
+    .list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .item {
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .item__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0 0 0.5rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .item__tipo {
+    color: var(--fg-muted);
+  }
+
+  .item__title {
+    margin: 0 0 0.65rem;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .item__body :global(p) {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--fg-muted);
+  }
+</style>

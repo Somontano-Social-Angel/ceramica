@@ -67,13 +67,39 @@ npm run dev:astro   # Solo Astro
 npm run dev:api     # Solo Express
 ```
 
-### Build de la web
+### Build y preview local (como producción)
 
 ```bash
 npm run build
+npm run start:prod
 ```
 
-Genera `dist/` (sitio estático). La API **no** se empaqueta ahí: en producción hay que desplegar el proceso Node (o integrar las rutas en otro backend) y configurar el dominio para que `/api` apunte a ese servicio.
+Abre `http://localhost:3000` — un solo proceso Node sirve **`dist/`** (Astro estático) y **`/api`**.
+
+```bash
+npm run preview:prod   # build + start:prod
+```
+
+### Producción (Coolify / Docker)
+
+1. Define **`SITE_URL`** (ej. `https://laceramica.com`, con `https` y sin `/` final).
+2. Copia `.env.example` → `.env` y rellena secretos (`SESSION_SECRET`, admin, SMTP).
+3. Despliega con Compose:
+
+```bash
+docker compose up -d --build
+```
+
+En **Coolify**: recurso *Docker Compose*, repo conectado, variables en la UI (mismas que `.env`). Asigna el dominio al servicio `ceramica`; puerto interno **3000**. Volumen `ceramica-data` guarda `server/data/db.json` (reservas).
+
+`SITE_URL` debe estar definida **antes del build** de la imagen (sitemap y metadatos). Si cambias de dominio, reconstruye la imagen.
+
+| Variable | Uso |
+|----------|-----|
+| **`SITE_URL`** | Dominio público (build + SEO). |
+| **`PUBLIC_CONTACT_EMAIL`** | Email en Schema.org (opcional; por defecto `info@tu-dominio`). |
+| **`COOKIE_SECURE`** | `true` con HTTPS (Coolify). |
+| Resto | Ver `.env.example`. |
 
 ## API (rutas principales)
 
@@ -89,11 +115,14 @@ Genera `dist/` (sitio estático). La API **no** se empaqueta ahí: en producció
 | `GET` | `/api/admin/session` | Estado de sesión admin. |
 | `GET` | `/api/admin/reservations?from=&to=` | Listado (requiere sesión). |
 | `PATCH` | `/api/admin/reservations/:id` | Actualizar `status` de una reserva (requiere sesión). |
+| `GET` | `/api/admin/dashboard?date=` | Resumen del día (stats, franjas, semana). |
+| `POST` | `/api/admin/reservations` | Alta manual (teléfono; requiere sesión). |
 
 ## Variables de entorno
 
 La referencia completa está en **`.env.example`**. Resumen:
 
+- **`SITE_URL`**: URL pública del sitio (producción / build Docker).
 - **`PORT`**: puerto de Express (por defecto `3000`).
 - **`SESSION_SECRET`**: clave de la cookie de sesión del admin.
 - **`ADMIN_PASSWORD`** o **`ADMIN_PASSWORD_HASH`**: acceso al panel `/admin`.
@@ -104,4 +133,4 @@ La referencia completa está en **`.env.example`**. Resumen:
 
 ## Licencia y uso
 
-Proyecto **privado** (`"private": true` en `package.json`). Ajusta licencia y `site` en `astro.config.mjs` cuando tengas dominio definitivo.
+Proyecto **privado** (`"private": true` en `package.json`). El dominio de producción se configura con **`SITE_URL`** (no hace falta tocar código).

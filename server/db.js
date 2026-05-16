@@ -29,11 +29,12 @@ export async function addReservation(row) {
     id,
     createdAt,
     status: row.status ?? "pending",
+    source: row.source ?? "web",
     date: row.date,
     time: row.time,
     partySize: row.partySize,
     name: row.name,
-    email: row.email,
+    email: row.email ?? "",
     phone: row.phone,
     notes: row.notes ?? "",
     services: row.services ?? [],
@@ -76,4 +77,13 @@ export async function sumCoversForSlot(date, time) {
   return db.data.reservations
     .filter((r) => r.date === date && r.time === time && r.status !== "cancelled")
     .reduce((s, r) => s + r.partySize, 0);
+}
+
+/** Reservas de un día, ordenadas por hora (asc). */
+export async function listReservationsForDay(dateStr) {
+  const list = await listReservations(dateStr, dateStr);
+  return list.sort((a, b) => {
+    if (a.time !== b.time) return a.time < b.time ? -1 : 1;
+    return a.createdAt < b.createdAt ? -1 : 1;
+  });
 }

@@ -1,0 +1,38 @@
+# Despliegue en Coolify (Docker Compose) u otro host.
+# 1. Copia .env.example → .env y rellena SITE_URL, secretos y SMTP.
+# 2. En Coolify: mismo compose + variables en la UI (sobreescriben .env).
+
+services:
+  ceramica:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SITE_URL: ${SITE_URL:-https://laceramica-barbastro.example}
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      SITE_URL: ${SITE_URL:-https://laceramica-barbastro.example}
+      SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET requerido}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      RESTAURANT_MAX_COVERS_PER_TIMESLOT: ${RESTAURANT_MAX_COVERS_PER_TIMESLOT:-40}
+      MAX_BOOKING_DAYS_AHEAD: ${MAX_BOOKING_DAYS_AHEAD:-120}
+      BOOKING_MIN_LEAD_MINUTES: ${BOOKING_MIN_LEAD_MINUTES:-30}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      MAIL_FROM: ${MAIL_FROM:-}
+      MAIL_BCC: ${MAIL_BCC:-}
+      PUBLIC_CONTACT_EMAIL: ${PUBLIC_CONTACT_EMAIL:-}
+    volumes:
+      - ceramica-data:/app/server/data
+
+volumes:
+  ceramica-data:

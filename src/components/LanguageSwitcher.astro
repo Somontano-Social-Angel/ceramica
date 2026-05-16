@@ -1,0 +1,194 @@
+---
+import { locales, localeLabels, type Locale } from "../i18n/types";
+import { getLocaleFromPath, stripLocaleFromPath, lpath } from "../i18n";
+import FlagIcon from "./FlagIcon.astro";
+
+interface Props {
+  variant?: "default" | "mobile";
+}
+
+const { variant = "default" } = Astro.props;
+const current = getLocaleFromPath(Astro.url.pathname);
+const pagePath = stripLocaleFromPath(Astro.url.pathname);
+---
+
+<div class:list={["lang", `lang--${variant}`]} data-lang-switcher>
+  <button
+    type="button"
+    class="lang__btn"
+    aria-expanded="false"
+    aria-haspopup="listbox"
+    aria-controls={`lang-list-${variant}`}
+    data-lang-trigger
+  >
+    <FlagIcon locale={current} />
+    <span class="lang__current">{localeLabels[current]}</span>
+    <span class="lang__chev" aria-hidden="true"></span>
+  </button>
+  <ul class="lang__list" id={`lang-list-${variant}`} role="listbox" hidden data-lang-list>
+    {
+      locales.map((code) => (
+        <li role="option" aria-selected={code === current}>
+          <a
+            class:list={["lang__opt", { "is-active": code === current }]}
+            href={lpath(code, pagePath)}
+            hreflang={code}
+            lang={code}
+          >
+            <FlagIcon locale={code as Locale} />
+            <span class="lang__opt-label">{localeLabels[code as Locale]}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<script>
+  /** Cierra todos los desplegables (p. ej. tras cambiar de idioma con View Transitions). */
+  function closeAllLangMenus() {
+    document.querySelectorAll("[data-lang-list]").forEach((list) => list.setAttribute("hidden", ""));
+    document.querySelectorAll("[data-lang-trigger]").forEach((btn) =>
+      btn.setAttribute("aria-expanded", "false"),
+    );
+  }
+
+  /** Delegación en document: los listeners siguen válidos tras navegación cliente (Astro). */
+  function bindLangSwitcher() {
+    if (document.documentElement.dataset.langSwitcherBound === "1") return;
+    document.documentElement.dataset.langSwitcherBound = "1";
+
+    document.addEventListener("click", (e) => {
+      const target = e.target;
+      if (!(target instanceof Element)) return;
+
+      const trigger = target.closest("[data-lang-trigger]");
+      if (trigger) {
+        e.stopPropagation();
+        const wrap = trigger.closest("[data-lang-switcher]");
+        const list = wrap?.querySelector("[data-lang-list]");
+        if (!list) return;
+
+        const open = list.hasAttribute("hidden");
+        document.querySelectorAll("[data-lang-list]").forEach((other) => {
+          if (other !== list) other.setAttribute("hidden", "");
+        });
+        document.querySelectorAll("[data-lang-trigger]").forEach((other) => {
+          if (other !== trigger) other.setAttribute("aria-expanded", "false");
+        });
+        list.toggleAttribute("hidden", !open);
+        trigger.setAttribute("aria-expanded", String(open));
+        return;
+      }
+
+      if (!target.closest("[data-lang-switcher]")) closeAllLangMenus();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeAllLangMenus();
+    });
+
+    document.addEventListener("astro:page-load", closeAllLangMenus);
+  }
+
+  bindLangSwitcher();
+  closeAllLangMenus();
+</script>
+
+<style>
+  .lang {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .lang__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: var(--fg-muted);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    cursor: pointer;
+    transition:
+      color 0.2s,
+      border-color 0.2s,
+      background 0.2s;
+  }
+
+  .lang__btn:hover {
+    color: var(--fg);
+    border-color: var(--border-strong);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .lang__chev {
+    width: 0.35rem;
+    height: 0.35rem;
+    margin-left: 0.05rem;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg) translateY(-1px);
+    opacity: 0.65;
+  }
+
+  .lang__list {
+    position: absolute;
+    top: calc(100% + 0.45rem);
+    right: 0;
+    z-index: 70;
+    list-style: none;
+    margin: 0;
+    padding: 0.35rem;
+    min-width: 10.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-strong);
+    background: rgba(28, 28, 28, 0.98);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  }
+
+  .lang__list[hidden] {
+    display: none;
+  }
+
+  .lang__opt {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.7rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--fg-muted);
+    border-radius: 8px;
+  }
+
+  .lang__opt:hover {
+    color: var(--fg);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .lang__opt.is-active {
+    color: var(--bg);
+    background: var(--fg);
+  }
+
+  .lang--mobile .lang__btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.65rem 1rem;
+  }
+
+  .lang--mobile .lang__list {
+    position: static;
+    margin-top: 0.5rem;
+    width: 100%;
+    box-shadow: none;
+    border-radius: var(--radius);
+  }
+</style>

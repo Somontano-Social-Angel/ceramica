@@ -1,0 +1,280 @@
+---
+import { getImage, Image } from "astro:assets";
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { siteImages } from "../data/images";
+import { absoluteUrl, restaurantJsonLd } from "../data/site";
+import { resolveSiteUrl } from "../data/site-url";
+import { lpath, useTranslations } from "../i18n";
+
+const locale = Astro.currentLocale ?? "es";
+const t = useTranslations(locale);
+const site = resolveSiteUrl(Astro.site);
+const gallery = [siteImages.retoBurger, siteImages.retoGrill, siteImages.diningRoom];
+const galleryAlts = [t("reto.g1"), t("reto.g2"), t("reto.g3")];
+const retoOg = await getImage({
+  src: siteImages.retoBurger.src,
+  width: 1200,
+  height: 630,
+  fit: "cover",
+  format: "webp",
+});
+
+const retoJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: "La Reto | La Cerámica",
+  description:
+    "El reto hamburguesa de La Cerámica en Barbastro: acaba el bocata XXL en 30 minutos y la hamburguesa y lo que bebas en el reto te salen gratis.",
+  url: absoluteUrl("/la-reto", site),
+  isPartOf: { "@id": `${site.origin}/#restaurant` },
+  about: {
+    "@type": "FoodEvent",
+    name: "La Reto",
+    description: "Reto gastronómico de hamburguesa XXL en 30 minutos.",
+    location: {
+      "@type": "Restaurant",
+      name: "La Cerámica",
+    },
+  },
+};
+---
+
+<Layout
+  title={t("meta.retoTitle")}
+  description={t("meta.retoDesc")}
+  ogImage={retoOg.src}
+  canonicalPath="/la-reto"
+  jsonLd={[restaurantJsonLd(site), retoJsonLd]}
+>
+  <a class="skip" href="#reto-main">{t("reto.skip")}</a>
+  <Header />
+  <main class="page" id="reto-main" transition:animate="fade">
+    <div class="shell">
+      <header class="hero">
+        <p class="eyebrow">{t("reto.eyebrow")}</p>
+        <h1 class="h1">{t("reto.title")}</h1>
+        <p class="lead">{t("reto.lead")}</p>
+        <div class="actions">
+          <a class="btn btn--primary" href={lpath(locale, "/reservar")}>{t("reto.book")}</a>
+          <a class="btn btn--ghost" href="tel:+34974312220">{t("reto.call")}</a>
+        </div>
+      </header>
+
+      <section class="rules" aria-labelledby="rules-title">
+        <h2 id="rules-title" class="h2">{t("reto.rules")}</h2>
+        <ol class="rules__list">
+          <li>{t("reto.r1")}</li>
+          <li>{t("reto.r2")}</li>
+          <li>{t("reto.r3")}</li>
+          <li>{t("reto.r4")}</li>
+          <li>{t("reto.r5")}</li>
+        </ol>
+        <p class="rules__note">{t("reto.note")}</p>
+      </section>
+
+      <section class="gallery" aria-labelledby="gallery-title">
+        <h2 id="gallery-title" class="h2">{t("reto.gallery")}</h2>
+        <ul class="gallery__grid">
+          {
+            gallery.map((img, i) => (
+              <li>
+                <Image
+                  src={img.src}
+                  alt={galleryAlts[i]}
+                  width={img.width}
+                  height={img.height}
+                  widths={[400, 800]}
+                  sizes="(min-width: 640px) 33vw, 90vw"
+                  loading="lazy"
+                  decoding="async"
+                  quality={82}
+                />
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section class="cta-block" aria-labelledby="cta-title">
+        <h2 id="cta-title" class="h2">{t("reto.ctaTitle")}</h2>
+        <p class="cta-block__text">{t("reto.ctaText")}</p>
+        <a class="btn btn--primary" href={lpath(locale, "/reservar")}>{t("reto.ctaBook")}</a>
+      </section>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .skip {
+    position: fixed;
+    top: 0;
+    left: 50%;
+    z-index: 100;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--bg);
+    background: var(--fg);
+    border-radius: 0 0 8px 8px;
+    transform: translate(-50%, -120%);
+    transition: transform 0.25s var(--ease-out);
+  }
+
+  .skip:focus {
+    transform: translate(-50%, 0);
+  }
+
+  .page {
+    padding: 6.5rem 1.5rem 4rem;
+    min-height: 100vh;
+  }
+
+  .shell {
+    max-width: var(--max);
+    margin: 0 auto;
+  }
+
+  .hero {
+    max-width: 42rem;
+    margin-bottom: 3.5rem;
+  }
+
+  .eyebrow {
+    margin: 0 0 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+  }
+
+  .h1 {
+    margin: 0 0 1rem;
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 6vw, 3.75rem);
+    font-weight: 600;
+    line-height: 1.05;
+    color: var(--fg);
+  }
+
+  .h2 {
+    margin: 0 0 1.25rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+    font-weight: 600;
+    color: var(--fg);
+  }
+
+  .lead {
+    margin: 0 0 1.5rem;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--fg-muted);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.85rem 1.35rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    transition: transform 0.2s var(--ease-out);
+  }
+
+  .btn--primary {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  .btn--ghost {
+    border-color: var(--border-strong);
+    color: var(--fg);
+  }
+
+  .rules {
+    margin-bottom: 3.5rem;
+    padding: 2rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .rules__list {
+    margin: 0 0 1rem;
+    padding-left: 1.25rem;
+    color: var(--fg-muted);
+    line-height: 1.75;
+  }
+
+  .rules__list li + li {
+    margin-top: 0.65rem;
+  }
+
+  .rules__note {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--fg-subtle);
+    line-height: 1.6;
+  }
+
+  .gallery {
+    margin-bottom: 3.5rem;
+  }
+
+  .gallery__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (min-width: 720px) {
+    .gallery__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .gallery__grid li {
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    aspect-ratio: 4 / 3;
+  }
+
+  .gallery__grid img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .cta-block {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-strong);
+    background: linear-gradient(180deg, rgba(255, 140, 70, 0.08), transparent);
+  }
+
+  .cta-block__text {
+    margin: 0 auto 1.5rem;
+    max-width: 36rem;
+    color: var(--fg-muted);
+    line-height: 1.7;
+  }
+</style>

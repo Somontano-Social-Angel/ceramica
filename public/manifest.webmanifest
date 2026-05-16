@@ -1,0 +1,19 @@
+{
+  "name": "La Cerámica",
+  "short_name": "Cerámica",
+  "description": "Restaurante en Barbastro — carta y reservas",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#1b1b1b",
+  "theme_color": "#1b1b1b",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

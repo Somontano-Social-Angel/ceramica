@@ -1,37 +1,108 @@
 ---
 import "../styles/global.css";
+import { ViewTransitions } from "astro:transitions";
+import { RESTAURANT, DEFAULT_OG_IMAGE, absoluteUrl, restaurantJsonLd } from "../data/site";
+import { resolveSiteUrl } from "../data/site-url";
+import { locales, type Locale } from "../i18n/types";
+import { lpath, stripLocaleFromPath } from "../i18n";
 
+const ogLocales: Record<Locale, string> = {
+  es: "es_ES",
+  en: "en_GB",
+  fr: "fr_FR",
+};
 interface Props {
   title?: string;
   description?: string;
   robots?: string;
+  ogImage?: string;
+  ogType?: string;
+  canonicalPath?: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
 const {
   title = "La Cerámica | Restaurante en Barbastro",
-  description = "Bar-restaurante en el polígono La Cerámica, Barbastro: pizzas y hamburguesas al horno de leña, terraza amplia y el reto La Reto. Reserva o llama al 974 31 22 20.",
+  description = RESTAURANT.description,
   robots,
+  ogImage = DEFAULT_OG_IMAGE,
+  ogType = "website",
+  canonicalPath,
+  jsonLd,
 } = Astro.props;
+
+const site = resolveSiteUrl(Astro.site);
+const canonical = absoluteUrl(canonicalPath ?? Astro.url.pathname, site);
+const ogImageAbs = ogImage.startsWith("http") ? ogImage : absoluteUrl(ogImage, site);
+const ldGraph = jsonLd ?? restaurantJsonLd(site);
+const ldScripts = Array.isArray(ldGraph) ? ldGraph : [ldGraph];
+const locale = (Astro.currentLocale ?? "es") as Locale;
+const htmlLang = locale === "es" ? "es" : locale;
+const pathForAlt = stripLocaleFromPath(canonicalPath ?? Astro.url.pathname);
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={htmlLang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#1b1b1b" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
     {robots ? <meta name="robots" content={robots} /> : null}
     <title>{title}</title>
+    <link rel="canonical" href={canonical} />
+    <meta property="og:locale" content={ogLocales[locale]} />
+    {
+      locales
+        .filter((l) => l !== locale)
+        .map((l) => <meta property="og:locale:alternate" content={ogLocales[l]} />)
+    }
+    {
+      locales.map((l) => (
+        <link rel="alternate" hreflang={l} href={absoluteUrl(lpath(l, pathForAlt), site)} />
+      ))
+    }
+    <link rel="alternate" hreflang="x-default" href={absoluteUrl(lpath("es", pathForAlt), site)} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={RESTAURANT.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageAbs} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageAbs} />
+    <meta name="geo.region" content="ES-AR" />
+    <meta name="geo.placename" content="Barbastro" />
+    <meta name="geo.position" content={`${RESTAURANT.latitude};${RESTAURANT.longitude}`} />
+    <meta name="ICBM" content={`${RESTAURANT.latitude}, ${RESTAURANT.longitude}`} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Manrope:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    {
+      ldScripts.map((block) => (
+        <script type="application/ld+json" set:html={JSON.stringify(block)} />
+      ))
+    }
+    <ViewTransitions />
   </head>
   <body>
     <slot />
+    <script is:inline>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js").catch(() => {});
+        });
+      }
+    </script>
   </body>
 </html>

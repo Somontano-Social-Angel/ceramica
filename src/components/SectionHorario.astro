@@ -1,24 +1,30 @@
+---
+import { useTranslations } from "../i18n";
+
+const locale = Astro.currentLocale ?? "es";
+const t = useTranslations(locale);
+---
+
 <section class="section" id="horario" aria-labelledby="horario-title">
   <div class="wrap">
     <div class="head">
-      <p class="eyebrow">Horario</p>
-      <h2 id="horario-title" class="h2">Te esperamos</h2>
+      <p class="eyebrow">{t("horario.eyebrow")}</p>
+      <h2 id="horario-title" class="h2">{t("horario.title")}</h2>
     </div>
     <div class="grid">
       <div class="block">
-        <h3 class="h3">Lunes a sábado</h3>
-        <p class="time">7:30 — 16:00</p>
-        <p class="days">Servicio continuo de mañana (desayuno / almuerzo según carta del día).</p>
+        <h3 class="h3">{t("horario.b1t")}</h3>
+        <p class="time">{t("horario.b1time")}</p>
+        <p class="days">{t("horario.b1d")}</p>
       </div>
       <div class="block">
-        <h3 class="h3">Viernes y sábado</h3>
-        <p class="time">20:00 — 23:30</p>
-        <p class="days">Cena. Domingo cerrado.</p>
+        <h3 class="h3">{t("horario.b2t")}</h3>
+        <p class="time">{t("horario.b2time")}</p>
+        <p class="days">{t("horario.b2d")}</p>
       </div>
       <div class="block block--note">
         <p class="note">
-          Las reservas online respetan estos horarios. Para grupos numerosos, La Reto o mesa concreta (accesibilidad,
-          terraza con mascota…), indícalo en el formulario o llama al <a href="tel:+34974312220">974 31 22 20</a>.
+          {t("horario.note")} <a href="tel:+34974312220">974 31 22 20</a>.
         </p>
       </div>
     </div>

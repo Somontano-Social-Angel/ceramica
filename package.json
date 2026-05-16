@@ -9,9 +9,15 @@
     "dev:api": "node server/index.js",
     "build": "astro build",
     "preview": "astro preview",
-    "start": "astro dev"
+    "preview:prod": "npm run build && node server/index.js",
+    "start:prod": "node server/index.js",
+    "start": "astro dev",
+    "admin:hash": "node scripts/hash-admin-password.mjs",
+    "images:optimize": "node scripts/optimize-images.mjs",
+    "test:smtp": "node scripts/test-smtp.mjs"
   },
   "dependencies": {
+    "@astrojs/sitemap": "^3.7.2",
     "astro": "^5.7.0",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.7",

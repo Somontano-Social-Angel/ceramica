@@ -4,19 +4,51 @@ import { ALERGENO_LABELS, ALERGENO_ORDEN, DIETA_LABELS } from "../data/carta";
 
 interface Props {
   carta: CartaData;
+  alergenoLabelsJson?: string;
+  dietaLabelsJson?: string;
+  uiStringsJson?: string;
 }
 
-const { carta } = Astro.props;
+const {
+  carta,
+  alergenoLabelsJson = JSON.stringify(ALERGENO_LABELS),
+  dietaLabelsJson = JSON.stringify(DIETA_LABELS),
+  uiStringsJson,
+} = Astro.props;
+
 const cartaJson = JSON.stringify(carta);
-const alergenoLabelsJson = JSON.stringify(ALERGENO_LABELS);
-const dietaLabelsJson = JSON.stringify(DIETA_LABELS);
+const alergenoLabels = JSON.parse(alergenoLabelsJson) as Record<string, string>;
+const dietaLabels = JSON.parse(dietaLabelsJson) as Record<string, string>;
+const ui = uiStringsJson
+  ? (JSON.parse(uiStringsJson) as Record<string, string>)
+  : {
+      filters: "Buscar y filtrar",
+      search: "Buscar",
+      searchPh: "Plato o ingrediente…",
+      avoidAllergens: "Evitar alérgenos",
+      preferences: "Preferencias",
+      clear: "Limpiar filtros",
+      all: "Ver todo",
+      empty: "Sin coincidencias",
+      emptyHint: "Prueba otra categoría o ajusta los filtros.",
+      clearInline: "Quitar filtros",
+      legend: "Leyenda de alérgenos (UE 1169/2011)",
+      legendFoot: "Información orientativa. Ante alergias graves, avisa siempre al personal.",
+      contains: "Contiene",
+      mayContain: "Puede contener",
+      askRoom: "Consultar en sala",
+      ingredients: "Ingredientes",
+      dishes: "platos",
+      dish: "plato",
+      orderInSpanish: "En mesa (español)",
+    };
 ---
 
 <section class="carta-app" id="carta-app" aria-label="Carta interactiva">
   <details class="carta-filters-panel">
     <summary class="carta-filters-panel__trigger">
       <span class="carta-filters-panel__icon" aria-hidden="true">⌕</span>
-      <span class="carta-filters-panel__text">Buscar y filtrar</span>
+      <span class="carta-filters-panel__text">{ui.filters}</span>
       <span class="carta-filters-panel__badge" data-carta-filter-badge hidden>0</span>
       <span class="carta-filters-panel__chev" aria-hidden="true"></span>
     </summary>
@@ -24,19 +56,19 @@ const dietaLabelsJson = JSON.stringify(DIETA_LABELS);
     <div class="carta-toolbar" aria-label="Filtros de carta">
       <div class="carta-toolbar__grid">
         <div class="carta-toolbar__search">
-          <label class="carta-filters__label" for="carta-search">Buscar</label>
+          <label class="carta-filters__label" for="carta-search">{ui.search}</label>
           <input
             type="search"
             id="carta-search"
             class="carta-search"
-            placeholder="Plato o ingrediente…"
+            placeholder={ui.searchPh}
             autocomplete="off"
             data-carta-search
           />
         </div>
 
         <div class="carta-toolbar__block">
-          <p class="carta-filters__label">Evitar alérgenos</p>
+          <p class="carta-filters__label">{ui.avoidAllergens}</p>
           <div class="carta-alergenos" data-carta-alergenos role="group" aria-label="Alérgenos a excluir">
             {
               ALERGENO_ORDEN.map((id, i) => (
@@ -45,12 +77,12 @@ const dietaLabelsJson = JSON.stringify(DIETA_LABELS);
                   class="carta-alergeno"
                   data-alergeno={id}
                   aria-pressed="false"
-                  title={ALERGENO_LABELS[id]}
+                  title={alergenoLabels[id]}
                 >
                   <span class="carta-alergeno__num" aria-hidden="true">
                     {i + 1}
                   </span>
-                  <span class="carta-alergeno__name">{ALERGENO_LABELS[id]}</span>
+                  <span class="carta-alergeno__name">{alergenoLabels[id]}</span>
                 </button>
               ))
             }
@@ -58,12 +90,12 @@ const dietaLabelsJson = JSON.stringify(DIETA_LABELS);
         </div>
 
         <div class="carta-toolbar__block">
-          <p class="carta-filters__label">Preferencias</p>
+          <p class="carta-filters__label">{ui.preferences}</p>
           <div class="carta-dietas" data-carta-dietas role="group" aria-label="Filtros dietéticos">
             {
               ["sin_gluten", "sin_lactosa", "sin_huevo", "sin_pescado", "sin_marisco", "vegetariano"].map((id) => (
                 <button type="button" class="carta-dieta" data-dieta={id} aria-pressed="false">
-                  {DIETA_LABELS[id] ?? id}
+                  {dietaLabels[id] ?? id}
                 </button>
               ))
             }
@@ -74,7 +106,7 @@ const dietaLabelsJson = JSON.stringify(DIETA_LABELS);
       <div class="carta-toolbar__foot">
         <span class="carta-search__count" data-carta-count aria-live="polite"></span>
         <button type="button" class="carta-clear" data-carta-clear hidden>
-          Limpiar filtros
+          {ui.clear}
         </button>
       </div>
     </div>
@@ -84,21 +116,18 @@ const dietaLabelsJson = JSON.stringify(DIETA_LABELS);
     <nav class="carta-tabs" data-carta-tabs aria-label="Categorías">
       <div class="carta-tabs__fade carta-tabs__fade--l" aria-hidden="true"></div>
       <div class="carta-tabs__scroll">
+        <button type="button" class="carta-tab is-active" data-cat-tab="todas" aria-selected="true">
+          {ui.all}
+        </button>
         {
-          carta.categorias.map((cat, i) => (
-            <button
-              type="button"
-              class:list={["carta-tab", { "is-active": i === 0 }]}
-              data-cat-tab={cat.id}
-              aria-selected={i === 0 ? "true" : "false"}
-            >
-              {cat.subcategoria ? cat.subcategoria.replace(/^Platos combinados de /i, "") : cat.categoria}
+          carta.categorias.map((cat) => (
+            <button type="button" class="carta-tab" data-cat-tab={cat.id} aria-selected="false">
+              {cat.subcategoria
+                ? cat.subcategoria.replace(/^(Platos combinados de |Combination plates — |Assiettes combinées — )/i, "")
+                : cat.categoria}
             </button>
           ))
         }
-        <button type="button" class="carta-tab" data-cat-tab="todas" aria-selected="false">
-          Ver todo
-        </button>
       </div>
       <div class="carta-tabs__fade carta-tabs__fade--r" aria-hidden="true"></div>
     </nav>
@@ -106,22 +135,17 @@ const dietaLabelsJson = JSON.stringify(DIETA_LABELS);
 
   <div class="carta-body">
     <div class="carta-empty" data-carta-empty hidden>
-      <p class="carta-empty__title">Sin coincidencias</p>
-      <p class="carta-empty__text">Prueba otra categoría o ajusta los filtros.</p>
+      <p class="carta-empty__title">{ui.empty}</p>
+      <p class="carta-empty__text">{ui.emptyHint}</p>
       <button type="button" class="carta-clear carta-clear--btn" data-carta-clear-inline>
-        Quitar filtros
+        {ui.clearInline}
       </button>
     </div>
 
     <div class="carta-sections" data-carta-sections>
       {
-        carta.categorias.map((cat, i) => (
-          <section
-            class="carta-section"
-            data-cat-section={cat.id}
-            aria-labelledby={`cat-${cat.id}`}
-            hidden={i !== 0}
-          >
+        carta.categorias.map((cat) => (
+          <section class="carta-section" data-cat-section={cat.id} aria-labelledby={`cat-${cat.id}`}>
             <header class="carta-section__head">
               <h2 class="carta-section__title" id={`cat-${cat.id}`}>
                 {cat.categoria}
@@ -135,7 +159,7 @@ const dietaLabelsJson = JSON.stringify(DIETA_LABELS);
                   class="carta-item"
                   data-item
                   data-buscar={item.buscar_por}
-                  data-nombre={item.nombre.toLowerCase()}
+                  data-nombre={item.buscar_por.toLowerCase()}
                   data-ingredientes={item.ingredientes.join(" ").toLowerCase()}
                   data-alergenos-contiene={item.alergenos_contiene.join(",")}
                   data-alergenos-posibles={item.alergenos_posibles.join(",")}
@@ -146,7 +170,15 @@ const dietaLabelsJson = JSON.stringify(DIETA_LABELS);
                   <button type="button" class="carta-item__toggle" aria-expanded="false">
                     <span class="carta-item__main">
                       {item.numero && <span class="carta-item__num">{item.numero}</span>}
-                      <span class="carta-item__name">{item.nombre}</span>
+                      <span class="carta-item__names">
+                        <span class="carta-item__name">{item.nombre}</span>
+                        {item.nombreEs && (
+                          <span class="carta-item__name-es">
+                            <span class="carta-item__name-es-label">{ui.orderInSpanish}</span>
+                            {item.nombreEs}
+                          </span>
+                        )}
+                      </span>
                       {item.descripcion && <span class="carta-item__desc">{item.descripcion}</span>}
                     </span>
                     <span class="carta-item__meta">
@@ -157,7 +189,7 @@ const dietaLabelsJson = JSON.stringify(DIETA_LABELS);
                   <div class="carta-item__detail" hidden>
                     {item.ingredientes.length > 0 && (
                       <p class="carta-item__ing">
-                        <strong>Ingredientes</strong>
+                        <strong>{ui.ingredients}</strong>
                         <span>{item.ingredientes.join(", ")}</span>
                       </p>
                     )}
@@ -165,22 +197,22 @@ const dietaLabelsJson = JSON.stringify(DIETA_LABELS);
                       <div class="carta-item__alerg">
                         {item.alergenos_contiene.length > 0 && (
                           <p>
-                            <strong>Contiene</strong>
-                            <span>{item.alergenos_contiene.map((a) => ALERGENO_LABELS[a] ?? a).join(", ")}</span>
+                            <strong>{ui.contains}</strong>
+                            <span>{item.alergenos_contiene.map((a) => alergenoLabels[a] ?? a).join(", ")}</span>
                           </p>
                         )}
                         {item.alergenos_posibles.length > 0 && (
                           <p class="carta-item__alerg--posible">
-                            <strong>Puede contener</strong>
-                            <span>{item.alergenos_posibles.map((a) => ALERGENO_LABELS[a] ?? a).join(", ")}</span>
+                            <strong>{ui.mayContain}</strong>
+                            <span>{item.alergenos_posibles.map((a) => alergenoLabels[a] ?? a).join(", ")}</span>
                           </p>
                         )}
                       </div>
                     )}
                     {item.dietas_apto_si_modifica.length > 0 && (
                       <p class="carta-item__mod">
-                        <strong>Consultar en sala</strong>
-                        <span>{item.dietas_apto_si_modifica.map((d) => DIETA_LABELS[d] ?? d).join(", ")}</span>
+                        <strong>{ui.askRoom}</strong>
+                        <span>{item.dietas_apto_si_modifica.map((d) => dietaLabels[d] ?? d).join(", ")}</span>
                       </p>
                     )}
                   </div>
@@ -194,27 +226,28 @@ const dietaLabelsJson = JSON.stringify(DIETA_LABELS);
   </div>
 
   <details class="carta-legend">
-    <summary class="carta-legend__trigger">Leyenda de alérgenos (UE 1169/2011)</summary>
+    <summary class="carta-legend__trigger">{ui.legend}</summary>
     <div class="carta-legend__body">
       <ol class="carta-legend__list">
         {
           ALERGENO_ORDEN.map((id, i) => (
             <li>
               <span class="carta-legend__n">{i + 1}</span>
-              {ALERGENO_LABELS[id]}
+              {alergenoLabels[id]}
             </li>
           ))
         }
       </ol>
       <p class="carta-legend__foot">
-        Información orientativa. Ante alergias graves, avisa siempre al personal antes de pedir.
+        {ui.legendFoot}
       </p>
     </div>
   </details>
 </section>
 
-<script define:vars={{ cartaJson, alergenoLabelsJson, dietaLabelsJson }}>
+<script define:vars={{ cartaJson, uiStringsJson: JSON.stringify(ui) }}>
   const carta = JSON.parse(cartaJson);
+  const ui = JSON.parse(uiStringsJson);
 
   const root = document.getElementById("carta-app");
   if (!root) throw new Error("Carta app no encontrada");
@@ -234,7 +267,7 @@ const dietaLabelsJson = JSON.stringify(DIETA_LABELS);
     search: "",
     excludeAlergenos: new Set(),
     dietas: new Set(),
-    activeTab: carta.categorias[0]?.id ?? "todas",
+    activeTab: "todas",
   };
 
   function normalize(str) {
@@ -344,7 +377,9 @@ const dietaLabelsJson = JSON.stringify(DIETA_LABELS);
 
     if (countEl) {
       const filtering = activeFilterCount() > 0;
-      countEl.textContent = filtering ? `${visibleTotal} plato${visibleTotal === 1 ? "" : "s"}` : "";
+      countEl.textContent = filtering
+        ? `${visibleTotal} ${visibleTotal === 1 ? ui.dish : ui.dishes}`
+        : "";
     }
 
     if (emptyEl) emptyEl.hidden = visibleTotal > 0;
@@ -409,7 +444,7 @@ const dietaLabelsJson = JSON.stringify(DIETA_LABELS);
       btn.setAttribute("aria-pressed", "false");
       btn.classList.remove("is-active");
     });
-    setActiveTab(carta.categorias[0]?.id ?? "todas");
+    setActiveTab("todas");
   }
 
   clearBtns.forEach((btn) => btn.addEventListener("click", clearFilters));
@@ -429,7 +464,7 @@ const dietaLabelsJson = JSON.stringify(DIETA_LABELS);
     if (panel) panel.open = true;
   }
 
-  applyFilters();
+  setActiveTab("todas");
 </script>
 
 <style>
@@ -912,11 +947,34 @@ const dietaLabelsJson = JSON.stringify(DIETA_LABELS);
     color: var(--fg-subtle);
   }
 
+  .carta-item__names {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
   .carta-item__name {
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--fg);
     line-height: 1.35;
+  }
+
+  .carta-item__name-es {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--fg-subtle);
+    line-height: 1.35;
+  }
+
+  .carta-item__name-es-label {
+    margin-right: 0.35rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
   }
 
   .carta-item__desc {

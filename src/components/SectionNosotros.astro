@@ -1,39 +1,45 @@
+---
+import { Image } from "astro:assets";
+import { siteImages } from "../data/images";
+import { useTranslations } from "../i18n";
+
+const locale = Astro.currentLocale ?? "es";
+const t = useTranslations(locale);
+const photo = siteImages.diningRoom;
+---
+
 <section class="section" id="nosotros" aria-labelledby="nosotros-title">
   <div class="wrap">
     <div class="col-text">
-      <p class="eyebrow">Nosotros</p>
-      <h2 id="nosotros-title" class="h2">Historia de bar, manos de familia</h2>
-      <p class="p">
-        José continúa el legado que dejó su padre en este mismo espacio: el bar que un día levantó la casa, hoy
-        restaurante con alma de vecindario. Junto a su mujer y el equipo que las acompaña cada servicio, la cosa
-        va de trato cercano, risas y platos que salen del horno de leña con cariño.
-      </p>
-      <p class="p">
-        En cocina manda ella; en el horno personalizado, él. Entre medias, sala llena, terraza que respira y una
-        barra donde siempre hay hueco para quien llega con hambre de verdad.
-      </p>
+      <p class="eyebrow">{t("nosotros.eyebrow")}</p>
+      <h2 id="nosotros-title" class="h2">{t("nosotros.title")}</h2>
+      <p class="p">{t("nosotros.p1")}</p>
+      <p class="p">{t("nosotros.p2")}</p>
       <ul class="ticks">
-        <li>Accesibilidad pensada para personas con movilidad reducida</li>
-        <li>Carta con compromiso real frente a alérgenos e intolerancias (pregunta sin problema)</li>
-        <li>Polígono industrial: aparcamiento con sitio de sobra</li>
+        <li>{t("nosotros.tick1")}</li>
+        <li>{t("nosotros.tick2")}</li>
+        <li>{t("nosotros.tick3")}</li>
       </ul>
     </div>
     <div class="col-visual" aria-hidden="true">
       <div class="frame">
         <div class="frame__inner">
-          <img
+          <Image
             class="frame__photo"
-            src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=800&q=82"
+            src={photo.src}
             alt=""
-            width="400"
-            height="480"
+            width={photo.width}
+            height={photo.height}
+            widths={[400, 800]}
+            sizes="(min-width: 900px) 400px, 85vw"
             loading="lazy"
             decoding="async"
+            quality={82}
           />
           <div class="frame__shade"></div>
           <div class="frame__front">
             <span class="frame__line"></span>
-            <p class="frame__quote">«Lo que empezó en el bar, sigue en el bar… solo que ahora también hay brasa.»</p>
+            <p class="frame__quote">{t("nosotros.quote")}</p>
           </div>
         </div>
       </div>

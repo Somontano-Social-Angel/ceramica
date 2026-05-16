@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -11,9 +12,7 @@ import bcrypt from "bcryptjs";
 import {
   getSlotsForDate,
   getBookableSlotsForDate,
-  isValidSlot,
-  isPastSlot,
-  isTooFarAhead,
+  findFirstBookableDate,
   madridDateString,
   madridNowDisplay,
   addCalendarDays,
@@ -22,10 +21,12 @@ import {
 import {
   addReservation,
   listReservations,
+  listReservationsForDay,
   sumCoversForSlot,
   updateReservationStatus,
 } from "./db.js";
-import { sendReservationEmails } from "./mail.js";
+import { logSmtpStatus, sendReservationEmails } from "./mail.js";
+import { validateReservationBody } from "./reservations.js";
 
 const PORT = Number(process.env.PORT ?? 3000);
 const SERVICE_OPTIONS = ["Terraza", "Interior", "Zona barra"];
@@ -33,6 +34,13 @@ const MAX_PARTY = 20;
 const MAX_COVERS = Number(process.env.RESTAURANT_MAX_COVERS_PER_TIMESLOT ?? 40);
 const MAX_AHEAD_DAYS = Number(process.env.MAX_BOOKING_DAYS_AHEAD ?? 120);
 const MIN_LEAD_MINUTES = Number(process.env.BOOKING_MIN_LEAD_MINUTES ?? 30);
+
+const reservationCtx = () => ({
+  serviceOptions: SERVICE_OPTIONS,
+  maxParty: MAX_PARTY,
+  maxAheadDays: MAX_AHEAD_DAYS,
+  minLeadMinutes: MIN_LEAD_MINUTES,
+});
 
 const app = express();
 app.set("trust proxy", 1);
@@ -68,10 +76,30 @@ function adminAuth(req, res, next) {
   return res.status(401).json({ ok: false, error: "No autorizado" });
 }
 
+function envSecret(key) {
+  const raw = process.env[key];
+  if (raw == null || raw === "") return "";
+  let v = String(raw).trim();
+  if (
+    (v.startsWith('"') && v.endsWith('"')) ||
+    (v.startsWith("'") && v.endsWith("'"))
+  ) {
+    v = v.slice(1, -1);
+  }
+  return v;
+}
+
 async function verifyAdminPassword(plain) {
-  const hash = process.env.ADMIN_PASSWORD_HASH;
-  if (hash) return bcrypt.compare(plain, hash);
-  const pwd = process.env.ADMIN_PASSWORD;
+  const hash = envSecret("ADMIN_PASSWORD_HASH");
+  if (hash) {
+    try {
+      return await bcrypt.compare(plain, hash);
+    } catch {
+      console.error("[api] ADMIN_PASSWORD_HASH no es un hash bcrypt válido");
+      return false;
+    }
+  }
+  const pwd = envSecret("ADMIN_PASSWORD");
   if (!pwd) return false;
   const a = Buffer.from(plain, "utf8");
   const b = Buffer.from(pwd, "utf8");
@@ -85,12 +113,14 @@ app.get("/api/health", (_req, res) => {
 
 app.get("/api/meta", (_req, res) => {
   const today = madridDateString();
+  const suggestedDate = findFirstBookableDate(today, 21, MIN_LEAD_MINUTES);
   res.json({
     ok: true,
     serviceOptions: SERVICE_OPTIONS,
     maxParty: MAX_PARTY,
     maxCoversPerSlot: MAX_COVERS,
     today,
+    suggestedDate,
     maxBookableDate: addCalendarDays(today, MAX_AHEAD_DAYS),
     maxBookingDaysAhead: MAX_AHEAD_DAYS,
     timezone: "Europe/Madrid",
@@ -137,14 +167,22 @@ app.get("/api/slots", async (req, res) => {
   const closed = calendarSlots.length === 0 || date < today;
   const bookable = closed ? [] : getBookableSlotsForDate(date, MIN_LEAD_MINUTES);
   const booked = {};
-  for (const t of bookable) {
-    booked[t] = await sumCoversForSlot(date, t);
+  try {
+    for (const t of bookable) {
+      booked[t] = await sumCoversForSlot(date, t);
+    }
+  } catch (e) {
+    console.error("[api/slots] db", e);
+    return res.status(500).json({ ok: false, error: "No se pudieron cargar las franjas" });
   }
+  const suggestedDate =
+    !closed && bookable.length === 0 ? findFirstBookableDate(date, 21, MIN_LEAD_MINUTES) : null;
   res.json({
     ok: true,
     date,
     closed,
     noSlotsLeft: !closed && bookable.length === 0,
+    suggestedDate,
     timezone: "Europe/Madrid",
     nowMadrid: madridNowDisplay(),
     minLeadMinutes: MIN_LEAD_MINUTES,
@@ -154,87 +192,54 @@ app.get("/api/slots", async (req, res) => {
   });
 });
 
+async function createReservation(data, res) {
+  const current = await sumCoversForSlot(data.date, data.time);
+  if (current + data.partySize > MAX_COVERS) {
+    return res.status(409).json({
+      ok: false,
+      error: "Aforo completo en esa franja. Elige otra hora.",
+    });
+  }
+
+  try {
+    const rec = await addReservation(data);
+
+    if (data.sendEmail && data.email) {
+      try {
+        await sendReservationEmails(rec);
+      } catch (e) {
+        console.error("[mail] No se pudo enviar el correo:", e instanceof Error ? e.message : e);
+      }
+    }
+
+    return res.status(201).json({ ok: true, id: rec.id, status: rec.status, reservation: rec });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ ok: false, error: "No se pudo guardar la reserva" });
+  }
+}
+
 app.post("/api/reservations", async (req, res) => {
   const ip = req.ip || "local";
   if (!rateLimit(ip)) {
     return res.status(429).json({ ok: false, error: "Demasiadas solicitudes. Prueba en un minuto." });
   }
 
-  const body = req.body ?? {};
-  const date = String(body.date ?? "");
-  const time = String(body.time ?? "");
-  const partySize = Number(body.partySize);
-  const name = String(body.name ?? "").trim();
-  const email = String(body.email ?? "").trim().toLowerCase();
-  const phone = String(body.phone ?? "").trim();
-  const notes = String(body.notes ?? "").trim().slice(0, 500);
-  const services = Array.isArray(body.services) ? body.services.map(String) : [];
-
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return res.status(400).json({ ok: false, error: "Fecha inválida" });
-  }
-  if (!isValidSlot(date, time)) {
-    return res.status(400).json({ ok: false, error: "Franja no disponible" });
-  }
-  if (isPastSlot(date, time, MIN_LEAD_MINUTES)) {
-    return res.status(400).json({ ok: false, error: "La fecha u hora ya no está disponible" });
-  }
-  if (isTooFarAhead(date, MAX_AHEAD_DAYS)) {
-    return res.status(400).json({ ok: false, error: `No se pueden reservar más de ${MAX_AHEAD_DAYS} días por adelantado` });
-  }
-  if (!Number.isFinite(partySize) || partySize < 1 || partySize > MAX_PARTY) {
-    return res.status(400).json({ ok: false, error: `Número de personas entre 1 y ${MAX_PARTY}` });
-  }
-  if (name.length < 2 || name.length > 80) {
-    return res.status(400).json({ ok: false, error: "Nombre no válido" });
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return res.status(400).json({ ok: false, error: "Email no válido" });
-  }
-  if (phone.length < 6 || phone.length > 30) {
-    return res.status(400).json({ ok: false, error: "Teléfono no válido" });
-  }
-  for (const s of services) {
-    if (!SERVICE_OPTIONS.includes(s)) {
-      return res.status(400).json({ ok: false, error: "Opción de servicio no válida" });
-    }
+  const validated = validateReservationBody(req.body ?? {}, reservationCtx());
+  if (!validated.ok) {
+    return res.status(validated.status).json({ ok: false, error: validated.error });
   }
 
-  const current = await sumCoversForSlot(date, time);
-  if (current + partySize > MAX_COVERS) {
-    return res.status(409).json({
-      ok: false,
-      error: "Aforo completo en esa franja. Elige otra hora o llámanos.",
-    });
-  }
-
-  try {
-    const rec = await addReservation({
-      date,
-      time,
-      partySize,
-      name,
-      email,
-      phone,
-      notes,
-      services,
-      status: "pending",
-    });
-
-    try {
-      await sendReservationEmails(rec);
-    } catch (e) {
-      console.error("[mail]", e);
-    }
-
-    return res.status(201).json({ ok: true, id: rec.id, status: rec.status });
-  } catch (e) {
-    console.error(e);
-    return res.status(500).json({ ok: false, error: "No se pudo guardar la reserva" });
-  }
+  return createReservation(validated.data, res);
 });
 
 app.post("/api/admin/login", async (req, res) => {
+  if (!envSecret("ADMIN_PASSWORD") && !envSecret("ADMIN_PASSWORD_HASH")) {
+    return res.status(503).json({
+      ok: false,
+      error: "Admin no configurado: define ADMIN_PASSWORD en .env y reinicia la API",
+    });
+  }
   const pwd = String(req.body?.password ?? "");
   if (!(await verifyAdminPassword(pwd))) {
     return res.status(401).json({ ok: false, error: "Contraseña incorrecta" });
@@ -261,6 +266,69 @@ app.get("/api/admin/reservations", adminAuth, async (req, res) => {
   res.json({ ok: true, reservations: list });
 });
 
+app.get("/api/admin/dashboard", adminAuth, async (req, res) => {
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(String(req.query.date ?? ""))
+    ? String(req.query.date)
+    : madridDateString();
+  const today = madridDateString();
+  const list = await listReservationsForDay(date);
+  const active = list.filter((r) => r.status !== "cancelled");
+  const covers = active.reduce((s, r) => s + r.partySize, 0);
+  const byTime = {};
+  for (const r of active) {
+    if (!byTime[r.time]) byTime[r.time] = [];
+    byTime[r.time].push(r);
+  }
+  const timeline = Object.keys(byTime)
+    .sort()
+    .map((time) => ({
+      time,
+      covers: byTime[time].reduce((s, r) => s + r.partySize, 0),
+      reservations: byTime[time],
+    }));
+
+  const weekEnd = addCalendarDays(date, 6);
+  const weekList = (await listReservations(date, weekEnd)).filter((r) => r.status !== "cancelled");
+  const weekByDate = {};
+  for (const r of weekList) {
+    weekByDate[r.date] = (weekByDate[r.date] ?? 0) + 1;
+  }
+
+  res.json({
+    ok: true,
+    date,
+    today,
+    isToday: date === today,
+    nowMadrid: madridNowDisplay(),
+    stats: {
+      total: list.length,
+      active: active.length,
+      covers,
+      pending: list.filter((r) => r.status === "pending").length,
+      confirmed: list.filter((r) => r.status === "confirmed").length,
+      cancelled: list.filter((r) => r.status === "cancelled").length,
+      phone: list.filter((r) => r.source === "phone").length,
+      web: list.filter((r) => r.source !== "phone").length,
+    },
+    timeline,
+    reservations: list,
+    weekSummary: Object.entries(weekByDate)
+      .sort(([a], [b]) => (a < b ? -1 : 1))
+      .map(([d, count]) => ({ date: d, count })),
+  });
+});
+
+app.post("/api/admin/reservations", adminAuth, async (req, res) => {
+  const validated = validateReservationBody(req.body ?? {}, {
+    ...reservationCtx(),
+    admin: true,
+  });
+  if (!validated.ok) {
+    return res.status(validated.status).json({ ok: false, error: validated.error });
+  }
+  return createReservation(validated.data, res);
+});
+
 app.patch("/api/admin/reservations/:id", adminAuth, async (req, res) => {
   const id = String(req.params.id);
   const status = String(req.body?.status ?? "");
@@ -277,9 +345,32 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ ok: false, error: "Error interno" });
 });
 
+const distPath = join(__root, "..", "dist");
+const hasDist = existsSync(distPath);
+if (hasDist) {
+  app.use(
+    express.static(distPath, {
+      index: "index.html",
+      extensions: ["html"],
+      redirect: true,
+      maxAge: process.env.NODE_ENV === "production" ? "1d" : 0,
+    }),
+  );
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api")) return next();
+    const base = req.path.replace(/\/$/, "") || "/";
+    const file = join(distPath, base === "/" ? "index.html" : `${base}/index.html`);
+    if (existsSync(file)) return res.sendFile(file);
+    res.status(404).type("text/plain").send("Not found");
+  });
+}
+
 app.listen(PORT, () => {
-  console.log(`[api] http://127.0.0.1:${PORT}`);
+  const mode = hasDist ? "web+api" : "api";
+  console.log(`[server] http://0.0.0.0:${PORT} (${mode})`);
+  if (process.env.SITE_URL) console.log(`[server] SITE_URL=${process.env.SITE_URL}`);
   if (!process.env.ADMIN_PASSWORD && !process.env.ADMIN_PASSWORD_HASH) {
     console.warn("[api] Define ADMIN_PASSWORD o ADMIN_PASSWORD_HASH en .env");
   }
+  logSmtpStatus();
 });

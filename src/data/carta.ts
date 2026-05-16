@@ -5,6 +5,8 @@ import hamburguesa from "../../JSON/Hamburguesa.json";
 import pizzas1 from "../../JSON/Pizzas_1.json";
 import pizzas2 from "../../JSON/Pizzas_2.json";
 import raciones from "../../JSON/Raciones.json";
+import type { Locale } from "../i18n/types";
+import { applyCartaLocale } from "./carta-locale";
 
 export type AlergenoId =
   | "gluten"
@@ -25,7 +27,11 @@ export type AlergenoId =
 export interface PlatoItem {
   id: string;
   nombre: string;
+  /** Nombre en español (carta del local) cuando la UI está en otro idioma. */
+  nombreEs?: string;
   descripcion?: string;
+  /** Descripción en español si se muestra traducción arriba. */
+  descripcionEs?: string;
   precio: string;
   ingredientes: string[];
   alergenos_contiene: AlergenoId[];
@@ -204,7 +210,7 @@ function flattenCategoria(cat: RawCategoria): CartaCategoria[] {
   ];
 }
 
-export function loadCarta(): CartaData {
+export function loadCartaRaw(): CartaData {
   const byId = new Map<string, CartaCategoria>();
 
   for (const file of MENU_FILES) {
@@ -239,4 +245,8 @@ export function loadCarta(): CartaData {
     categorias,
     alergenos_referencia: ALERGENO_ORDEN,
   };
+}
+
+export function loadCarta(locale: Locale = "es"): CartaData {
+  return applyCartaLocale(loadCartaRaw(), locale);
 }

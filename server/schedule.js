@@ -94,15 +94,15 @@ export function madridDateString(d = new Date()) {
 }
 
 function madridNowMinutesFromMidnight() {
-  const parts = new Intl.DateTimeFormat("en-US", {
+  const line = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Europe/Madrid",
     hour: "2-digit",
     minute: "2-digit",
-    hour12: false,
     hourCycle: "h23",
-  }).formatToParts(new Date());
-  const h = Number(parts.find((p) => p.type === "hour")?.value ?? "0");
-  const m = Number(parts.find((p) => p.type === "minute")?.value ?? "0");
+  }).format(new Date());
+  const [hRaw, mRaw] = line.split(":");
+  const h = Number(hRaw) % 24;
+  const m = Number(mRaw);
   return h * 60 + m;
 }
 
@@ -110,6 +110,24 @@ function madridNowMinutesFromMidnight() {
  * Franjas reservables hoy (Madrid): a partir de ahora + margen mínimo.
  * Otros días abiertos: todas las del calendario.
  */
+/**
+ * Primer día (desde startDate) con al menos una franja reservable.
+ * @param {string} startDate YYYY-MM-DD
+ */
+export function findFirstBookableDate(startDate, maxDays = 21, minLeadMinutes = 30) {
+  const today = madridDateString();
+  let d = startDate < today ? today : startDate;
+  for (let i = 0; i < maxDays; i++) {
+    if (getSlotsForDate(d).length === 0) {
+      d = addCalendarDays(d, 1);
+      continue;
+    }
+    if (getBookableSlotsForDate(d, minLeadMinutes).length > 0) return d;
+    d = addCalendarDays(d, 1);
+  }
+  return startDate;
+}
+
 export function getBookableSlotsForDate(dateStr, minLeadMinutes = 30) {
   const all = getSlotsForDate(dateStr);
   const today = madridDateString();

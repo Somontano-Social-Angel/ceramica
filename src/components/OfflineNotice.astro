@@ -1,0 +1,42 @@
+---
+interface Props {
+  message?: string;
+}
+
+const { message = "Sin conexión — mostrando contenido guardado. Las reservas online no están disponibles." } =
+  Astro.props;
+---
+
+<p class="offline-notice" data-offline-notice hidden>
+  {message}
+</p>
+
+<script>
+  const el = document.querySelector("[data-offline-notice]");
+  if (!el) throw new Error("offline notice");
+
+  function sync() {
+    el.hidden = navigator.onLine;
+  }
+
+  sync();
+  window.addEventListener("online", sync);
+  window.addEventListener("offline", sync);
+</script>
+
+<style>
+  .offline-notice {
+    margin: 0 0 1rem;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: #f5e6c8;
+    background: rgba(180, 120, 40, 0.18);
+    border: 1px solid rgba(220, 170, 80, 0.35);
+    border-radius: 10px;
+  }
+
+  .offline-notice[hidden] {
+    display: none;
+  }
+</style>
