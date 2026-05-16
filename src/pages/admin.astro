@@ -34,6 +34,7 @@ const calI18nJson = JSON.stringify(calI18n);
           <button class="adm-nav__btn is-active" type="button" data-nav="overview">Resumen</button>
           <button class="adm-nav__btn" type="button" data-nav="list">Todas</button>
           <button class="adm-nav__btn" type="button" data-nav="new">Nueva · teléfono</button>
+          <button class="adm-nav__btn" type="button" data-nav="novedades">Qué hay de nuevo</button>
         </nav>
         <button class="adm-link" type="button" id="logout-btn">Cerrar sesión</button>
       </aside>
@@ -171,6 +172,51 @@ const calI18nJson = JSON.stringify(calI18n);
             <p class="adm-ok" id="new-ok" hidden></p>
             <button class="adm-btn" type="submit">Guardar reserva</button>
           </form>
+        </section>
+
+        <section class="adm-panel" id="panel-novedades" data-panel="novedades" hidden>
+          <header class="adm-head">
+            <div>
+              <h1 class="adm-title adm-title--sm">Qué hay de nuevo</h1>
+              <p class="adm-sub">Publica avisos, menús o eventos en la home (español).</p>
+            </div>
+            <button class="adm-btn adm-btn--ghost adm-btn--compact" type="button" id="avisos-reload">Actualizar</button>
+          </header>
+
+          <form class="adm-form adm-form--wide" id="aviso-form">
+            <div class="adm-grid">
+              <label class="adm-lbl">Título
+                <input class="adm-inp" name="title" required maxlength="160" />
+              </label>
+              <label class="adm-lbl">Tipo
+                <select class="adm-inp" name="tipo">
+                  <option value="evento">Evento</option>
+                  <option value="menu">Menú del día</option>
+                  <option value="aviso">Aviso</option>
+                </select>
+              </label>
+              <label class="adm-lbl">Publicado
+                <input class="adm-inp" type="date" name="publicado" required />
+              </label>
+              <label class="adm-lbl">Visible hasta <span class="adm-opt">(opcional)</span>
+                <input class="adm-inp" type="date" name="hasta" />
+              </label>
+            </div>
+            <label class="adm-lbl">Texto
+              <textarea class="adm-inp adm-textarea" name="body" rows="4" required maxlength="4000" placeholder="Párrafos separados por línea en blanco."></textarea>
+            </label>
+            <label class="adm-check">
+              <input type="checkbox" name="destacado" />
+              Destacar en banner (solo uno activo recomendado)
+            </label>
+            <p class="adm-err" id="aviso-err" hidden></p>
+            <p class="adm-ok" id="aviso-ok" hidden></p>
+            <button class="adm-btn" type="submit">Publicar</button>
+          </form>
+
+          <h2 class="adm-h2">Publicados</h2>
+          <div class="adm-cards" id="avisos-list"></div>
+          <p class="adm-empty" id="avisos-empty" hidden>Sin novedades publicadas.</p>
         </section>
       </div>
     </div>
@@ -350,6 +396,55 @@ const calI18nJson = JSON.stringify(calI18n);
     });
   }
 
+  const TIPO_AVISO = { evento: "Evento", menu: "Menú del día", aviso: "Aviso" };
+
+  function renderAvisoCard(a) {
+    const hasta = a.hasta ? ` · hasta ${a.hasta}` : "";
+    const preview =
+      a.body.length > 220 ? `${a.body.slice(0, 220).trim()}…` : a.body;
+    return `
+      <article class="adm-card-item" data-aviso-id="${a.id}">
+        <header class="adm-card-item__head">
+          <span class="adm-badge">${TIPO_AVISO[a.tipo] ?? a.tipo}</span>
+          <span class="adm-muted">${a.publicado}${hasta}</span>
+          ${a.destacado ? '<span class="adm-badge adm-badge--phone">Destacado</span>' : ""}
+        </header>
+        <h3 class="adm-card-item__name">${escapeHtml(a.title)}</h3>
+        <p class="adm-card-item__notes">${escapeHtml(preview)}</p>
+        <footer class="adm-card-item__foot">
+          <button type="button" class="adm-btn adm-btn--ghost adm-btn--compact" data-delete-aviso="${a.id}">Eliminar</button>
+        </footer>
+      </article>`;
+  }
+
+  async function loadAvisos() {
+    const list = $("#avisos-list");
+    const empty = /** @type {HTMLParagraphElement} */ ($("#avisos-empty"));
+    if (!list || !empty) return;
+    const { r, j } = await api("/api/admin/avisos");
+    if (!r?.ok) {
+      list.innerHTML = "";
+      empty.textContent = j.error || "No se pudo cargar";
+      empty.hidden = false;
+      return;
+    }
+    const avisos = j.avisos ?? [];
+    empty.hidden = avisos.length > 0;
+    list.innerHTML = avisos.map(renderAvisoCard).join("");
+    list.querySelectorAll("[data-delete-aviso]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const id = /** @type {HTMLButtonElement} */ (btn).dataset.deleteAviso;
+        if (!id || !confirm("¿Eliminar esta novedad de la web?")) return;
+        const { r: dr } = await api(`/api/admin/avisos/${id}`, { method: "DELETE" });
+        if (!dr?.ok) {
+          alert("No se pudo eliminar");
+          return;
+        }
+        await loadAvisos();
+      });
+    });
+  }
+
   function setNav(panel) {
     $$(".adm-nav__btn").forEach((b) => b.classList.toggle("is-active", b.dataset.nav === panel));
     $$(".adm-panel").forEach((p) => {
@@ -360,6 +455,11 @@ const calI18nJson = JSON.stringify(calI18n);
     if (panel === "overview") loadOverview();
     if (panel === "list") loadList();
     if (panel === "new") loadNewSlots();
+    if (panel === "novedades") {
+      const pub = /** @type {HTMLInputElement | null} */ ($('#aviso-form [name="publicado"]'));
+      if (pub && !pub.value) pub.value = madridToday();
+      loadAvisos();
+    }
   }
 
   async function checkApi() {
@@ -578,6 +678,41 @@ const calI18nJson = JSON.stringify(calI18n);
   });
 
   $("#reload-btn").addEventListener("click", () => loadList());
+
+  $("#avisos-reload")?.addEventListener("click", () => loadAvisos());
+
+  $("#aviso-form")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const err = /** @type {HTMLParagraphElement} */ ($("#aviso-err"));
+    const ok = /** @type {HTMLParagraphElement} */ ($("#aviso-ok"));
+    err.hidden = true;
+    ok.hidden = true;
+    const fd = new FormData(/** @type {HTMLFormElement} */ (e.target));
+    const body = {
+      title: fd.get("title"),
+      body: fd.get("body"),
+      tipo: fd.get("tipo"),
+      publicado: fd.get("publicado"),
+      hasta: fd.get("hasta") || "",
+      destacado: fd.get("destacado") === "on",
+    };
+    const { r, j } = await api("/api/admin/avisos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!r?.ok) {
+      err.textContent = j.error || "No se pudo publicar";
+      err.hidden = false;
+      return;
+    }
+    ok.textContent = "Novedad publicada.";
+    ok.hidden = false;
+    /** @type {HTMLFormElement} */ (e.target).reset();
+    const pub = /** @type {HTMLInputElement | null} */ ($('#aviso-form [name="publicado"]'));
+    if (pub) pub.value = madridToday();
+    await loadAvisos();
+  });
 
   $("#new-form").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -1262,3 +1397,4 @@ const calI18nJson = JSON.stringify(calI18n);
     color: var(--fg-subtle);
   }
 </style>
+

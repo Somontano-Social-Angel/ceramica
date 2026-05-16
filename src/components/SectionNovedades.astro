@@ -11,46 +11,131 @@ const now = new Date();
 const entries = await getCollection("avisos", ({ data }) => !data.hasta || data.hasta >= now);
 const sorted = entries.sort((a, b) => b.data.publicado.getTime() - a.data.publicado.getTime()).slice(0, 4);
 
-if (sorted.length === 0) return null;
-
 const rendered = await Promise.all(
   sorted.map(async (entry) => {
     const { Content } = await render(entry);
     return { entry, Content };
   }),
 );
+
+const tipoLabels: Record<string, string> = {
+  menu: "Menú del día",
+  evento: "Evento",
+  aviso: "Aviso",
+};
 ---
 
-<section class="section" id="novedades" aria-labelledby="novedades-title">
+<section class="section" id="novedades" aria-labelledby="novedades-title" data-novedades-section>
   <div class="wrap">
     <header class="head">
       <p class="eyebrow">{t("novedades.eyebrow")}</p>
       <h2 id="novedades-title" class="h2">{t("novedades.title")}</h2>
     </header>
-    <ul class="list">
+    <ul class="list" data-novedades-list>
       {
-        rendered.map(({ entry, Content }) => (
-          <li class="item">
-            <p class="item__meta">
-              <span class="item__tipo">{entry.data.tipo}</span>
-              <time datetime={entry.data.publicado.toISOString()}>
-                {entry.data.publicado.toLocaleDateString("es-ES", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </time>
-            </p>
-            <h3 class="item__title">{entry.data.title}</h3>
-            <div class="item__body">
-              <Content />
-            </div>
+        rendered.length > 0 ? (
+          rendered.map(({ entry, Content }) => (
+            <li class="item" data-novedades-item>
+              <p class="item__meta">
+                <span class="item__tipo">{tipoLabels[entry.data.tipo] ?? entry.data.tipo}</span>
+                <time datetime={entry.data.publicado.toISOString()}>
+                  {entry.data.publicado.toLocaleDateString("es-ES", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </time>
+              </p>
+              <h3 class="item__title">{entry.data.title}</h3>
+              <div class="item__body">
+                <Content />
+              </div>
+            </li>
+          ))
+        ) : (
+          <li class="item item--placeholder" data-novedades-placeholder hidden>
+            <p class="item__body">Cargando novedades…</p>
           </li>
-        ))
+        )
       }
     </ul>
   </div>
 </section>
+
+<script data-astro-rerun>
+  const TIPO_LABELS = { menu: "Menú del día", evento: "Evento", aviso: "Aviso" };
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function bodyHtml(text) {
+    const inline = (s) =>
+      escapeHtml(s)
+        .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\n/g, "<br>");
+    return String(text)
+      .split(/\n{2,}/)
+      .map((p) => p.trim())
+      .filter(Boolean)
+      .map((p) => `<p>${inline(p)}</p>`)
+      .join("");
+  }
+
+  function formatDate(iso) {
+    const [y, m, d] = iso.split("-").map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  }
+
+  async function hydrateNovedades() {
+    const section = document.querySelector("[data-novedades-section]");
+    const list = section?.querySelector("[data-novedades-list]");
+    if (!list) return;
+
+    try {
+      const r = await fetch("/api/avisos", { credentials: "same-origin" });
+      if (!r.ok) return;
+      const j = await r.json();
+      if (!j.ok || !Array.isArray(j.avisos)) return;
+      if (j.avisos.length === 0) {
+        list.innerHTML = "";
+        return;
+      }
+
+      const items = j.avisos.slice(0, 6);
+      list.innerHTML = items
+        .map((a) => {
+          const tipo = TIPO_LABELS[a.tipo] ?? a.tipo;
+          const hasta =
+            a.hasta && a.hasta >= a.publicado
+              ? ` · hasta ${formatDate(a.hasta)}`
+              : "";
+          return `<li class="item">
+            <p class="item__meta">
+              <span class="item__tipo">${escapeHtml(tipo)}</span>
+              <time datetime="${escapeHtml(a.publicado)}">${escapeHtml(formatDate(a.publicado))}${escapeHtml(hasta)}</time>
+            </p>
+            <h3 class="item__title">${escapeHtml(a.title)}</h3>
+            <div class="item__body">${bodyHtml(a.body)}</div>
+          </li>`;
+        })
+        .join("");
+    } catch {
+      /* build estático / sin API: se mantiene el HTML del servidor */
+    }
+  }
+
+  hydrateNovedades();
+  document.addEventListener("astro:page-load", hydrateNovedades);
+</script>
 
 <style>
   .section {
@@ -133,5 +218,9 @@ const rendered = await Promise.all(
     font-size: 0.95rem;
     line-height: 1.65;
     color: var(--fg-muted);
+  }
+
+  .item__body :global(p + p) {
+    margin-top: 0.65rem;
   }
 </style>

@@ -1088,6 +1088,17 @@ const ui = uiStringsJson
     -webkit-line-clamp: unset;
   }
 
+  @media (max-width: 767px) {
+    .carta-item:not(.is-open) .carta-item__desc {
+      display: none;
+    }
+
+    .carta-item.is-open .carta-item__desc {
+      display: block;
+      -webkit-line-clamp: unset;
+    }
+  }
+
   .carta-item__meta {
     display: flex;
     flex-direction: column;

@@ -1,101 +1,40 @@
-/* Home: menos texto y bloques en móvil (≤959px) */
+/* Home móvil: recortes puntuales, no vaciar secciones */
 @media (max-width: 959px) {
   .home-main .section,
   .home-main .cta {
-    padding: 2.25rem 1.15rem;
+    padding: 2.75rem 1.15rem;
   }
 
-  .home-main .cta {
-    margin: 0 1rem 2.5rem;
-    padding: 1.75rem 1.15rem;
-  }
-
-  .home-main .eyebrow {
-    display: none;
-  }
-
-  .home-main .section .p,
-  .home-main .cta .text {
-    display: none;
-  }
-
-  .home-main .h2 {
-    font-size: clamp(1.55rem, 6vw, 1.85rem);
-    margin-bottom: 0.85rem;
-  }
-
-  /* Carta (resumen) */
-  .home-main #carta .intro {
-    display: block;
-  }
-
+  /* Carta (resumen en home): menos bloques, el texto principal se mantiene */
   .home-main #carta .intro__shot,
   .home-main #carta .cols,
   .home-main #carta .note {
     display: none;
   }
 
-  .home-main #carta .intro__text {
-    text-align: center;
-  }
-
   .home-main #carta .carta-cta {
     display: flex;
     width: 100%;
     max-width: 18rem;
-    margin: 0 auto;
+    margin: 0.75rem auto 0;
     justify-content: center;
-    min-height: 3rem;
-    font-size: 1rem;
+    min-height: 2.85rem;
   }
 
-  /* Horario */
-  .home-main #horario .days,
+  /* Horario: priorizar franja actual */
   .home-main #horario .block--note {
-    display: none;
-  }
-
-  .home-main #horario .grid {
-    gap: 0.75rem;
+    font-size: 0.9rem;
   }
 
   .home-main #horario .time {
-    font-size: 1.35rem;
+    font-size: 1.25rem;
   }
 
-  /* Ubicación */
-  .home-main #contacto .p,
-  .home-main #contacto .reviews {
-    display: none;
-  }
-
-  .home-main #contacto .wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .home-main #contacto .contact {
-    margin: 0 0 0.5rem;
-  }
-
-  .home-main #contacto .maplink {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 2.75rem;
-    padding: 0.65rem 1rem;
-    font-weight: 600;
-    border: 1px solid var(--border-strong);
-    border-radius: 12px;
-    margin-bottom: 0.5rem;
-  }
-
+  /* Ubicación: mapa visible, reseñas en bloque aparte si hay espacio */
   .home-main #contacto .map {
     min-height: 220px;
   }
 
-  /* Reserva final */
   .home-main #reserva .actions {
     flex-direction: column;
     gap: 0.55rem;
@@ -103,35 +42,6 @@
 
   .home-main #reserva .btn {
     width: 100%;
-    min-height: 3rem;
-    font-size: 0.95rem;
-  }
-
-  /* Hero móvil: aún más limpio */
-  .hero__mobile-label {
-    display: none;
-  }
-
-  .hero__mobile-place {
-    margin-bottom: 1.1rem;
-  }
-
-  .hero__scroll-more {
-    margin-top: 0.85rem;
-    font-size: 0.82rem;
-  }
-
-  body:has(.home-main) .footer .brand__tag,
-  body:has(.home-main) .footer .legal {
-    display: none;
-  }
-
-  body:has(.home-main) .footer {
-    padding: 1.5rem 1.15rem;
-    text-align: center;
-  }
-
-  body:has(.home-main) .footer .inner {
-    align-items: center;
+    min-height: 2.85rem;
   }
 }

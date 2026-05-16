@@ -29,14 +29,12 @@ import "../styles/home-mobile.css";
   <Header />
   <main class="home-main" transition:animate="fade">
     <Hero />
-    <div class="home-mobile-lite">
-      <SectionNosotros />
-      <SectionFirma />
-      <SectionNovedades />
-      <SectionExperiencia />
-      <SectionTestimonios />
-      <SectionFAQ />
-    </div>
+    <SectionNosotros />
+    <SectionFirma />
+    <SectionNovedades />
+    <SectionExperiencia />
+    <SectionTestimonios />
+    <SectionFAQ />
     <SectionCarta />
     <SectionHorario />
     <SectionUbicacion />
@@ -65,9 +63,4 @@ import "../styles/home-mobile.css";
     transform: translate(-50%, 0);
   }
 
-  @media (max-width: 959px) {
-    .home-mobile-lite {
-      display: none;
-    }
-  }
 </style>

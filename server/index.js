@@ -20,11 +20,15 @@ import {
 } from "./schedule.js";
 import {
   addReservation,
+  addAviso,
+  deleteAviso,
+  listAvisos,
   listReservations,
   listReservationsForDay,
   sumCoversForSlot,
   updateReservationStatus,
 } from "./db.js";
+import { validateAvisoBody } from "./avisos.js";
 import { logSmtpStatus, sendReservationEmails } from "./mail.js";
 import { validateReservationBody } from "./reservations.js";
 
@@ -109,6 +113,11 @@ async function verifyAdminPassword(plain) {
 
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true, time: new Date().toISOString() });
+});
+
+app.get("/api/avisos", async (_req, res) => {
+  const avisos = await listAvisos({ activeOnly: true });
+  res.json({ ok: true, avisos });
 });
 
 app.get("/api/meta", (_req, res) => {
@@ -338,6 +347,28 @@ app.patch("/api/admin/reservations/:id", adminAuth, async (req, res) => {
   const updated = await updateReservationStatus(id, status);
   if (!updated) return res.status(404).json({ ok: false, error: "No encontrada" });
   res.json({ ok: true, reservation: updated });
+});
+
+app.get("/api/admin/avisos", adminAuth, async (_req, res) => {
+  const avisos = await listAvisos();
+  res.json({ ok: true, avisos });
+});
+
+app.post("/api/admin/avisos", adminAuth, async (req, res) => {
+  const validated = validateAvisoBody(req.body ?? {});
+  if (!validated.ok) {
+    return res.status(validated.status).json({ ok: false, error: validated.error });
+  }
+  const aviso = await addAviso(validated.data);
+  res.status(201).json({ ok: true, aviso });
+});
+
+app.delete("/api/admin/avisos/:id", adminAuth, async (req, res) => {
+  const id = String(req.params.id ?? "");
+  if (!id) return res.status(400).json({ ok: false, error: "ID no válido" });
+  const removed = await deleteAviso(id);
+  if (!removed) return res.status(404).json({ ok: false, error: "No encontrado" });
+  res.json({ ok: true });
 });
 
 app.use((err, _req, res, _next) => {
