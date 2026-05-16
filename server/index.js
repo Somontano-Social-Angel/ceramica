@@ -8,7 +8,9 @@ dotenv.config({ path: join(__root, "..", ".env") });
 import crypto from "node:crypto";
 import express from "express";
 import session from "express-session";
+import createFileStore from "session-file-store";
 import bcrypt from "bcryptjs";
+import { mkdirSync } from "node:fs";
 import {
   getSlotsForDate,
   getBookableSlotsForDate,
@@ -59,6 +61,10 @@ function sessionCookieSecure() {
   return "auto";
 }
 
+const sessionDir = join(__root, "data", "sessions");
+mkdirSync(sessionDir, { recursive: true });
+const FileStore = createFileStore(session);
+
 app.use(
   session({
     name: "laceramica.sid",
@@ -66,6 +72,10 @@ app.use(
     resave: false,
     saveUninitialized: false,
     proxy: true,
+    store: new FileStore({
+      path: sessionDir,
+      ttl: 7 * 24 * 60 * 60,
+    }),
     cookie: {
       httpOnly: true,
       sameSite: "lax",
@@ -399,6 +409,10 @@ app.delete("/api/admin/avisos/:id", adminAuth, async (req, res) => {
 app.use((err, _req, res, _next) => {
   console.error(err);
   res.status(500).json({ ok: false, error: "Error interno" });
+});
+
+app.all("/api/*", (req, res) => {
+  res.status(404).json({ ok: false, error: "Ruta API no encontrada", path: req.path });
 });
 
 const distPath = join(__root, "..", "dist");
