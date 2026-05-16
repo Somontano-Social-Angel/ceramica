@@ -99,93 +99,127 @@ const homeHref = lpath(locale, "/");
 
   <div class="mobile" id="mobile-nav" hidden data-mobile-nav>
     <nav class="mobile__nav" aria-label="Móvil">
-      <LanguageSwitcher variant="mobile" />
-      <ul class="mobile__top">
-        <li>
-          <a class="mobile__link" href={homeHref}>{t("nav.home")}</a>
-        </li>
+      <p class="mobile__quick-title">{t("nav.mobileQuick")}</p>
+      <div class="mobile__tiles">
+        <a class="mobile__tile mobile__tile--primary" href={reservarCta.href}>{t("nav.bookTable")}</a>
         {
           pageLinks
             .filter((p) => !p.href.includes("/reservar"))
             .map((item) => (
-              <li>
-                <a class="mobile__link" href={item.href}>{item.label}</a>
-              </li>
+              <a class="mobile__tile" href={item.href}>
+                {item.label === t("nav.cartaFull") ? t("nav.carta") : item.label}
+              </a>
             ))
         }
-      </ul>
-
-      <details class="mobile__group" open={isHome}>
-        <summary class="mobile__group-trigger">{t("nav.mobileSections")}</summary>
-        <ul class="mobile__group-list">
-          {
-            landingSections.map((item) => (
-              <li>
-                <a class="mobile__sublink" href={item.href}>{item.label}</a>
-              </li>
-            ))
-          }
-        </ul>
-      </details>
-
-      <a class="cta cta--block" href={reservarCta.href}>{t("nav.bookTable")}</a>
+        <a class="mobile__tile" href="tel:+34974312220">{t("nav.call")}</a>
+      </div>
+      <LanguageSwitcher variant="mobile" />
+      {isHome && (
+        <details class="mobile__group">
+          <summary class="mobile__group-trigger">{t("nav.mobileMore")}</summary>
+          <ul class="mobile__group-list">
+            {
+              landingSections.map((item) => (
+                <li>
+                  <a class="mobile__sublink" href={item.href}>{item.label}</a>
+                </li>
+              ))
+            }
+          </ul>
+        </details>
+      )}
+      {!isHome && <a class="mobile__home-link" href={homeHref}>{t("nav.home")}</a>}
     </nav>
   </div>
 </header>
 
 <script>
-  const header = document.querySelector("[data-site-header]");
-  const btn = document.querySelector("[data-menu-btn]");
-  const panel = document.querySelector("[data-mobile-nav]");
-  const dropdowns = document.querySelectorAll("[data-nav-dropdown]");
-
-  function onScroll() {
-    if (header) header.classList.toggle("is-scrolled", window.scrollY > 24);
+  /** Delegación + reset tras View Transitions (cambio de idioma, etc.). */
+  function mobileNavEls() {
+    return {
+      btn: document.querySelector("[data-menu-btn]"),
+      panel: document.querySelector("[data-mobile-nav]"),
+    };
   }
 
-  onScroll();
-  window.addEventListener("scroll", onScroll, { passive: true });
-
   function setMobileOpen(open) {
+    const { btn, panel } = mobileNavEls();
     if (!btn || !panel) return;
     panel.toggleAttribute("hidden", !open);
     btn.setAttribute("aria-expanded", String(open));
     document.body.classList.toggle("nav-open", open);
-    btn.querySelector(".sr-only")!.textContent = open
-      ? btn.getAttribute("data-close-label") || "Close menu"
-      : btn.getAttribute("data-open-label") || "Open menu";
+    const sr = btn.querySelector(".sr-only");
+    if (sr) {
+      sr.textContent = open
+        ? btn.getAttribute("data-close-label") || "Cerrar menú"
+        : btn.getAttribute("data-open-label") || "Abrir menú";
+    }
   }
 
-  btn?.addEventListener("click", () => {
-    setMobileOpen(panel?.hasAttribute("hidden") ?? false);
-  });
+  function closeMobileNav() {
+    setMobileOpen(false);
+  }
 
-  panel?.querySelectorAll("a").forEach((a) => {
-    a.addEventListener("click", () => setMobileOpen(false));
-  });
+  function onScroll() {
+    const header = document.querySelector("[data-site-header]");
+    if (header) header.classList.toggle("is-scrolled", window.scrollY > 24);
+  }
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      setMobileOpen(false);
-      dropdowns.forEach((d) => d.removeAttribute("open"));
-    }
-  });
+  function bindSiteHeader() {
+    if (document.documentElement.dataset.siteHeaderBound === "1") return;
+    document.documentElement.dataset.siteHeaderBound = "1";
 
-  dropdowns.forEach((details) => {
-    details.addEventListener("toggle", () => {
-      if (!details.open) return;
-      dropdowns.forEach((other) => {
-        if (other !== details) other.removeAttribute("open");
-      });
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    document.addEventListener("click", (e) => {
+      const target = e.target;
+      if (!(target instanceof Element)) return;
+
+      if (target.closest("[data-menu-btn]")) {
+        const { panel } = mobileNavEls();
+        if (!panel) return;
+        setMobileOpen(panel.hasAttribute("hidden"));
+        return;
+      }
+
+      if (target.closest("[data-mobile-nav] a") || target.closest("[data-lang-switcher] a.lang__opt")) {
+        closeMobileNav();
+      }
+
+      if (!target.closest("[data-nav-dropdown]") && !target.closest("[data-lang-switcher]")) {
+        document.querySelectorAll("[data-nav-dropdown]").forEach((d) => d.removeAttribute("open"));
+      }
     });
-  });
 
-  document.addEventListener("click", (e) => {
-    const target = e.target;
-    if (!(target instanceof Element)) return;
-    if (target.closest("[data-nav-dropdown]") || target.closest("[data-lang-switcher]")) return;
-    dropdowns.forEach((d) => d.removeAttribute("open"));
-  });
+    document.addEventListener(
+      "toggle",
+      (e) => {
+        const details = e.target;
+        if (!(details instanceof HTMLDetailsElement) || !details.matches("[data-nav-dropdown]")) return;
+        if (!details.open) return;
+        document.querySelectorAll("[data-nav-dropdown]").forEach((other) => {
+          if (other !== details) other.removeAttribute("open");
+        });
+      },
+      true,
+    );
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      closeMobileNav();
+      document.querySelectorAll("[data-nav-dropdown]").forEach((d) => d.removeAttribute("open"));
+    });
+
+    document.addEventListener("astro:before-swap", closeMobileNav);
+    document.addEventListener("astro:page-load", () => {
+      closeMobileNav();
+      onScroll();
+    });
+  }
+
+  bindSiteHeader();
+  onScroll();
+  closeMobileNav();
 </script>
 
 <style>
@@ -468,27 +502,63 @@ const homeHref = lpath(locale, "/");
     padding: 1rem 1.25rem 1.5rem;
   }
 
-  .mobile__nav :global(.lang--mobile) {
-    margin-bottom: 1.25rem;
-  }
-
-  .mobile__top {
-    list-style: none;
+  .mobile__quick-title {
     margin: 0 0 0.75rem;
-    padding: 0;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--fg-subtle);
   }
 
-  .mobile__link {
+  .mobile__tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.55rem;
+    margin-bottom: 1.15rem;
+  }
+
+  .mobile__tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3rem;
+    padding: 0.75rem 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.25;
+    color: var(--fg);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+  }
+
+  .mobile__tile:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .mobile__tile--primary {
+    grid-column: 1 / -1;
+    background: var(--fg);
+    color: var(--bg);
+    border-color: transparent;
+    font-size: 1rem;
+    min-height: 3.15rem;
+  }
+
+  .mobile__nav :global(.lang--mobile) {
+    margin-bottom: 1rem;
+  }
+
+  .mobile__home-link {
     display: block;
-    padding: 0.65rem 0;
+    margin-top: 0.75rem;
     font-size: 0.9rem;
     font-weight: 500;
     color: var(--fg-muted);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .mobile__link:hover {
-    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   .mobile__group {

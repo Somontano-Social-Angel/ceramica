@@ -45,7 +45,8 @@ const ui = uiStringsJson
 ---
 
 <section class="carta-app" id="carta-app" aria-label="Carta interactiva">
-  <details class="carta-filters-panel">
+  <div class="carta-sticky-head">
+  <details class="carta-filters-panel" open>
     <summary class="carta-filters-panel__trigger">
       <span class="carta-filters-panel__icon" aria-hidden="true">⌕</span>
       <span class="carta-filters-panel__text">{ui.filters}</span>
@@ -131,6 +132,7 @@ const ui = uiStringsJson
       </div>
       <div class="carta-tabs__fade carta-tabs__fade--r" aria-hidden="true"></div>
     </nav>
+  </div>
   </div>
 
   <div class="carta-body">
@@ -245,23 +247,8 @@ const ui = uiStringsJson
   </details>
 </section>
 
-<script define:vars={{ cartaJson, uiStringsJson: JSON.stringify(ui) }}>
-  const carta = JSON.parse(cartaJson);
+<script define:vars={{ cartaJson, uiStringsJson: JSON.stringify(ui) }} data-astro-rerun>
   const ui = JSON.parse(uiStringsJson);
-
-  const root = document.getElementById("carta-app");
-  if (!root) throw new Error("Carta app no encontrada");
-
-  const searchEl = root.querySelector("[data-carta-search]");
-  const countEl = root.querySelector("[data-carta-count]");
-  const filterBadge = root.querySelector("[data-carta-filter-badge]");
-  const emptyEl = root.querySelector("[data-carta-empty]");
-  const sectionsWrap = root.querySelector("[data-carta-sections]");
-  const clearBtns = root.querySelectorAll("[data-carta-clear], [data-carta-clear-inline]");
-  const tabBtns = root.querySelectorAll("[data-cat-tab]");
-  const alergenoBtns = root.querySelectorAll("[data-alergeno]");
-  const dietaBtns = root.querySelectorAll("[data-dieta]");
-  const tabsScroll = root.querySelector(".carta-tabs__scroll");
 
   const state = {
     search: "",
@@ -269,6 +256,10 @@ const ui = uiStringsJson
     dietas: new Set(),
     activeTab: "todas",
   };
+
+  function getCartaRoot() {
+    return document.getElementById("carta-app");
+  }
 
   function normalize(str) {
     return str
@@ -319,30 +310,35 @@ const ui = uiStringsJson
     return true;
   }
 
-  function updateFilterBadge() {
+  function updateFilterBadge(root) {
     const n = activeFilterCount();
+    const filterBadge = root.querySelector("[data-carta-filter-badge]");
     if (filterBadge) {
       filterBadge.hidden = n === 0;
       filterBadge.textContent = String(n);
     }
   }
 
-  function updateClearVisibility() {
+  function updateClearVisibility(root) {
     const hasFilters = activeFilterCount() > 0;
-    clearBtns.forEach((btn) => {
-      if (btn.hasAttribute("data-carta-clear")) btn.hidden = !hasFilters;
+    root.querySelectorAll("[data-carta-clear]").forEach((btn) => {
+      btn.hidden = !hasFilters;
     });
-    updateFilterBadge();
+    updateFilterBadge(root);
   }
 
-  function scrollActiveTabIntoView() {
+  function scrollActiveTabIntoView(root) {
     const active = root.querySelector(".carta-tab.is-active");
+    const tabsScroll = root.querySelector(".carta-tabs__scroll");
     if (active && tabsScroll) {
       active.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
     }
   }
 
-  function applyFilters() {
+  function applyFilters(root) {
+    const countEl = root.querySelector("[data-carta-count]");
+    const emptyEl = root.querySelector("[data-carta-empty]");
+    const sectionsWrap = root.querySelector("[data-carta-sections]");
     let visibleTotal = 0;
     const sections = root.querySelectorAll("[data-cat-section]");
 
@@ -384,87 +380,129 @@ const ui = uiStringsJson
 
     if (emptyEl) emptyEl.hidden = visibleTotal > 0;
     if (sectionsWrap) sectionsWrap.hidden = visibleTotal === 0;
-    updateClearVisibility();
+    updateClearVisibility(root);
   }
 
-  function setActiveTab(tabId) {
+  function setActiveTab(root, tabId) {
+    if (!tabId) return;
     state.activeTab = tabId;
-    tabBtns.forEach((btn) => {
+    root.querySelectorAll("[data-cat-tab]").forEach((btn) => {
       const active = btn.dataset.catTab === tabId;
       btn.classList.toggle("is-active", active);
       btn.setAttribute("aria-selected", String(active));
     });
-    applyFilters();
-    scrollActiveTabIntoView();
+    applyFilters(root);
+    scrollActiveTabIntoView(root);
   }
 
-  searchEl?.addEventListener("input", () => {
-    state.search = searchEl.value;
-    applyFilters();
-  });
+  function syncFilterControls(root) {
+    const searchEl = root.querySelector("[data-carta-search]");
+    if (searchEl && searchEl.value !== state.search) searchEl.value = state.search;
 
-  alergenoBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const id = btn.dataset.alergeno;
-      const pressed = btn.getAttribute("aria-pressed") === "true";
-      btn.setAttribute("aria-pressed", String(!pressed));
-      btn.classList.toggle("is-active", !pressed);
-      if (pressed) state.excludeAlergenos.delete(id);
-      else state.excludeAlergenos.add(id);
-      applyFilters();
+    root.querySelectorAll("[data-alergeno]").forEach((btn) => {
+      const on = state.excludeAlergenos.has(btn.dataset.alergeno);
+      btn.setAttribute("aria-pressed", String(on));
+      btn.classList.toggle("is-active", on);
     });
-  });
 
-  dietaBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const id = btn.dataset.dieta;
-      const pressed = btn.getAttribute("aria-pressed") === "true";
-      btn.setAttribute("aria-pressed", String(!pressed));
-      btn.classList.toggle("is-active", !pressed);
-      if (pressed) state.dietas.delete(id);
-      else state.dietas.add(id);
-      applyFilters();
+    root.querySelectorAll("[data-dieta]").forEach((btn) => {
+      const on = state.dietas.has(btn.dataset.dieta);
+      btn.setAttribute("aria-pressed", String(on));
+      btn.classList.toggle("is-active", on);
     });
-  });
+  }
 
-  tabBtns.forEach((btn) => {
-    btn.addEventListener("click", () => setActiveTab(btn.dataset.catTab));
-  });
-
-  function clearFilters() {
+  function clearFilters(root) {
     state.search = "";
     state.excludeAlergenos.clear();
     state.dietas.clear();
-    if (searchEl) searchEl.value = "";
-    alergenoBtns.forEach((btn) => {
-      btn.setAttribute("aria-pressed", "false");
-      btn.classList.remove("is-active");
-    });
-    dietaBtns.forEach((btn) => {
-      btn.setAttribute("aria-pressed", "false");
-      btn.classList.remove("is-active");
-    });
-    setActiveTab("todas");
+    syncFilterControls(root);
+    setActiveTab(root, "todas");
   }
 
-  clearBtns.forEach((btn) => btn.addEventListener("click", clearFilters));
-
-  root.querySelectorAll(".carta-item__toggle").forEach((toggle) => {
-    toggle.addEventListener("click", () => {
-      const expanded = toggle.getAttribute("aria-expanded") === "true";
-      const detail = toggle.parentElement?.querySelector(".carta-item__detail");
-      toggle.setAttribute("aria-expanded", String(!expanded));
-      toggle.parentElement?.classList.toggle("is-open", !expanded);
-      if (detail) detail.hidden = expanded;
-    });
-  });
-
-  if (window.matchMedia("(min-width: 768px)").matches) {
+  function setupFiltersPanel(root) {
     const panel = root.querySelector(".carta-filters-panel");
-    if (panel) panel.open = true;
+    if (!panel) return;
+    panel.open = true;
   }
 
-  setActiveTab("todas");
+  function initCartaApp() {
+    const root = getCartaRoot();
+    if (!root) return;
+    setupFiltersPanel(root);
+    syncFilterControls(root);
+    setActiveTab(root, state.activeTab || "todas");
+  }
+
+  function bindCartaAppOnce() {
+    if (document.documentElement.dataset.cartaBound === "1") return;
+    document.documentElement.dataset.cartaBound = "1";
+
+    document.addEventListener("click", (e) => {
+      const root = getCartaRoot();
+      if (!root || !(e.target instanceof Element) || !root.contains(e.target)) return;
+
+      const tabBtn = e.target.closest("[data-cat-tab]");
+      if (tabBtn instanceof HTMLButtonElement) {
+        e.preventDefault();
+        setActiveTab(root, tabBtn.dataset.catTab);
+        return;
+      }
+
+      const alergenoBtn = e.target.closest("[data-alergeno]");
+      if (alergenoBtn instanceof HTMLButtonElement) {
+        const id = alergenoBtn.dataset.alergeno;
+        const pressed = alergenoBtn.getAttribute("aria-pressed") === "true";
+        alergenoBtn.setAttribute("aria-pressed", String(!pressed));
+        alergenoBtn.classList.toggle("is-active", !pressed);
+        if (pressed) state.excludeAlergenos.delete(id);
+        else state.excludeAlergenos.add(id);
+        applyFilters(root);
+        return;
+      }
+
+      const dietaBtn = e.target.closest("[data-dieta]");
+      if (dietaBtn instanceof HTMLButtonElement) {
+        const id = dietaBtn.dataset.dieta;
+        const pressed = dietaBtn.getAttribute("aria-pressed") === "true";
+        dietaBtn.setAttribute("aria-pressed", String(!pressed));
+        dietaBtn.classList.toggle("is-active", !pressed);
+        if (pressed) state.dietas.delete(id);
+        else state.dietas.add(id);
+        applyFilters(root);
+        return;
+      }
+
+      if (e.target.closest("[data-carta-clear], [data-carta-clear-inline]")) {
+        clearFilters(root);
+        return;
+      }
+
+      const toggle = e.target.closest(".carta-item__toggle");
+      if (toggle instanceof HTMLButtonElement) {
+        const expanded = toggle.getAttribute("aria-expanded") === "true";
+        const detail = toggle.parentElement?.querySelector(".carta-item__detail");
+        toggle.setAttribute("aria-expanded", String(!expanded));
+        toggle.parentElement?.classList.toggle("is-open", !expanded);
+        if (detail) detail.hidden = expanded;
+      }
+    });
+
+    document.addEventListener("input", (e) => {
+      const root = getCartaRoot();
+      if (!root || !(e.target instanceof Element) || !root.contains(e.target)) return;
+      const search = e.target.closest("[data-carta-search]");
+      if (search instanceof HTMLInputElement) {
+        state.search = search.value;
+        applyFilters(root);
+      }
+    });
+
+    document.addEventListener("astro:page-load", initCartaApp);
+  }
+
+  bindCartaAppOnce();
+  initCartaApp();
 </script>
 
 <style>
@@ -479,7 +517,58 @@ const ui = uiStringsJson
     box-shadow: 0 28px 64px rgba(0, 0, 0, 0.4);
   }
 
-  /* —— Filtros (plegable en móvil) —— */
+  /* —— Cabecera fija: filtros + pestañas (móvil) —— */
+  @media (max-width: 767px) {
+    .carta-sticky-head {
+      position: sticky;
+      top: 3.75rem;
+      z-index: 13;
+      background: var(--bg-soft);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+    }
+
+    .carta-filters-panel__trigger {
+      display: none;
+    }
+
+    .carta-filters-panel .carta-toolbar {
+      padding: 0.75rem 1rem 0.65rem;
+    }
+
+    .carta-toolbar__grid {
+      gap: 0.75rem;
+    }
+
+    .carta-toolbar__block .carta-alergenos,
+    .carta-toolbar__block .carta-dietas {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 0.15rem;
+      scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .carta-toolbar__block .carta-alergenos::-webkit-scrollbar,
+    .carta-toolbar__block .carta-dietas::-webkit-scrollbar {
+      display: none;
+    }
+
+    .carta-alergeno,
+    .carta-dieta {
+      scroll-snap-align: start;
+      flex-shrink: 0;
+    }
+
+    .carta-nav-bar {
+      position: static;
+      top: auto;
+      border-bottom: none;
+    }
+  }
+
+  /* —— Filtros (plegable en escritorio) —— */
   .carta-filters-panel {
     border-bottom: 1px solid var(--border);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
@@ -612,6 +701,14 @@ const ui = uiStringsJson
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
+  }
+
+  .carta-alergeno,
+  .carta-dieta,
+  .carta-tab,
+  .carta-item__toggle,
+  .carta-clear {
+    touch-action: manipulation;
   }
 
   .carta-alergeno,

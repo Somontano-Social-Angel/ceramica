@@ -17,6 +17,7 @@ import SectionUbicacion from "../components/SectionUbicacion.astro";
 import SectionFAQ from "../components/SectionFAQ.astro";
 import SectionReserva from "../components/SectionReserva.astro";
 import Footer from "../components/Footer.astro";
+import "../styles/home-mobile.css";
 ---
 
 <Layout
@@ -26,17 +27,19 @@ import Footer from "../components/Footer.astro";
 >
   <a class="skip" href="#inicio">{t("skip")}</a>
   <Header />
-  <main transition:animate="fade">
+  <main class="home-main" transition:animate="fade">
     <Hero />
-    <SectionNosotros />
-    <SectionFirma />
+    <div class="home-mobile-lite">
+      <SectionNosotros />
+      <SectionFirma />
+      <SectionNovedades />
+      <SectionExperiencia />
+      <SectionTestimonios />
+      <SectionFAQ />
+    </div>
     <SectionCarta />
-    <SectionNovedades />
-    <SectionExperiencia />
     <SectionHorario />
-    <SectionTestimonios />
     <SectionUbicacion />
-    <SectionFAQ />
     <SectionReserva />
   </main>
   <Footer />
@@ -60,5 +63,11 @@ import Footer from "../components/Footer.astro";
 
   .skip:focus {
     transform: translate(-50%, 0);
+  }
+
+  @media (max-width: 959px) {
+    .home-mobile-lite {
+      display: none;
+    }
   }
 </style>

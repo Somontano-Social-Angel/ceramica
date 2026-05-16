@@ -1,11 +1,17 @@
 ---
 import { Image } from "astro:assets";
 import { siteImages } from "../data/images";
-import { lpath, sectionHref, useTranslations } from "../i18n";
+import { RESTAURANT } from "../data/site";
+import { getPageLinks, getReservarCta } from "../data/nav";
+import { sectionHref, useTranslations } from "../i18n";
 
 const locale = Astro.currentLocale ?? "es";
 const t = useTranslations(locale);
 const hero = siteImages.heroPizza;
+const pageLinks = getPageLinks(locale as import("../i18n/types").Locale);
+const reservar = getReservarCta(locale as import("../i18n/types").Locale);
+const cartaLink = pageLinks.find((p) => p.href.includes("/carta"));
+const retoLink = pageLinks.find((p) => p.href.includes("/la-reto"));
 ---
 
 <section class="hero" id="inicio" aria-labelledby="hero-title">
@@ -13,9 +19,32 @@ const hero = siteImages.heroPizza;
   <div class="hero__grid" aria-hidden="true"></div>
   <div class="hero__glow" aria-hidden="true"></div>
   <div class="hero__inner">
-    <div class="hero__main">
+    <!-- Móvil: logo, nombre y accesos discretos -->
+    <div class="hero__mobile">
+      <img
+        class="hero__mobile-logo"
+        src="/logo.svg"
+        alt=""
+        width="120"
+        height="80"
+        loading="eager"
+        decoding="async"
+      />
+      <h1 id="hero-title" class="hero__mobile-name">{t("hero.mobileName")}</h1>
+      <p class="hero__mobile-place">{t("hero.mobilePlace")}</p>
+      <nav class="hero__quick hero__quick--subtle" aria-label={t("nav.mobileQuick")}>
+        <a class="hero__quick-link hero__quick-link--emph" href={reservar.href}>{reservar.label}</a>
+        {cartaLink && <a class="hero__quick-link" href={cartaLink.href}>{t("nav.carta")}</a>}
+        {retoLink && <a class="hero__quick-link" href={retoLink.href}>{t("nav.reto")}</a>}
+        <a class="hero__quick-link" href={`tel:${RESTAURANT.telephone}`}>{t("nav.call")}</a>
+      </nav>
+      <a class="hero__scroll-more" href="#horario">{t("hero.scrollMore")}</a>
+    </div>
+
+    <!-- Escritorio (y detalle completo) -->
+    <div class="hero__main hero__detail">
       <p class="eyebrow">{t("hero.eyebrow")}</p>
-      <h1 id="hero-title" class="title">{t("hero.title")}</h1>
+      <h1 class="title hero__desktop-title">{t("hero.title")}</h1>
       <p class="addr">{t("hero.addr")}</p>
       <ul class="facts" aria-label={t("hero.factsLabel")}>
         <li>{t("hero.fact1")}</li>
@@ -26,7 +55,7 @@ const hero = siteImages.heroPizza;
       <p class="lead">{t("hero.lead1")}</p>
       <p class="lead">{t("hero.lead2")}</p>
       <div class="actions">
-        <a class="btn btn--primary" href={lpath(locale, "/reservar")}>{t("hero.book")}</a>
+        <a class="btn btn--primary" href={reservar.href}>{t("hero.book")}</a>
         <a class="btn btn--ghost" href={sectionHref(locale, "carta")}>{t("hero.menu")}</a>
       </div>
     </div>
@@ -59,12 +88,19 @@ const hero = siteImages.heroPizza;
 <style>
   .hero {
     position: relative;
-    min-height: min(100vh, 900px);
+    min-height: auto;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 6.5rem 1.5rem 3.5rem;
+    padding: 5.5rem 1.25rem 2.5rem;
     overflow: hidden;
+  }
+
+  @media (min-width: 960px) {
+    .hero {
+      min-height: min(100vh, 900px);
+      padding: 6.5rem 1.5rem 3.5rem;
+    }
   }
 
   .hero__bg {
@@ -104,7 +140,7 @@ const hero = siteImages.heroPizza;
     margin: 0 auto;
     width: 100%;
     display: grid;
-    gap: 2.75rem;
+    gap: 1.5rem;
     align-items: center;
   }
 
@@ -112,6 +148,119 @@ const hero = siteImages.heroPizza;
     .hero__inner {
       grid-template-columns: 1fr minmax(300px, 40%);
       gap: 3.5rem;
+    }
+  }
+
+  /* —— Móvil simplificado —— */
+  .hero__mobile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 22rem;
+    margin-inline: auto;
+  }
+
+  .hero__mobile-logo {
+    width: min(38vw, 112px);
+    height: auto;
+    margin: 0 0 1.1rem;
+    filter: invert(1) brightness(1.05);
+    opacity: 0.94;
+  }
+
+  .hero__detail,
+  .hero__visual {
+    display: none;
+  }
+
+  .hero__mobile-name {
+    margin: 0 0 0.35rem;
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 11vw, 3.25rem);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+  }
+
+  .hero__mobile-place {
+    margin: 0 0 1.15rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--fg-muted);
+  }
+
+  .hero__quick {
+    margin: 0;
+  }
+
+  .hero__quick--subtle {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem 0.85rem;
+    width: 100%;
+  }
+
+  .hero__quick-link {
+    font-size: 0.86rem;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--fg-muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(255, 255, 255, 0.22);
+    padding: 0.25rem 0.15rem;
+    transition: color 0.2s;
+  }
+
+  .hero__quick-link:hover {
+    color: var(--fg);
+    text-decoration-color: rgba(255, 255, 255, 0.45);
+  }
+
+  .hero__quick-link--emph {
+    text-decoration: none;
+    color: var(--fg);
+    font-weight: 600;
+    padding: 0.45rem 0.95rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .hero__quick-link--emph:hover {
+    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .hero__scroll-more {
+    margin-top: 1.25rem;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--fg-subtle);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .hero__scroll-more:hover {
+    color: var(--fg-muted);
+  }
+
+  @media (min-width: 960px) {
+    .hero__mobile {
+      display: none;
+    }
+
+    .hero__detail,
+    .hero__visual {
+      display: block;
+    }
+
+    .hero__visual {
+      margin: 0;
+      min-width: 0;
     }
   }
 
@@ -234,11 +383,6 @@ const hero = siteImages.heroPizza;
   .btn--ghost:hover {
     border-color: var(--fg);
     background: rgba(255, 255, 255, 0.04);
-  }
-
-  .hero__visual {
-    margin: 0;
-    min-width: 0;
   }
 
   .hero__plate {

@@ -88,6 +88,7 @@ const pagePath = stripLocaleFromPath(Astro.url.pathname);
       if (e.key === "Escape") closeAllLangMenus();
     });
 
+    document.addEventListener("astro:before-swap", closeAllLangMenus);
     document.addEventListener("astro:page-load", closeAllLangMenus);
   }
 

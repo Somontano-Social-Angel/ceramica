@@ -5,10 +5,7 @@
     "brasa": { "categoria": "Grillades" },
     "sandwiches": { "categoria": "Sandwichs" },
     "hamburguesas": { "categoria": "Burgers" },
-    "pizzas-13": { "categoria": "Pizzas 13EUR" },
-    "pizzas-14": { "categoria": "Pizzas 14EUR" },
-    "pizzas-15": { "categoria": "Pizzas 15EUR" },
-    "pizzas-16": { "categoria": "Pizzas 16EUR" },
+    "pizzas": { "categoria": "Pizzas" },
     "platos-combinados-platos-combinados-de-carne": { "categoria": "Assiettes Composees", "subcategoria": "Assiettes Composees de Viande" },
     "platos-combinados-platos-combinados-de-pescado": { "categoria": "Assiettes Composees", "subcategoria": "Assiettes Composees de Poisson" }
   },

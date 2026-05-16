@@ -1,0 +1,159 @@
+/* Calendario de reservas (web + admin) */
+.res-cal {
+  margin-bottom: 1rem;
+}
+
+.res-cal--compact .res-cal__month {
+  font-size: 1.15rem;
+}
+
+.res-cal--compact .res-cal__grid :global(button.res-cal__day),
+.res-cal--compact .res-cal__grid :global(.res-cal__pad) {
+  min-height: 2.35rem;
+}
+
+.res-cal__lbl {
+  margin: 0 0 0.65rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fg-subtle);
+}
+
+.res-cal__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.res-cal__month {
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg);
+  text-transform: capitalize;
+}
+
+.res-cal__nav {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--fg);
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    opacity 0.2s;
+}
+
+.res-cal__nav:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.res-cal__nav:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+}
+
+.res-cal__nav-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+  font-weight: 400;
+  margin-top: -2px;
+}
+
+.res-cal__dow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+  margin-bottom: 0.35rem;
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--fg-subtle);
+}
+
+.res-cal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.35rem;
+}
+
+.res-cal__grid .res-cal__pad {
+  min-height: 2.75rem;
+}
+
+.res-cal__grid button.res-cal__day {
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.92);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    background 0.2s var(--ease-out),
+    box-shadow 0.2s,
+    color 0.2s,
+    transform 0.15s var(--ease-out);
+  appearance: none;
+}
+
+.res-cal__grid button.res-cal__day:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.28);
+  transform: translateY(-1px);
+}
+
+.res-cal__grid button.res-cal__day:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
+.res-cal__grid button.res-cal__day--today:not(:disabled) {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.45);
+}
+
+.res-cal__grid button.res-cal__day--picked {
+  background: #fff !important;
+  color: var(--bg) !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35) !important;
+  font-weight: 700;
+}
+
+.res-cal__grid button.res-cal__day--off {
+  cursor: not-allowed;
+  opacity: 0.32;
+  background: transparent;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.35);
+  transform: none;
+}
+
+.res-cal__grid button.res-cal__day--closed.res-cal__day--off {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(255, 255, 255, 0.25);
+}

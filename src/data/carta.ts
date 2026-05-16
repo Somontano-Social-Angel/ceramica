@@ -148,13 +148,35 @@ const TAB_ORDER = [
   "brasa",
   "sandwiches",
   "hamburguesas",
-  "pizzas-13",
-  "pizzas-14",
-  "pizzas-15",
-  "pizzas-16",
+  "pizzas",
   "platos-combinados-platos-combinados-de-carne",
   "platos-combinados-platos-combinados-de-pescado",
 ];
+
+function isPizzaCategoryId(id: string): boolean {
+  return id === "pizzas" || id.startsWith("pizzas-");
+}
+
+function mergePizzaCategories(categorias: CartaCategoria[]): CartaCategoria[] {
+  const pizzaCats = categorias.filter((c) => isPizzaCategoryId(c.id));
+  if (pizzaCats.length === 0) return categorias;
+
+  const items = pizzaCats
+    .flatMap((c) => c.items)
+    .sort((a, b) => a.orden - b.orden);
+  const nota = pizzaCats.map((c) => c.nota).find(Boolean);
+
+  const merged: CartaCategoria = {
+    id: "pizzas",
+    categoria: "Pizzas",
+    nota,
+    items,
+  };
+
+  const rest = categorias.filter((c) => !isPizzaCategoryId(c.id));
+  rest.push(merged);
+  return rest;
+}
 
 function slugify(text: string): string {
   return text
@@ -227,12 +249,12 @@ export function loadCartaRaw(): CartaData {
     }
   }
 
-  const categorias = [...byId.values()]
-    .map((cat) => ({
+  const categorias = mergePizzaCategories(
+    [...byId.values()].map((cat) => ({
       ...cat,
       items: cat.items.sort((a, b) => a.orden - b.orden),
-    }))
-    .sort((a, b) => {
+    })),
+  ).sort((a, b) => {
       const ia = TAB_ORDER.indexOf(a.id);
       const ib = TAB_ORDER.indexOf(b.id);
       if (ia === -1 && ib === -1) return a.categoria.localeCompare(b.categoria);

@@ -1,8 +1,13 @@
 ---
-import Layout from "../layouts/Layout.astro";
+import AdminLayout from "../layouts/AdminLayout.astro";
+import BookingCalendar from "../components/BookingCalendar.astro";
+import { getReservarClientI18n } from "../i18n";
+
+const calI18n = getReservarClientI18n("es");
+const calI18nJson = JSON.stringify(calI18n);
 ---
 
-<Layout title="Admin reservas | La Cerámica" description="Panel de reservas (personal autorizado)." robots="noindex, nofollow">
+<AdminLayout title="Admin reservas | La Cerámica">
   <main class="adm">
     <section class="adm-card adm-card--login" id="login-panel">
       <p class="adm-brand">La Cerámica</p>
@@ -17,9 +22,12 @@ import Layout from "../layouts/Layout.astro";
         <p class="adm-err" id="login-err" hidden></p>
         <button class="adm-btn" type="submit">Entrar</button>
       </form>
+      <p class="adm-back">
+        <a class="adm-back__link" href="/">← Volver al inicio</a>
+      </p>
     </section>
 
-    <div class="adm-shell" id="dash-panel" hidden>
+    <div class="adm-shell" id="dash-panel" aria-hidden="true" inert>
       <aside class="adm-side">
         <p class="adm-brand">La Cerámica</p>
         <nav class="adm-nav" aria-label="Secciones">
@@ -38,13 +46,19 @@ import Layout from "../layouts/Layout.astro";
               <h1 class="adm-title adm-title--sm">Resumen</h1>
               <p class="adm-sub" id="overview-now"></p>
             </div>
-            <div class="adm-date-nav">
-              <button class="adm-icon-btn" type="button" id="ov-prev" aria-label="Día anterior">‹</button>
-              <input class="adm-inp adm-inp--date" type="date" id="ov-date" />
-              <button class="adm-icon-btn" type="button" id="ov-next" aria-label="Día siguiente">›</button>
-              <button class="adm-btn adm-btn--ghost adm-btn--compact" type="button" id="ov-today">Hoy</button>
-            </div>
+            <button class="adm-btn adm-btn--ghost adm-btn--compact" type="button" id="ov-today">Hoy</button>
           </header>
+
+          <div class="adm-overview-cal">
+            <BookingCalendar
+              calendarId="ov"
+              label={calI18n.pickDay}
+              pickDayLabel={calI18n.pickDay}
+              prevMonthLabel="Mes anterior"
+              nextMonthLabel="Mes siguiente"
+              dow={calI18n.dow}
+            />
+          </div>
 
           <div class="adm-stats" id="stats-row" aria-live="polite"></div>
 
@@ -61,10 +75,30 @@ import Layout from "../layouts/Layout.astro";
           <header class="adm-head">
             <h1 class="adm-title adm-title--sm">Todas las reservas</h1>
           </header>
-          <div class="adm-filters">
-            <label class="adm-lbl">Desde <input class="adm-inp adm-inp--date" type="date" id="f-from" /></label>
-            <label class="adm-lbl">Hasta <input class="adm-inp adm-inp--date" type="date" id="f-to" /></label>
-            <label class="adm-lbl">Estado
+          <div class="adm-filters adm-filters--cal">
+            <div class="adm-cal-wrap">
+              <BookingCalendar
+                calendarId="list-from"
+                label="Desde"
+                pickDayLabel={calI18n.pickDay}
+                prevMonthLabel="Mes anterior"
+                nextMonthLabel="Mes siguiente"
+                dow={calI18n.dow}
+                compact
+              />
+            </div>
+            <div class="adm-cal-wrap">
+              <BookingCalendar
+                calendarId="list-to"
+                label="Hasta"
+                pickDayLabel={calI18n.pickDay}
+                prevMonthLabel="Mes anterior"
+                nextMonthLabel="Mes siguiente"
+                dow={calI18n.dow}
+                compact
+              />
+            </div>
+            <label class="adm-lbl adm-lbl--filter">Estado
               <select class="adm-inp" id="f-status">
                 <option value="">Todas</option>
                 <option value="pending">Pendiente</option>
@@ -85,10 +119,17 @@ import Layout from "../layouts/Layout.astro";
             <p class="adm-sub">Se guarda como confirmada y aparece en el resumen del día.</p>
           </header>
           <form class="adm-form adm-form--wide" id="new-form">
+            <div class="adm-new-cal">
+              <BookingCalendar
+                calendarId="new"
+                label={calI18n.pickDay}
+                pickDayLabel={calI18n.pickDay}
+                prevMonthLabel="Mes anterior"
+                nextMonthLabel="Mes siguiente"
+                dow={calI18n.dow}
+              />
+            </div>
             <div class="adm-grid">
-              <label class="adm-lbl">Fecha
-                <input class="adm-inp" type="date" name="date" id="new-date" required />
-              </label>
               <label class="adm-lbl">Hora
                 <select class="adm-inp" name="time" id="new-time" required disabled>
                   <option value="">Cargando franjas…</option>
@@ -134,9 +175,10 @@ import Layout from "../layouts/Layout.astro";
       </div>
     </div>
   </main>
-</Layout>
+</AdminLayout>
 
-<script>
+<script define:vars={{ calI18nJson }}>
+  import { initBookingCalendar } from "../lib/booking-calendar.js";
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 
@@ -148,6 +190,49 @@ import Layout from "../layouts/Layout.astro";
 
   let meta = null;
   let overviewDate = "";
+  /** @type {Map<string, Awaited<ReturnType<typeof initBookingCalendar>>>} */
+  const calendars = new Map();
+
+  function setAuthUi(ok) {
+    document.documentElement.classList.toggle("adm-auth", ok);
+    document.documentElement.classList.toggle("adm-guest", !ok);
+    const login = $("#login-panel");
+    const dash = $("#dash-panel");
+    if (dash) {
+      dash.toggleAttribute("inert", !ok);
+      dash.setAttribute("aria-hidden", ok ? "false" : "true");
+    }
+    if (login) {
+      login.toggleAttribute("inert", ok);
+      login.setAttribute("aria-hidden", ok ? "true" : "false");
+    }
+  }
+
+  async function setupCalendars() {
+    if (calendars.size) return;
+    const i18n = JSON.parse(calI18nJson);
+    const bind = async (id, opts) => {
+      const root = document.querySelector(`[data-calendar-id="${id}"]`);
+      if (!root) return;
+      calendars.set(
+        id,
+        await initBookingCalendar(/** @type {HTMLElement} */ (root), { i18n, ...opts }),
+      );
+    };
+    await bind("ov", {
+      allowPast: true,
+      onChange: (d) => {
+        overviewDate = d;
+        loadOverview();
+      },
+    });
+    await bind("list-from", { allowPast: true, onChange: () => loadList() });
+    await bind("list-to", { allowPast: true, onChange: () => loadList() });
+    await bind("new", {
+      allowPast: false,
+      onChange: () => loadNewSlots(),
+    });
+  }
 
   function madridToday() {
     return new Intl.DateTimeFormat("en-CA", {
@@ -313,9 +398,8 @@ import Layout from "../layouts/Layout.astro";
   }
 
   async function loadOverview() {
-    const date = /** @type {HTMLInputElement} */ ($("#ov-date")).value || overviewDate || madridToday();
+    const date = calendars.get("ov")?.getDate() || overviewDate || madridToday();
     overviewDate = date;
-    /** @type {HTMLInputElement} */ ($("#ov-date")).value = date;
 
     const { r, j } = await api(`/api/admin/dashboard?date=${encodeURIComponent(date)}`);
     if (!r?.ok) return;
@@ -363,16 +447,17 @@ import Layout from "../layouts/Layout.astro";
         .join("");
       week.querySelectorAll("[data-date]").forEach((btn) => {
         btn.addEventListener("click", () => {
-          overviewDate = /** @type {HTMLButtonElement} */ (btn).dataset.date ?? "";
-          loadOverview();
+          const d = /** @type {HTMLButtonElement} */ (btn).dataset.date ?? "";
+          overviewDate = d;
+          calendars.get("ov")?.setDate(d);
         });
       });
     }
   }
 
   async function loadList() {
-    const from = /** @type {HTMLInputElement} */ ($("#f-from")).value;
-    const to = /** @type {HTMLInputElement} */ ($("#f-to")).value;
+    const from = calendars.get("list-from")?.getDate() ?? "";
+    const to = calendars.get("list-to")?.getDate() ?? "";
     const statusFilter = /** @type {HTMLSelectElement} */ ($("#f-status")).value;
     const q = new URLSearchParams();
     if (from) q.set("from", from);
@@ -393,12 +478,16 @@ import Layout from "../layouts/Layout.astro";
   }
 
   async function loadNewSlots() {
-    const dateInp = /** @type {HTMLInputElement} */ ($("#new-date"));
-    if (!dateInp.value) dateInp.value = madridToday();
+    const cal = calendars.get("new");
+    let date = cal?.getDate() ?? "";
+    if (!date) {
+      date = madridToday();
+      await cal?.setDate(date);
+    }
     const sel = /** @type {HTMLSelectElement} */ ($("#new-time"));
     sel.disabled = true;
     sel.innerHTML = '<option value="">Cargando…</option>';
-    const { r, j } = await api(`/api/slots?date=${encodeURIComponent(dateInp.value)}`);
+    const { r, j } = await api(`/api/slots?date=${encodeURIComponent(date)}`);
     if (!r?.ok) {
       sel.innerHTML = `<option value="">${escapeHtml(j.error || "Error")}</option>`;
       return;
@@ -433,26 +522,27 @@ import Layout from "../layouts/Layout.astro";
       )
       .join("");
 
-    /** @type {HTMLInputElement} */ ($("#new-date")).addEventListener("change", loadNewSlots);
   }
 
   async function refreshSession() {
     await checkApi();
-    await ensureMeta();
     const { r, j } = await api("/api/admin/session");
     if (!r) return;
     const ok = r.ok && j.admin;
-    $("#login-panel").hidden = ok;
-    $("#dash-panel").hidden = !ok;
+    setAuthUi(ok);
     if (ok) {
+      await ensureMeta();
+      await setupCalendars();
       const today = madridToday();
       overviewDate = today;
-      /** @type {HTMLInputElement} */ ($("#ov-date")).value = today;
-      /** @type {HTMLInputElement} */ ($("#f-from")).value = today;
-      /** @type {HTMLInputElement} */ ($("#f-to")).value = addDays(today, 30);
-      /** @type {HTMLInputElement} */ ($("#new-date")).value = today;
+      await calendars.get("ov")?.setDate(today);
+      await calendars.get("list-from")?.setDate(today);
+      await calendars.get("list-to")?.setDate(addDays(today, 30));
+      await calendars.get("new")?.setDate(today);
       setupNewForm();
       setNav("overview");
+    } else {
+      calendars.clear();
     }
   }
 
@@ -460,21 +550,9 @@ import Layout from "../layouts/Layout.astro";
     btn.addEventListener("click", () => setNav(/** @type {HTMLButtonElement} */ (btn).dataset.nav ?? "overview"));
   });
 
-  $("#ov-prev").addEventListener("click", () => {
-    const d = /** @type {HTMLInputElement} */ ($("#ov-date")).value;
-    /** @type {HTMLInputElement} */ ($("#ov-date")).value = addDays(d, -1);
-    loadOverview();
+  $("#ov-today")?.addEventListener("click", () => {
+    calendars.get("ov")?.setDate(madridToday());
   });
-  $("#ov-next").addEventListener("click", () => {
-    const d = /** @type {HTMLInputElement} */ ($("#ov-date")).value;
-    /** @type {HTMLInputElement} */ ($("#ov-date")).value = addDays(d, 1);
-    loadOverview();
-  });
-  $("#ov-today").addEventListener("click", () => {
-    /** @type {HTMLInputElement} */ ($("#ov-date")).value = madridToday();
-    loadOverview();
-  });
-  $("#ov-date").addEventListener("change", loadOverview);
 
   $("#login-form").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -510,7 +588,7 @@ import Layout from "../layouts/Layout.astro";
     const fd = new FormData(/** @type {HTMLFormElement} */ (e.target));
     const services = $$('input[name="services"]:checked', e.target).map((el) => el.value);
     const body = {
-      date: fd.get("date"),
+      date: calendars.get("new")?.getDate() ?? "",
       time: fd.get("time"),
       partySize: Number(fd.get("partySize")),
       name: fd.get("name"),
@@ -535,7 +613,7 @@ import Layout from "../layouts/Layout.astro";
     ok.textContent = `Reserva guardada (${j.id?.slice(0, 8) ?? "ok"}).`;
     ok.hidden = false;
     /** @type {HTMLFormElement} */ (e.target).reset();
-    /** @type {HTMLInputElement} */ ($("#new-date")).value = madridToday();
+    await calendars.get("new")?.setDate(madridToday());
     await loadNewSlots();
     await loadOverview();
   });
@@ -597,6 +675,22 @@ import Layout from "../layouts/Layout.astro";
 
   .adm-card--login {
     margin-top: 4vh;
+  }
+
+  .adm-back {
+    margin: 1.25rem 0 0;
+    text-align: center;
+  }
+
+  .adm-back__link {
+    font-size: 0.88rem;
+    color: var(--fg-muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .adm-back__link:hover {
+    color: var(--fg);
   }
 
   .adm-warn {
@@ -716,15 +810,28 @@ import Layout from "../layouts/Layout.astro";
     text-underline-offset: 3px;
   }
 
-  .adm-shell {
-    display: grid;
+  #dash-panel {
+    display: none;
     gap: 1.5rem;
     max-width: 1200px;
     margin: 0 auto;
   }
 
+  :global(html.adm-auth) #dash-panel {
+    display: grid !important;
+    visibility: visible !important;
+  }
+
+  :global(html.adm-guest) #login-panel {
+    display: block;
+  }
+
+  :global(html.adm-auth) #login-panel {
+    display: none !important;
+  }
+
   @media (min-width: 900px) {
-    .adm-shell {
+    :global(html.adm-auth) #dash-panel {
       grid-template-columns: 200px 1fr;
       align-items: start;
     }
@@ -928,12 +1035,36 @@ import Layout from "../layouts/Layout.astro";
     color: var(--fg);
   }
 
+  .adm-overview-cal {
+    max-width: 22rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .adm-new-cal {
+    max-width: 22rem;
+    margin-bottom: 1rem;
+  }
+
   .adm-filters {
     display: flex;
     flex-wrap: wrap;
     gap: 1rem 1.25rem;
     align-items: flex-end;
     margin-bottom: 1.25rem;
+  }
+
+  .adm-filters--cal {
+    align-items: flex-start;
+  }
+
+  .adm-cal-wrap {
+    flex: 1 1 16rem;
+    max-width: 20rem;
+  }
+
+  .adm-lbl--filter {
+    flex: 0 0 auto;
+    min-width: 9rem;
   }
 
   .adm-cards {

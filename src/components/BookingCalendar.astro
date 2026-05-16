@@ -1,0 +1,39 @@
+---
+import "../styles/booking-calendar.css";
+
+interface Props {
+  calendarId: string;
+  label?: string;
+  pickDayLabel: string;
+  prevMonthLabel: string;
+  nextMonthLabel: string;
+  dow: string[];
+  compact?: boolean;
+}
+
+const { calendarId, label, pickDayLabel, prevMonthLabel, nextMonthLabel, dow, compact = false } =
+  Astro.props;
+---
+
+<div
+  class:list={["res-cal", { "res-cal--compact": compact }]}
+  data-booking-calendar
+  data-calendar-id={calendarId}
+  aria-labelledby={`${calendarId}-cal-label`}
+>
+  <p class="res-cal__lbl" id={`${calendarId}-cal-label`}>{label ?? pickDayLabel}</p>
+  <div class="res-cal__toolbar">
+    <button type="button" class="res-cal__nav" data-cal-prev aria-label={prevMonthLabel}>
+      <span class="res-cal__nav-icon" aria-hidden="true">‹</span>
+    </button>
+    <h3 class="res-cal__month" data-cal-month>—</h3>
+    <button type="button" class="res-cal__nav" data-cal-next aria-label={nextMonthLabel}>
+      <span class="res-cal__nav-icon" aria-hidden="true">›</span>
+    </button>
+  </div>
+  <div class="res-cal__dow" aria-hidden="true">
+    {dow.map((d) => <span>{d}</span>)}
+  </div>
+  <div class="res-cal__grid" data-cal-grid role="grid" aria-labelledby={`${calendarId}-cal-label`}></div>
+  <input type="hidden" data-date-input value="" />
+</div>

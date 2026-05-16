@@ -5,10 +5,7 @@
     "brasa": { "categoria": "Chargrill" },
     "sandwiches": { "categoria": "Sandwiches" },
     "hamburguesas": { "categoria": "Burgers" },
-    "pizzas-13": { "categoria": "Pizzas 13EUR" },
-    "pizzas-14": { "categoria": "Pizzas 14EUR" },
-    "pizzas-15": { "categoria": "Pizzas 15EUR" },
-    "pizzas-16": { "categoria": "Pizzas 16EUR" },
+    "pizzas": { "categoria": "Pizzas" },
     "platos-combinados-platos-combinados-de-carne": { "categoria": "Combo Plates", "subcategoria": "Meat Combo Plates" },
     "platos-combinados-platos-combinados-de-pescado": { "categoria": "Combo Plates", "subcategoria": "Fish Combo Plates" }
   },
